@@ -13,22 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Исходные файлы\MainCPP">
-      <UniqueIdentifier>{142095af-6be6-458b-9251-d5248edb0a10}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Исходные файлы\dllsysmetr">
-      <UniqueIdentifier>{ee07730a-e9cf-4374-9f20-f7547582a411}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Исходные файлы\dllsysparam">
-      <UniqueIdentifier>{72cf5a2e-af97-4679-be8d-213474476b44}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Исходные файлы\dllsystsituat">
-      <UniqueIdentifier>{84700b95-48a2-4428-b891-306185e643ee}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mainenter.cpp">
-      <Filter>Исходные файлы\MainCPP</Filter>
+    <ClCompile Include="Source.cpp">
+      <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
