@@ -1,9 +1,15 @@
+
 #include <Windows.h>
 #include <stdio.h>
 #include <tchar.h>
 #include <lmcons.h> //для функций GetUserName и GetUserNameEx
-#include <secext.h> //для функции GetUserNameEx
-#include "StatLib.h"
+//#include <secext.h> //для функции GetUserNameEx
+
+//*#include "StatLib.h"
+
+#pragma comment(lib,"Secur32.lib")
+#define SECURITY_WIN32
+#include <security.h>//для функции GetUserNameEx
 
 BOOL PrintCompName()
 {

@@ -15,6 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="lw_os_1.manifest" />
+    <ClCompile Include="Source.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
