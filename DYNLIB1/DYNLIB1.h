@@ -12,7 +12,7 @@ extern "C"
 {
 #endif
 	DYNLIB1_API void PrintSysDir(const long csidl[], unsigned long nCount);
-
+	DYNLIB1_API void PrintOSinfo();
 #ifdef __cplusplus
 
 }
