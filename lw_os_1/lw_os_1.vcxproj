@@ -78,8 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Kurbatova\source\LW2020\lw_os_1\Debug;C:\Users\Kurbatova\source\LW2020\lw_os_1\STATILIBR;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Kurbatova\source\LW2020\lw_os_1\STATILIBR;C:\Users\Kurbatova\source\LW2020\lw_os_1\Debug\;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Kurbatova\source\LW2020\lw_os_1\STATILIBR;C:\Users\Kurbatova\source\LW2020\lw_os_1\DYNLIB1;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Kurbatova\source\LW2020\lw_os_1\Release;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -126,7 +126,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>STATILIBR.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>STATILIBR.lib;DYNLIB1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

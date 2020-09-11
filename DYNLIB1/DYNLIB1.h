@@ -7,9 +7,13 @@
 		#define DYNLIB1_API _declspec(dllimport)
 	#endif // 
 #endif // !!defined(_DYN_LIB_1_H)
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C"
 {
+#endif
+	DYNLIB1_API void PrintSysDir(const long csidl[], unsigned long nCount);
+
+#ifdef __cplusplus
 
 }
 #endif // _cplusplus
