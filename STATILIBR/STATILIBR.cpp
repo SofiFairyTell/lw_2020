@@ -21,6 +21,7 @@ BOOL PrintCompName()
 		wprintf(TEXT("Имя компьютера в локальной сети:%s\n"), szbuffer);
 	}
 	return ret;
+
 }
 
 BOOL PrintDNSName()
