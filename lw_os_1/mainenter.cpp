@@ -12,21 +12,22 @@
 int wmain()
 {
 	_wsetlocale(LC_ALL, TEXT(""));
-	wprintf(TEXT("Вывод данных статической библиотеки\n"));
+	wprintf(TEXT("\nВывод данных статической библиотеки\n\n"));
 	PrintCompName();
 	PrintDNSName();
 	PrintUserName();
 	PrintUserNameExtended();
-	wprintf(TEXT("Пути к системным каталогам\n"));
+	wprintf(TEXT("\nПути к системным каталогам\n\n"));
 	const long csdir[] =
 	{
 		CSIDL_DESKTOP,
-		CSIDL_INTERNET,
 		CSIDL_PROGRAMS,
-		CSIDL_PERSONAL
-
-
-	};//виртуальный каталог рабочего стола
+		CSIDL_PERSONAL,
+		CSIDL_STARTUP,
+		CSIDL_SYSTEM,
+		CSIDL_HISTORY
+	};//список идентификаторов системных папок
 	PrintSysDir(csdir, _countof(csdir)); 
-
+	wprintf(TEXT("\nВерсия операционной системы\n\n"));
+	PrintOSinfo();
 }
