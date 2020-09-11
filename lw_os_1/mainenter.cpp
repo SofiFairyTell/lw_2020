@@ -1,9 +1,13 @@
-//#pragma comment (lib,"STATILIBR.lib")
 #include <Windows.h>
 #include <wchar.h>
 #include <locale.h>
 #include <stdio.h>
+#include <ShlObj.h>
 #include <STATILIBR.h>
+#include <DYNLIB1.h>
+
+#pragma comment (lib,"STATILIBR.lib")
+#pragma comment (lib,"DYNLIB1.lib") // неявное подключение к динам.библиотеке
 
 int wmain()
 {
@@ -13,4 +17,16 @@ int wmain()
 	PrintDNSName();
 	PrintUserName();
 	PrintUserNameExtended();
+	wprintf(TEXT("Пути к системным каталогам\n"));
+	const long csdir[] =
+	{
+		CSIDL_DESKTOP,
+		CSIDL_INTERNET,
+		CSIDL_PROGRAMS,
+		CSIDL_PERSONAL
+
+
+	};//виртуальный каталог рабочего стола
+	PrintSysDir(csdir, _countof(csdir)); 
+
 }
