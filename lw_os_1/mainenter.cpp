@@ -17,7 +17,7 @@ int wmain()
 	PrintDNSName();
 	PrintUserName();
 	PrintUserNameExtended();
-	wprintf(TEXT("\nПути к системным каталогам\n\n"));
+	wprintf(TEXT("\n\nПути к системным каталогам\n\n"));
 	const long csdir[] =
 	{
 		CSIDL_DESKTOP,
