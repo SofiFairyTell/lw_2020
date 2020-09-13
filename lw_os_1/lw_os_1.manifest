@@ -2,11 +2,11 @@
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
     <assemblyIdentity 
         type="win32" 
-        name="Sample"
+        name="lw_os_1"
         version="1.0.0.0"
         processorArchitecture="x86"
     />
-    <description>Sample</description>
+    <description>lw_os_1</description>
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
         <security>
             <requestedPrivileges>

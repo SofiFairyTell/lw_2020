@@ -10,6 +10,29 @@ BOOL WINAPI DllMain(HINSTANCE hinstDll,DWORD idReason, LPVOID lpReserved )
 {
 	return TRUE;		
 }
+//IObject * __stdcall Info()
+//{
+//	DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname, DWORD dwFlags,
+//		const SYSTEMTIME * lpDate, LPCWSTR lpDateFormat, LPCWSTR lpTimeFormat)
+//	{
+//		wchar_t szDateStr[MAXCHAR] = L"";
+//		wchar_t szTimeStr[MAXCHAR] = L"";
+//		GetDateFormatEx(lplocalname, 0, lpDate, lpDateFormat, szDateStr, _countof(szDateStr), NULL);
+//		GetTimeFormatEx(lplocalname, 0, lpDate, lpTimeFormat, szTimeStr, _countof(szTimeStr));
+//		wprintf(L"%s%s\n", szDateStr, szTimeStr);
+//	}
+//	DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname, DWORD dwFlags, LPCWSTR lpDateFormat, LPCWSTR lpTimeFormat)
+//	{
+//		SYSTEMTIME STIME;
+//		GetLocalTime(&STIME);
+//		wchar_t szDateStr[MAXCHAR] = L"";
+//		wchar_t szTimeStr[MAXCHAR] = L"";
+//		GetDateFormatEx(lplocalname, 0, &STIME, lpDateFormat, szDateStr, _countof(szDateStr), NULL);
+//		GetTimeFormatEx(lplocalname, 0, &STIME, lpTimeFormat, szTimeStr, _countof(szTimeStr));
+//		wprintf(L"%s%s\n", szDateStr, szTimeStr);
+//	}
+//	return IObject * __stdcall();
+//}
 DYNLIB1_API void PrintSysDir(const long csidl[], unsigned long nCount)
 {
 	TCHAR szPath[MAX_PATH + 1];
@@ -28,7 +51,7 @@ DYNLIB1_API void PrintOSinfo()
 	BOOL ret = GetVersionEx(&osver);
 	if (ret != FALSE)
 	{
-		wprintf(TEXT("Version:%d.%d.%d\n", osver.dwBuildNumber, osver.dwMajorVersion, osver.dwMinorVersion));
+		wprintf(L"Version:%d.%d.%d\n", osver.dwMajorVersion, osver.dwMinorVersion, osver.dwBuildNumber);
 		switch (osver.dwMajorVersion)
 		{
 		case 5:
@@ -73,10 +96,32 @@ DYNLIB1_API void PrintOSinfo()
 				break;	 
 			}
 		
-		default:
+		/*default:
 			wprintf(TEXT("OS undefined"));
-			break;
+			break;*/
 		}
 
 	}
 }
+
+DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname, DWORD dwFlags, 
+	const SYSTEMTIME * lpDate, LPCWSTR lpDateFormat, LPCWSTR lpTimeFormat)
+{
+	wchar_t szDateStr[MAXCHAR] = L"";
+	wchar_t szTimeStr[MAXCHAR] = L"";
+	GetDateFormatEx(lplocalname, 0, lpDate, lpDateFormat, szDateStr, _countof(szDateStr), NULL);
+	GetTimeFormatEx(lplocalname, 0, lpDate, lpTimeFormat, szTimeStr, _countof(szTimeStr));
+	wprintf(L"%s%s\n", szDateStr, szTimeStr);
+}
+DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname, DWORD dwFlags, LPCWSTR lpDateFormat, LPCWSTR lpTimeFormat)
+{
+	SYSTEMTIME STIME;
+	GetLocalTime(&STIME);
+	wchar_t szDateStr[MAXCHAR] = L"";
+	wchar_t szTimeStr[MAXCHAR] = L"";
+	GetDateFormatEx(lplocalname, 0, &STIME, lpDateFormat, szDateStr, _countof(szDateStr), NULL);
+	GetTimeFormatEx(lplocalname, dwFlags, &STIME, lpTimeFormat, szTimeStr, _countof(szTimeStr));
+	wprintf(L"%s%s\n", szDateStr, szTimeStr);
+}
+
+

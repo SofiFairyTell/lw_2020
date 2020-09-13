@@ -8,13 +8,31 @@
 	#endif // 
 #endif // !!defined(_DYN_LIB_1_H)
 #ifdef __cplusplus
-extern "C"
-{
-#endif
+
+//extern "C" IObject *__stdcall Info();
+//struct IObject
+//{
+//	DYNLIB1_API void TimeDateInfo(
+//		LPCWSTR lplocalname,
+//		DWORD dwFlags,
+//		const SYSTEMTIME * lpDate,
+//		LPCWSTR lpDateFormat,
+//		LPCWSTR lpTimeFormat);
+//	DYNLIB1_API void TimeDateInfo(
+//		LPCWSTR lplocalname,
+//		DWORD dwFlags,
+//		LPCWSTR lpDateFormat,
+//		LPCWSTR lpTimeFormat);
+//};
+//extern "C"
+//{
+//#endif
 	DYNLIB1_API void PrintSysDir(const long csidl[], unsigned long nCount);
 	DYNLIB1_API void PrintOSinfo();
-#ifdef __cplusplus
+	DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname,DWORD dwFlags,const SYSTEMTIME * lpDate,LPCWSTR lpDateFormat,LPCWSTR lpTimeFormat);
+	DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname, DWORD dwFlags, LPCWSTR lpDateFormat, LPCWSTR lpTimeFormat);
+	//#ifdef __cplusplus
+//}
 
-}
 #endif // _cplusplus
 

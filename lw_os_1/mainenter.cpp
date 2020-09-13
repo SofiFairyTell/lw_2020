@@ -12,12 +12,13 @@
 int wmain()
 {
 	_wsetlocale(LC_ALL, TEXT(""));
-	wprintf(TEXT("\nВывод данных статической библиотеки\n\n"));
+	wprintf(TEXT("\n1. Вывод данных статической библиотеки\n"));
 	PrintCompName();
 	PrintDNSName();
 	PrintUserName();
 	PrintUserNameExtended();
-	wprintf(TEXT("\n\nПути к системным каталогам\n\n"));
+	wprintf(TEXT("\n\n2. Вывод данных динамической библиотеки\n"));
+	wprintf(TEXT("\nПути к системным каталогам\n"));
 	const long csdir[] =
 	{
 		CSIDL_DESKTOP,
@@ -26,8 +27,10 @@ int wmain()
 		CSIDL_STARTUP,
 		CSIDL_SYSTEM,
 		CSIDL_HISTORY
-	};//список идентификаторов системных папок
+	};//список части идентификаторов системных папок
 	PrintSysDir(csdir, _countof(csdir)); 
 	wprintf(TEXT("\nВерсия операционной системы\n\n"));
 	PrintOSinfo();
+	wprintf(TEXT("\nТекущая дата и время\n\n"));
+	TimeDateInfo(LOCALE_NAME_INVARIANT, TIME_NOTIMEMARKER, L"\tdd-MM-yyyy", L"\thh:mm:ss tt");
 }

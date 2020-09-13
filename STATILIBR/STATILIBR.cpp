@@ -62,6 +62,5 @@ BOOL PrintUserNameExtended()
 	{
 		wprintf(TEXT("Доменное имя локального компьютера:%s\n"), szbuffer);
 	}
-	delete[] szbuffer;
 	return ret;
 }
