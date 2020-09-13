@@ -18,6 +18,8 @@
     <Manifest Include="lw_os_1.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="lw_os_1.manifest" />
+    <ClCompile Include="mainenter.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
