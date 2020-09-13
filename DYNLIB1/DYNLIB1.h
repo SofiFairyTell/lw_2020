@@ -13,6 +13,13 @@ extern "C"
 #endif
 	DYNLIB1_API void PrintSysDir(const long csidl[], unsigned long nCount);
 	DYNLIB1_API void PrintOSinfo();
+	DYNLIB1_API void TimeDateInfo(
+		LPCWSTR lplocalname, 
+		DWORD dwFlags, 
+		const SYSTEMTIME * lpDate, 
+		LPCWSTR lpDateFormat, 
+		LPCWSTR lpTimeFormat);
+
 #ifdef __cplusplus
 
 }

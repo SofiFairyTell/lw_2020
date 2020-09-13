@@ -28,6 +28,8 @@ int wmain()
 		CSIDL_HISTORY
 	};//список идентификаторов системных папок
 	PrintSysDir(csdir, _countof(csdir)); 
+	//пока определяется как 8-я
 	wprintf(TEXT("\nВерсия операционной системы\n\n"));
 	PrintOSinfo();
+	TimeDataInfo()
 }
