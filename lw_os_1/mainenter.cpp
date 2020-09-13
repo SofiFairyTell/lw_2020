@@ -31,5 +31,5 @@ int wmain()
 	//пока определяется как 8-я
 	wprintf(TEXT("\nВерсия операционной системы\n\n"));
 	PrintOSinfo();
-	TimeDataInfo()
+	TimeDataInfo();
 }
