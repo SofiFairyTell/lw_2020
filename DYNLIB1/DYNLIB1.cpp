@@ -73,10 +73,22 @@ DYNLIB1_API void PrintOSinfo()
 				break;	 
 			}
 		
-		default:
+		/*default:
 			wprintf(TEXT("OS undefined"));
-			break;
+			break;*/
 		}
 
 	}
 }
+
+DYNLIB1_API void TimeDateInfo(LPCWSTR lplocalname, DWORD dwFlags, 
+	const SYSTEMTIME * lpDate, LPCWSTR lpDateFormat, LPCWSTR lpTimeFormat)
+{
+	wchar_t szDateStr[MAXCHAR] = L"";
+	wchar_t szTimeStr[MAXCHAR] = L"";
+	GetDateFormatEx(lplocalname, 0, lpDate, lpDateFormat, szDateStr, sizeof(szDateStr), NULL);
+	GetTimeFormatEx(lplocalname, 0, lpDate, lpTimeFormat, szTimeStr, sizeof(szTimeStr));
+	wprintf(TEXT("%s\n"), szDateStr, szTimeStr);
+}
+
+
