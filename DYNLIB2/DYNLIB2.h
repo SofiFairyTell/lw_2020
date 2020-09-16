@@ -7,5 +7,19 @@
 	#define DYNLIB2_API _declspec(dllimport)
 	#endif // 
 #endif
+typedef void(*PRINT_SYSMETR_PROC)(LPCWSTR LpDisplayNam, int index);
+#ifdef DYNLIB2_PROTOTYPES
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+	DYNLIB2_API void PrintSYSmetr(LPCWSTR LpDisplayNam, int index);
+#ifdef __cplusplus
+
+#endif // __cplusplus
+
+}
+#endif // DYNLIB2_PROTOTYPES
+
 
 
