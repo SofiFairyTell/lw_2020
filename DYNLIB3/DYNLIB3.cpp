@@ -33,9 +33,12 @@ DYNLIB3_API BOOL PrintSYSparamInfo(LPCWSTR lpDispalyNam, UINT uiAction)
 				switch (value)
 				{
 				case MOUSEWHEEL_ROUTING_FOCUS:
+					/*информация вводимая колесом мышм отправляется в приложение с фокусом*/
 					wprintf(L"%s:MOUSEWHEEL_ROUTING_FOCUS\n", lpDispalyNam);
 					break;
 				case MOUSEWHEEL_ROUTING_HYBRID:
+					/* информация введенная колёсиком мыши отправляетсяв приложение
+					рабочего стола с фокусом или приложения Window Store под курсором мыши*/
 					wprintf(L"%s:MOUSEWHEEL_ROUTING_HYBRID \n", lpDispalyNam);
 					break;
 				case MOUSEWHEEL_ROUTING_MOUSE_POS:
