@@ -2,7 +2,7 @@
 #include <wchar.h>
 #include <locale.h>
 #include <stdio.h>
-#include <delayimp.h>
+#include <delayimp.h> //лоя вызова функции __FUnloadDelayLoadedDLL2(LPCSTR szDLL)
 #include <ShlObj.h>
 #include <STATILIBR.h>
 #include <DYNLIB1.h>
@@ -45,7 +45,7 @@ int wmain()
 	wprintf(TEXT("\nТекущая дата и время\n\n"));
 	TimeDateInfo(LOCALE_NAME_INVARIANT, TIME_NOTIMEMARKER, L"\tdd-MM-yyyy", L"\thh:mm:ss tt");
 
-	HMODULE Hdll = LoadLibrary(TEXT("DYNLIB2.dll"));
+	HMODULE Hdll = LoadLibrary(TEXT("DYNLIB2.dll"));//явное подключение к библиотеке
 
 	if (NULL != Hdll)
 	{
@@ -62,7 +62,7 @@ int wmain()
 		{
 			wprintf(TEXT("Функция не найдена %d"),GetLastError());
 		}
-		FreeLibrary(Hdll);
+		FreeLibrary(Hdll);//для выгрузки библиотеки из адресного пространства
 	}
 	else
 	{
@@ -89,6 +89,6 @@ int wmain()
 			break;
 		}
 	}
-	__FUnloadDelayLoadedDLL2("DYNLIB3.dll");
+	__FUnloadDelayLoadedDLL2("DYNLIB3.dll"); //для выгрузки отложенно загруженного DLL
 	system("pause");
 }
