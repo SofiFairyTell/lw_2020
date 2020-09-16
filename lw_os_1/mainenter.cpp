@@ -24,12 +24,20 @@ int wmain()
 	wprintf(TEXT("\nПути к системным каталогам\n"));
 	const long csdir[] =
 	{
-		CSIDL_DESKTOP,
-		CSIDL_PROGRAMS,
+		CSIDL_APPDATA,
+		CSIDL_COMMON_APPDATA,
+		CSIDL_COMMON_DOCUMENTS,
+		CSIDL_HISTORY,
+		CSIDL_INTERNET_CACHE,
+		CSIDL_LOCAL_APPDATA,
 		CSIDL_PERSONAL,
-		CSIDL_STARTUP,
+		CSIDL_PROGRAMS,
+		CSIDL_PROGRAM_FILES,
+		CSIDL_PROGRAM_FILES_COMMON,
 		CSIDL_SYSTEM,
-		CSIDL_HISTORY
+		CSIDL_WINDOWS,
+		CSIDL_DESKTOP,
+		CSIDL_STARTUP	
 	};//список части идентификаторов системных папок
 	PrintSysDir(csdir, _countof(csdir)); 
 	wprintf(TEXT("\nВерсия операционной системы\n\n"));
@@ -45,6 +53,10 @@ int wmain()
 		if (NULL != PrintSYSmetr)
 		{
 			PrintSYSmetr(L"SM_CXEDGE", SM_CXEDGE);
+			PrintSYSmetr(L"SM_CYEDGE", SM_CYEDGE);
+			PrintSYSmetr(L"SM_CXMINSPACING", SM_CXMINSPACING);
+			PrintSYSmetr(L"SM_CYMINSPACING", SM_CYMINSPACING);
+			PrintSYSmetr(L"SM_SHOWSOUNDS", SM_SHOWSOUNDS);
 		}
 		else
 		{
@@ -58,6 +70,10 @@ int wmain()
 	}
 	__try
 	{
+		/*получение настройки пути для ввода колесика кнопок.
+		Настройка маршрутизации определяет отправляется ли ввод
+		колесика кнопки в приложение, ориентированое на передний
+		план или в приложение находящееся под курсором мыши*/
 		PrintSYSparamInfo(L"\nSPI_GETMOUSEWHEELROUTING", SPI_GETMOUSEWHEELROUTING);
 		PrintSYSparamInfo(L"\nSPI_GETWORKAREA", SPI_GETWORKAREA); //определение размера рабочего стола
 	}
