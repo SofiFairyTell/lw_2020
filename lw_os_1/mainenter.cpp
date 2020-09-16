@@ -5,6 +5,7 @@
 #include <ShlObj.h>
 #include <STATILIBR.h>
 #include <DYNLIB1.h>
+#include <DYNLIB2.h>
 
 #pragma comment (lib,"STATILIBR.lib")
 #pragma comment (lib,"DYNLIB1.lib") // неявное подключение к динам.библиотеке
@@ -33,4 +34,25 @@ int wmain()
 	PrintOSinfo();
 	wprintf(TEXT("\nТекущая дата и время\n\n"));
 	TimeDateInfo(LOCALE_NAME_INVARIANT, TIME_NOTIMEMARKER, L"\tdd-MM-yyyy", L"\thh:mm:ss tt");
+
+	HMODULE Hdll = LoadLibrary(TEXT("DYNLIB2.dll"));
+
+	if (NULL != Hdll)
+	{
+		PRINT_SYSMETR_PROC PrintSYSmetr = (PRINT_SYSMETR_PROC)GetProcAddress(Hdll, "PrintSYSmetr");
+		if (NULL != PrintSYSmetr)
+		{
+			PrintSYSmetr(L"SM_CXEDGE", SM_CXEDGE);
+		}
+		else
+		{
+			wprintf(TEXT("Функция не найдена%d"),GetLastError());
+		}
+		FreeLibrary(Hdll);
+	}
+	else
+	{
+		wprintf(TEXT("Функция не найдена %d"), GetLastError());
+	}
+	
 }
