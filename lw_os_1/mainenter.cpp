@@ -2,10 +2,12 @@
 #include <wchar.h>
 #include <locale.h>
 #include <stdio.h>
+#include <delayimp.h>
 #include <ShlObj.h>
 #include <STATILIBR.h>
 #include <DYNLIB1.h>
 #include <DYNLIB2.h>
+#include <DYNLIB3.h>
 
 #pragma comment (lib,"STATILIBR.lib")
 #pragma comment (lib,"DYNLIB1.lib") // неявное подключение к динам.библиотеке
@@ -46,13 +48,31 @@ int wmain()
 		}
 		else
 		{
-			wprintf(TEXT("Функция не найдена%d"),GetLastError());
+			wprintf(TEXT("Функция не найдена %d"),GetLastError());
 		}
 		FreeLibrary(Hdll);
 	}
 	else
 	{
-		wprintf(TEXT("Функция не найдена %d"), GetLastError());
+		wprintf(TEXT("Функция не найдена %d \n"), GetLastError());
 	}
-	
+	__try
+	{
+		PrintSYSparamInfo(L"\nSPI_GETMOUSEWHEELROUTING", SPI_GETMOUSEWHEELROUTING);
+		PrintSYSparamInfo(L"\nSPI_GETWORKAREA", SPI_GETWORKAREA); //определение размера рабочего стола
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		switch (GetLastError())
+		{
+		case ERROR_MOD_NOT_FOUND:
+			wprintf(TEXT(":%d DYNLIB3.dll"), ERROR_MOD_NOT_FOUND);
+			break;
+		case ERROR_PROC_NOT_FOUND:
+			wprintf(TEXT(":%d PrintSYSparamInfo"), ERROR_PROC_NOT_FOUND);
+			break;
+		}
+	}
+	__FUnloadDelayLoadedDLL2("DYNLIB3.dll");
+	system("pause");
 }
