@@ -6,8 +6,11 @@
 #include <fstream> 
 #include <time.h> 
 #include <io.h>
+#include <tchar.h>
 #include <stdio.h>
 #include<direct.h> //удаление файлов и папок
+#include <shellapi.h> //чтобы открыть указанную папку
+#include <TlHelp32.h>
 //#include <stdafx.h>
 //using namespace UnitTest1;
 
@@ -19,10 +22,13 @@ using std::setw;
 using std::ofstream;
 using std::ifstream;
 
+namespace keyfoo {
 void chdir(); //ok 
 void filecreate();
 void removefile();// Удалить существующий файл, общая функция
-
+BOOL GetProcessList();
+BOOL TerminateMyProcess(DWORD dwProcessId, UINT uExitCode);
+}
 //int mainmenu();
 
 ///*функции взаимодействия с пользователем*/
