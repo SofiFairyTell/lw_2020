@@ -33,12 +33,12 @@ DYNLIB3_API BOOL PrintSYSparamInfo(LPCWSTR lpDispalyNam, UINT uiAction)
 				switch (value)
 				{
 				case MOUSEWHEEL_ROUTING_FOCUS:
-					/*информация вводимая колесом мышм отправляется в приложение с фокусом*/
+					/*ГЁГ­ГґГ®Г°Г¬Г Г¶ГЁГї ГўГўГ®Г¤ГЁГ¬Г Гї ГЄГ®Г«ГҐГ±Г®Г¬ Г¬Г»ГёГ¬ Г®ГІГЇГ°Г ГўГ«ГїГҐГІГ±Гї Гў ГЇГ°ГЁГ«Г®Г¦ГҐГ­ГЁГҐ Г± ГґГ®ГЄГіГ±Г®Г¬*/
 					wprintf(L"%s:MOUSEWHEEL_ROUTING_FOCUS\n", lpDispalyNam);
 					break;
 				case MOUSEWHEEL_ROUTING_HYBRID:
-					/* информация введенная колёсиком мыши отправляетсяв приложение
-					рабочего стола с фокусом или приложения Window Store под курсором мыши*/
+					/* ГЁГ­ГґГ®Г°Г¬Г Г¶ГЁГї ГўГўГҐГ¤ГҐГ­Г­Г Гї ГЄГ®Г«ВёГ±ГЁГЄГ®Г¬ Г¬Г»ГёГЁ Г®ГІГЇГ°Г ГўГ«ГїГҐГІГ±ГїГў ГЇГ°ГЁГ«Г®Г¦ГҐГ­ГЁГҐ
+					Г°Г ГЎГ®Г·ГҐГЈГ® Г±ГІГ®Г«Г  Г± ГґГ®ГЄГіГ±Г®Г¬ ГЁГ«ГЁ ГЇГ°ГЁГ«Г®Г¦ГҐГ­ГЁГї Window Store ГЇГ®Г¤ ГЄГіГ°Г±Г®Г°Г®Г¬ Г¬Г»ГёГЁ*/
 					wprintf(L"%s:MOUSEWHEEL_ROUTING_HYBRID \n", lpDispalyNam);
 					break;
 				case MOUSEWHEEL_ROUTING_MOUSE_POS:

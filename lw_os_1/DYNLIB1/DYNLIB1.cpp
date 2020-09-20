@@ -4,7 +4,7 @@
 #include <ShlObj.h>
 #include "DYNLIB1.h"
 
-#pragma warning(disable : 4996) //отключает Ошибку deprecate. Возникает, когда используется устаревшая функция
+#pragma warning(disable : 4996) //Г®ГІГЄГ«ГѕГ·Г ГҐГІ ГЋГёГЁГЎГЄГі deprecate. Г‚Г®Г§Г­ГЁГЄГ ГҐГІ, ГЄГ®ГЈГ¤Г  ГЁГ±ГЇГ®Г«ГјГ§ГіГҐГІГ±Гї ГіГ±ГІГ Г°ГҐГўГёГ Гї ГґГіГ­ГЄГ¶ГЁГї
 
 BOOL WINAPI DllMain(HINSTANCE hinstDll,DWORD idReason, LPVOID lpReserved )
 {
