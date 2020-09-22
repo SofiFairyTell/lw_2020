@@ -10,5 +10,6 @@
 
 
 https://www.cyberforum.ru/win-api/thread2555647.html
+https://stackoverflow.com/questions/23965895/how-to-close-windows-explorer-windows-with-opened-folders-from-a-certain-drive
 
 GetActiveWindow gets the active window for the calling thread. If the calling thread does not own the foreground window, then GetActiveWindow returns NULL.
