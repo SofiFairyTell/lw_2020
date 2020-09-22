@@ -10,3 +10,5 @@
 
 
 https://www.cyberforum.ru/win-api/thread2555647.html
+
+GetActiveWindow gets the active window for the calling thread. If the calling thread does not own the foreground window, then GetActiveWindow returns NULL.
