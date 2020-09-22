@@ -34,17 +34,19 @@ int main()
 			/*HWND hWnd;
 			hWnd = FindWindow(NULL, _T("explorer.exe"));
 			if (IsWindow(hWnd))
-			SendMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);*/
+			*/
 			//HANDLE explorer;
 			//explorer = OpenProcess(PROCESS_ALL_ACCESS, false, 2120);
 			//TerminateProcess(explorer, 1);
 			//keyfoo::GetProcessList();
 			HWND hwnd; 
-			hwnd = FindWindow("Лабораторные работы", NULL);//Ищем проводник <br>      
+			hwnd = FindWindow("CabinetWClass", NULL);//Ищем проводник <br>      
+			std::cout << hwnd;
 			if (hwnd!=NULL)//Проводник открыт! 
 				{ 
-				SendMessage(hwnd,WM_DESTROY,NULL,NULL);
-				SendMessage(hwnd,WM_NCDESTROY,NULL,NULL);           
+				//SendMessage(hwnd,WM_DESTROY,NULL,NULL);
+				//SendMessage(hwnd,WM_NCDESTROY,NULL,NULL);
+				SendMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, 0);           
 				Sleep(100);//Подождем чуть-чуть :)     
 				}      
 			}
