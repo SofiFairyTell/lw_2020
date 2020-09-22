@@ -90,7 +90,7 @@ namespace keyfoo
 
 	}
 	/**********************************************************************/
-	/*HANDLE GetProcessHandle(LPSTR szExeName)
+	HANDLE GetProcessHandle(LPSTR szExeName)
 	{
 		PROCESSENTRY32 Pc = { sizeof(PROCESSENTRY32) };
 		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
@@ -103,15 +103,31 @@ namespace keyfoo
 		}
 		return NULL;
 	}
-	void closeexp()
+	//void closeexp()
+	//{
+	//	int x;
+	//	HANDLE kill = GetProcessHandle("");
+	//	printf("%i\n", kill);
+	//	DWORD fdwExit = 0;
+	//	GetExitCodeProcess(kill, &fdwExit);
+	//	TerminateProcess(kill, fdwExit);
+	//	x = CloseHandle(kill);
+	//	printf("%i\n", x);
+	//}
+	void exp()
 	{
-		int x;
-		HANDLE kill = GetProcessHandle("explorer");
-		printf("%i\n", kill);
-		DWORD fdwExit = 0;
-		GetExitCodeProcess(kill, &fdwExit);
-		TerminateProcess(kill, fdwExit);
-		x = CloseHandle(kill);
-		printf("%i\n", x);
-	}*/
+		STARTUPINFO cif;
+		ZeroMemory(&cif, sizeof(STARTUPINFO));
+		PROCESS_INFORMATION pi;
+		if (CreateProcess("c:\\windows\\explorer.exe", NULL,
+			NULL, NULL, FALSE, NULL, NULL, NULL, &cif, &pi) == TRUE)
+		{
+			cout << "process" << endl;
+			cout << "handle " << pi.hProcess << endl;
+			Sleep(1000);				// подождать
+			TerminateProcess(pi.hProcess, NO_ERROR);	// убрать процесс
+		}
+		CloseHandle(pi.hThread);
+		CloseHandle(pi.hProcess);
+	}
 }
