@@ -31,13 +31,6 @@ int main()
 			break;
 		case 'e':
 			{
-			/*HWND hWnd;
-			hWnd = FindWindow(NULL, _T("explorer.exe"));
-			if (IsWindow(hWnd))
-			*/
-			//HANDLE explorer;
-			//explorer = OpenProcess(PROCESS_ALL_ACCESS, false, 2120);
-			//TerminateProcess(explorer, 1);
 			//keyfoo::GetProcessList();
 			HWND hwnd; 
 			hwnd = FindWindow("CabinetWClass", NULL);//Ищем проводник <br>      
@@ -46,21 +39,10 @@ int main()
 				{ 
 				//SendMessage(hwnd,WM_DESTROY,NULL,NULL);
 				//SendMessage(hwnd,WM_NCDESTROY,NULL,NULL);
-				SendMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, 0);           
-				Sleep(100);//Подождем чуть-чуть :)     
+				SendMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, 0);              
 				}      
 			}
 		break;
 		}
-			
-		
-		//case 'e':
-		//	//  вот тут надо использовать WinApi для закрытия окна;
-		//	// не совсем уверен, но примерно так:
-		//{
-			
-		//}
-		//// а может можно и так
-		//system("taskkill /f /im explorer.exe");
 	}
 }
