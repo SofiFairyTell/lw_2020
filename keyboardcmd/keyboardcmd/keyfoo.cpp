@@ -90,7 +90,7 @@ namespace keyfoo
 
 	}
 	/**********************************************************************/
-	/*HANDLE GetProcessHandle(LPSTR szExeName)
+	HANDLE GetProcessHandle(LPSTR szExeName)
 	{
 		PROCESSENTRY32 Pc = { sizeof(PROCESSENTRY32) };
 		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
@@ -103,15 +103,48 @@ namespace keyfoo
 		}
 		return NULL;
 	}
-	void closeexp()
+	//void closeexp()
+	//{
+	//	int x;
+	//	HANDLE kill = GetProcessHandle("");
+	//	printf("%i\n", kill);
+	//	DWORD fdwExit = 0;
+	//	GetExitCodeProcess(kill, &fdwExit);
+	//	TerminateProcess(kill, fdwExit);
+	//	x = CloseHandle(kill);
+	//	printf("%i\n", x);
+	//}
+	void exp()
 	{
-		int x;
-		HANDLE kill = GetProcessHandle("explorer");
-		printf("%i\n", kill);
-		DWORD fdwExit = 0;
-		GetExitCodeProcess(kill, &fdwExit);
-		TerminateProcess(kill, fdwExit);
-		x = CloseHandle(kill);
-		printf("%i\n", x);
-	}*/
+		STARTUPINFO cif;
+		ZeroMemory(&cif, sizeof(STARTUPINFO));
+		PROCESS_INFORMATION pi;
+		std::string myAppname = TEXT("c:\\windows\\explorer.exe");
+		if (CreateProcess("c:\\windows\\explorer.exe", NULL,
+			NULL, NULL, FALSE, NULL, NULL, NULL, &cif, &pi) == TRUE)
+		{
+			HWND hConsoleWindow = FindWindowEx(0, 0, 0, "c:\\windows\\explorer.exe");
+			cout << "process" << endl;
+			cout << "handle " << pi.hProcess << endl;
+			cout << "HWND" << GetActiveWindow() << endl;
+			Sleep(1000);				// подождать
+			//PostMessage(FindWindow(NULL, "Проводник"), WM_QUIT, 0, 0);
+			//DestroyWindow(hConsoleWindow);
+			HWND iHandle = FindWindow("Explorer.exe", "c:\\windows");
+			if (iHandle > 0)
+			{
+				// close the window using API        
+				SendMessage(iHandle, WM_SYSCOMMAND, SC_CLOSE, 0);
+			}
+			TerminateProcess(pi.hProcess, NO_ERROR);	// убрать процесс
+		}	
+		//DWORD t;
+		//GetExitCodeProcess(pi.hProcess,t);
+//		HWND hwnd = FindWindow("Проводник", NULL);
+	//	HWND hWnd = GetForegroundWindow();
+		//DestroyWindow(hWnd);
+		CloseHandle(pi.hThread);
+		WaitForSingleObject(pi.hProcess, INFINITE);
+		CloseHandle(pi.hProcess);
+	}
 }
