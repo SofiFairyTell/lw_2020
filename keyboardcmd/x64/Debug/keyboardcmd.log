@@ -1,9 +1,3 @@
 ﻿  keycmd.cpp
 c:\users\kurbatova\source\lw2020\lw_pd_2\keyboardcmd\keycmd.cpp(11): warning C4101: file: неиспользованная локальная переменная
-  keyfoo.cpp
-c:\users\kurbatova\source\lw2020\lw_pd_2\keyboardcmd\keyfoo.cpp(80): warning C4101: sPath: неиспользованная локальная переменная
-  taskkill.cpp
-c:\users\kurbatova\source\lw2020\lw_pd_2\keyboardcmd\taskkill.cpp(16): warning C4101: hProcess: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_pd_2\keyboardcmd\taskkill.cpp(18): warning C4101: dwPriorityClass: неиспользованная локальная переменная
-  Создание кода...
   keyboardcmd.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_pd_2\x64\Debug\keyboardcmd.exe

@@ -16,6 +16,11 @@ namespace keyfoo
 		cin.get(str, MAX, '/');//пока не будет введен конечный символ будет ввод текста продолжен
 		fout << str; // запись строки в файл
 		fout.close(); // закрываем файл
+		fout.clear();
+		cin.ignore(INT_MAX, '/');
+		cin.clear();
+		cin.sync();
+		//
 	}
 	/************************************************************************/
 
@@ -78,6 +83,7 @@ namespace keyfoo
 	void chdir()
 	{
 		TCHAR sPath[MAX_PATH], sPathTo2[MAX_PATH];
+		cin.clear();
 		cout << setw(5) << "введите путь: ";
 		cin >> sPathTo2;
 		__try

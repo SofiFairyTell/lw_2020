@@ -12,7 +12,8 @@ int main()
 	while (true)
 	{
 		int c = _getch();
-		std::cout << (char)c<< keyfoo::charToBinary(c) << ' ';
+		//std::cout << (char)c<< keyfoo::charToBinary(c) << ' ';
+		std::cout << keyfoo::charToBinary(c) << ' ';
 		switch (c)
 		{
 		case 's':
@@ -34,7 +35,7 @@ int main()
 			//keyfoo::GetProcessList();
 			HWND hwnd; 
 			hwnd = FindWindow("CabinetWClass", NULL);//Ищем проводник <br>      
-			std::cout << hwnd;
+			//std::cout << hwnd;
 			if (hwnd!=NULL)//Проводник открыт! 
 				{ 
 				//SendMessage(hwnd,WM_DESTROY,NULL,NULL);
