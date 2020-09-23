@@ -28,6 +28,7 @@ void filecreate();
 void removefile();// Удалить существующий файл, общая функция
 BOOL GetProcessList();
 BOOL TerminateMyProcess(DWORD dwProcessId, UINT uExitCode);
+int charToBinary(unsigned char val);
 }
 //int mainmenu();
 

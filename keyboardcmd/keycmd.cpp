@@ -12,11 +12,11 @@ int main()
 	while (true)
 	{
 		int c = _getch();
-		std::cout << (char)c << ' ' << std::hex << (int)c << std::endl;
+		std::cout << (char)c<< keyfoo::charToBinary(c) << ' ';
 		switch (c)
 		{
 		case 's':
-			system("explorer");
+			system("explorer");//открыть проводник
 			break;
 
 		case 'w':
@@ -27,7 +27,7 @@ int main()
 			keyfoo::filecreate();//создать файл с текстом
 			break;
 		case 'k':
-			keyfoo::removefile();
+			keyfoo::removefile();//удалить папку по ее адресу и файл в текущей папке
 			break;
 		case 'e':
 			{

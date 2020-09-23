@@ -38,6 +38,7 @@ namespace keyfoo
 			if (remove(fname))
 			{
 				cout << "Ошибка удаления файла" << endl;
+				cout << "error" << strerror(errno) << endl;
 			}
 			else
 				cout << "Файл удален" << endl;
@@ -114,4 +115,18 @@ namespace keyfoo
 		x = CloseHandle(kill);
 		printf("%i\n", x);
 	}*/
+	int charToBinary(unsigned char val)
+	{
+		int binary = 0;
+
+		for (int i = 7; i >= 0; --i)
+		{
+			binary *= 10;
+
+			if (val & (1 << i))
+				binary += 1;
+		}
+
+		return binary;
+	}
 }
