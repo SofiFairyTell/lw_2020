@@ -86,8 +86,18 @@ namespace keyfoo
 		cin.clear();
 		cout << setw(5) << "введите путь: ";
 		cin >> sPathTo2;
+		STARTUPINFO si = { sizeof(STARTUPINFO) };
+		PROCESS_INFORMATION pi;
 		__try
 		{
+			//BOOL bRet = CreateProcess(NULL, sPathTo2, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+			//
+			//if (FALSE != bRet)
+			//{
+			//	CloseHandle(pi.hThread);
+			//	WaitForSingleObject(pi.hProcess, INFINITE);
+			//	CloseHandle(pi.hProcess);
+			//}
 			ShellExecute(NULL, "open", sPathTo2, NULL, NULL, SW_SHOW);//работает
 		}
 		__except (filter(GetExceptionCode(), GetExceptionInformation()))
