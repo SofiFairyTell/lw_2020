@@ -17,13 +17,15 @@
 #define ID_40010                        40010
 #define ID_40011                        40011
 #define ID_EDIT                         40012
+#define ID_40013                        40013
+#define ID_40014                        40014
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40013
+#define _APS_NEXT_COMMAND_VALUE         40015
 #define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
