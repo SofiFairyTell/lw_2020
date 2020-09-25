@@ -1,6 +1,6 @@
-﻿//{{NO_DEPENDENCIES}}
-// Включаемый файл, созданный в Microsoft Visual C++.
-// Используется lw_os_21.rc
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by lw_os_21.rc
 //
 #define IDD_DIALOG1                     101
 #define IDR_MENU1                       102
@@ -19,13 +19,16 @@
 #define ID_EDIT                         40012
 #define ID_40013                        40013
 #define ID_40014                        40014
+#define ID_40016                        40016
+#define ID_40017                        40017
+#define ID_                             40018
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40016
+#define _APS_NEXT_COMMAND_VALUE         40019
 #define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
