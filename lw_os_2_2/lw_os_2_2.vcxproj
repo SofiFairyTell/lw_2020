@@ -31,6 +31,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -143,10 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\lw_os_2_1\lw_os_2_main.cpp" />
-    <ClCompile Include="..\lw_os_2_1\MainWindowProc.cpp" />
-    <ClCompile Include="..\lw_os_2_1\Register.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="lw_os_2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lw_os_2_1\lw_os_2_1.h" />
