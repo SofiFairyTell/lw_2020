@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="lw_os_2.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="updowncontrol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="lw_os_21.rc" />
