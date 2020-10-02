@@ -34,6 +34,7 @@
 		HWND hFindDlg = NULL;
 	#pragma endregion
 	TCHAR szBuffer[100] = TEXT("");
+	TCHAR szBuffer1[100] = TEXT("");
 	RECT rc;
 	
 	#pragma region MainWindowFunction
@@ -172,6 +173,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				hdc = GetDC(hwnd);
 				TextOut(hdc, 600, 50, L"WM_SIZING", 14);
+				UINT state =  NULL;
+				if (state != SIZE_MINIMIZED)
+				{
+					HWND hctr = GetDlgItem(hwnd, IDC_LIST1);
+					MoveWindow(hctr, 10, 10, 250, 20, true);
+				}
+				
 				ReleaseDC(hwnd, hdc);
 				return 0;
 			}
@@ -179,6 +187,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				hdc = GetDC(hwnd);
 				TextOut(hdc, 600, 70, L"WM_LBUTTONDBLCLK", 14);
+
 				ReleaseDC(hwnd, hdc);
 				SetFocus(hwnd);
 				return 0;
@@ -323,7 +332,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				findDlg.hInstance = hInstance;// указываем дескриптор экземпляра приложения
 				findDlg.hwndOwner = hWnd;			// указываем дескриптор окна владельца
 				findDlg.lpstrFindWhat = szBuffer;
-				findDlg.lpstrReplaceWith = szBuffer;
+				findDlg.lpstrReplaceWith = szBuffer1;
 				findDlg.wReplaceWithLen  = _countof(szBuffer);			// указываем размер буфера
 				findDlg.wFindWhatLen = _countof(szBuffer);	
 				//findDlg.Flags = FR_REPLACE|FR_REPLACEALL|FR_DIALOGTERM|FR_FINDNEXT;
@@ -359,45 +368,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		MessageBox(hFindDlg, TEXT("Кнопка replace нажата!"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
 		for (;;)
 		{
-#pragma region dON WORK
-			//HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-						////int iItem = ListBox_GetCurSel(hwndCtl);
-						//// выполним поиск указанного текста в первом столбце списка просмотра
-						//// выполним поиск указанного текста в списке
-						//// сразу после текущего выделенного элемента
-						//iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
-						//
-						//// выделяем найденный элемент
-						//ListBox_SetCurSel(hwndCtl, iItem);
-						////MessageBox(hFindDlg, TEXT("Перед изменением!"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
-						//if (iItem != -1)
-						//{
-						//	ListBox_DeleteString(hwndCtl, iItem);
-						//	ListBox_AddString(hwndCtl, lpFindReplace->lpstrReplaceWith);
-						//	ListBox_SetCurSel(hwndCtl, iItem);
-						//	SendMessage(hWnd, WM_ADDITEM, 0, 0);
-						//	//Update
-						//	// копируем текст в первый столбец списка просмотра
-						//	//ListBox_SetItemText(hwndLV, iItem, 0, szBuffer2);
-						//} // if
-#pragma endregion
-#pragma region MyRegion
-	//iItem = ListBox_FindString(hwndCtl, iItem, &fi);
-			/*iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
-			ListBox_AddItemData(hwndCtl, iItem, 0, &fi);*/
-			//if (iItem != -1)
-			//{
-			//	// копируем текст в первый столбец списка просмотра
-			//	//ListView_SetItemText(hwndCtl, iItem, 0, szBuffer2);
-			//	
-			//} // if
-			//else
-			//{
-				//MessageBox(hFindDlg, TEXT("Не получилось!"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
-				//break; // выходим из цикла
-			//} // else
-#pragma endregion
-
 			int iItem = ListBox_GetCurSel(hwndCtl);
 			iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
 			ListBox_SetCurSel(hwndCtl, iItem);
