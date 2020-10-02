@@ -267,7 +267,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		} break;
 		case ID_NEW_RECORD2:
 		{
-			int DialogResult = DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG2), hWnd, (DialogProc), NULL);
+			int DialogResult = DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG2), hWnd, (DialogProcMany), NULL);
 			if (IDOK == DialogResult)
 			{
 				SendMessage(hWnd, WM_ADDITEM, 0, 0);
@@ -477,9 +477,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		if (hWnd == hDlg) { DestroyWindow(hWnd); }
 		else { EndDialog(hWnd, 0); }
 	}
-
 #pragma endregion
-
+#pragma region ManyStringAdd
 	INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
@@ -491,6 +490,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		}break;
 		case WM_COMMAND:
 		{
+			TCHAR str[] = TEXT("");
 			switch (LOWORD(wParam))
 			{
 			case IDOK:
@@ -500,11 +500,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				////memset(str, 0, sizeof(WCHAR) * 20);
 				//Edit_GetText(counter, str, 1);
 				//int res = (int)counter;
+				
+				int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
 				while (counter != 0)
 				{
-				int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
 				SetDlgItemText(hWndlg, IDC_EDIT3, NULL);
 				SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0);
+				counter--;
 				}
 				
 			} break;
@@ -522,7 +524,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		}
 		return FALSE;
 	}
-
 	BOOL Dialog_OnInitDialogMany(HWND hWnd, HWND hWndF, LPARAM lParam)
 	{
 		HWND hwndEdit = GetDlgItem(hWnd, IDC_EDIT3);
@@ -536,7 +537,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		if (hWnd == hDlg) { DestroyWindow(hWnd); }
 		else { EndDialog(hWnd, 0); }
 	}
-
+#pragma endregion 
 
 
 
