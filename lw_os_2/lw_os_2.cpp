@@ -2,6 +2,7 @@
 #include <WindowsX.h>
 #include <CommCtrl.h>
 #include <tchar.h>
+#include <fstream>
 #include "resource.h"
 #define LEFT 300
 #define TOP  240
@@ -319,6 +320,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			if (GetSaveFileName(&OpenFDLG) != FALSE)
 			{
 				MessageBox(hWnd, szFileName, TEXT("Сохранить как"), MB_OK | MB_ICONINFORMATION);
+				std::ofstream fout(szFileName); // создаём объект класса ofstream для записи 
+				fout << "Файл создан в программе LWOS";
+				fout.close();
 			}
 		}break;
 		case ID_REPLACE: // нажата кнопка "Найти запись"
@@ -365,7 +369,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		LVFINDINFO fi = { LVFI_STRING };
 		fi.psz = szBuffer;
 		int iItem = -1;
-		MessageBox(hFindDlg, TEXT("Кнопка replace нажата!"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
+		//MessageBox(hFindDlg, TEXT("Кнопка replace нажата!"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
 		for (;;)
 		{
 			int iItem = ListBox_GetCurSel(hwndCtl);
@@ -377,17 +381,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				} 
 			if (iItem != -1)
 			{
-				int mbResult = MessageBox(hWnd, TEXT("Удалить выбранный элемент?"), TEXT("LW_OS_2"), MB_YESNO | MB_ICONQUESTION);
+				//int mbResult = MessageBox(hWnd, TEXT("Удалить выбранный элемент?"), TEXT("LW_OS_2"), MB_YESNO | MB_ICONQUESTION);
 
-				if (mbResult == IDYES)
-				{
-					
+				//if (mbResult == IDYES)			
+				//{
 					ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
-					//SetDlgItemText(hwndCtl, *(lpFindReplace->lpstrReplaceWith), NULL);
-					SendMessage(hwndCtl, EM_REPLACESEL, 0, (LPARAM)lpFindReplace->lpstrReplaceWith);
-					ListBox_AddString(hwndCtl, lpFindReplace->lpstrReplaceWith);
+					//ListBox_AddString(hwndCtl, lpFindReplace->lpstrReplaceWith); //добавляет в конец списка 
+					ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
+
 					SetForegroundWindow(hwndCtl);
-				}
+				//}
 			}
 			break;
 		}
