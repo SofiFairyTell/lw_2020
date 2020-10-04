@@ -130,6 +130,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
 			HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
 			HANDLE_MSG(hwnd, WM_TIMER, OnTimer);
+
 			case WM_ADDITEM:
 			{
 				OnAddItem(hwnd);
@@ -156,16 +157,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			}
 			case WM_LBUTTONUP:
 			{
-				hdc = GetDC(hwnd);
-				TextOut(hdc, 600, 50, L"WM_LBUTTONUP", 14);
-
-				ReleaseDC(hwnd, hdc);
-				return 0;
+				ReleaseCapture();//освобождает мышь
 			}
 			case WM_MOUSEWHEEL:
 			{
 				hdc = GetDC(hwnd);
-				TextOut(hdc, 600, 50, L"WM_MOUSEWHEEL", 14);
+				//TextOut(hdc, 600, 50, L"WM_MOUSEWHEEL", 14);
 				KillTimer(hwnd, 1);
 				ReleaseDC(hwnd, hdc);
 				return 0;
@@ -174,13 +171,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				hdc = GetDC(hwnd);
 				TextOut(hdc, 600, 50, L"WM_SIZING", 14);
-				UINT state =  NULL;
-				if (state != SIZE_MINIMIZED)
-				{
-					HWND hctr = GetDlgItem(hwnd, IDC_LIST1);
-					MoveWindow(hctr, 10, 10, 250, 20, true);
-				}
-				
+				/*сообщение вызываетя при изменении размеров окна пользователем
+				поэтому кодом ниже фиксируем заданные при создании окна размеры*/
+				RECT rc;
+				GetWindowRect(hWnd, &rc);
+				*((LPRECT)lParam) = rc;
+				SetTimer(hWnd, 1, 5, NULL);
 				ReleaseDC(hwnd, hdc);
 				return 0;
 			}
@@ -188,7 +184,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				hdc = GetDC(hwnd);
 				TextOut(hdc, 600, 70, L"WM_LBUTTONDBLCLK", 14);
-
 				ReleaseDC(hwnd, hdc);
 				SetFocus(hwnd);
 				return 0;
@@ -262,6 +257,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			SetPixel(hdc, x, y, RGB(255, 255, 255)); //Выводим точку
 			ReleaseDC(hWnd, hdc);
 	}
+	
 	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify)
 	{
 		HINSTANCE hInstance = GetWindowInstance(hWnd);
@@ -306,7 +302,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		break;
 		case ID_SAVE_AS:
 		{
-			//char pListBox[] = GetDlgItemText(IDC_LIST1);
 			char pListBox[] = { GetListBoxInfo(hWnd) };
 			TCHAR szFileName[MAX_PATH] = TEXT("");
 			OpenFDLG.lStructSize = sizeof(OPENFILENAME);
@@ -337,11 +332,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				findDlg.hwndOwner = hWnd;			// указываем дескриптор окна владельца
 				findDlg.lpstrFindWhat = szBuffer;
 				findDlg.lpstrReplaceWith = szBuffer1;
-				findDlg.wReplaceWithLen  = _countof(szBuffer);			// указываем размер буфера
+				findDlg.wReplaceWithLen  = _countof(szBuffer1);			// указываем размер буфера
 				findDlg.wFindWhatLen = _countof(szBuffer);	
-				//findDlg.Flags = FR_REPLACE|FR_REPLACEALL|FR_DIALOGTERM|FR_FINDNEXT;
 				hFindDlg = ReplaceText(&findDlg);
-			} // if
+			} 
 			break;
 		}
 	}
@@ -369,7 +363,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		LVFINDINFO fi = { LVFI_STRING };
 		fi.psz = szBuffer;
 		int iItem = -1;
-		//MessageBox(hFindDlg, TEXT("Кнопка replace нажата!"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
 		for (;;)
 		{
 			int iItem = ListBox_GetCurSel(hwndCtl);
@@ -381,16 +374,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				} 
 			if (iItem != -1)
 			{
-				//int mbResult = MessageBox(hWnd, TEXT("Удалить выбранный элемент?"), TEXT("LW_OS_2"), MB_YESNO | MB_ICONQUESTION);
-
-				//if (mbResult == IDYES)			
-				//{
 					ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
 					//ListBox_AddString(hwndCtl, lpFindReplace->lpstrReplaceWith); //добавляет в конец списка 
 					ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
-
 					SetForegroundWindow(hwndCtl);
-				//}
 			}
 			break;
 		}
@@ -469,11 +456,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			case IDOK:
 			{
 				int counter = GetDlgItemInt(hWndlg,IDC_EDIT2,NULL,NULL);
-				//WCHAR str[20]; 
-				////memset(str, 0, sizeof(WCHAR) * 20);
-				//Edit_GetText(counter, str, 1);
-				//int res = (int)counter;
-				
 				int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
 				while (counter != 0)
 				{
