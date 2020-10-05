@@ -44,6 +44,8 @@
 	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify);	
 	void OnDestroy(HWND hwnd);
 	void OnTimer(HWND hwnd, UINT id);
+	void OnClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);
+	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);
 	#pragma endregion
 	
 	#pragma region EditDialogFunction
@@ -130,31 +132,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
 			HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
 			HANDLE_MSG(hwnd, WM_TIMER, OnTimer);
-
+			HANDLE_MSG(hwnd, WM_LBUTTONDBLCLK, OnClick);
+			HANDLE_MSG(hwnd, WM_LBUTTONDOWN, OnClick);
+			HANDLE_MSG(hwnd, WM_SYSKEYUP, OnSysKey);
 			case WM_ADDITEM:
 			{
 				OnAddItem(hwnd);
 				return 0;
 			}
-			case WM_LBUTTONDOWN:
-			{
-				hdc = GetDC(hwnd);
-				GetClientRect(hwnd, &rc);
-				TextOut(hdc, 600, 50, L"WM_LBUTTONDOWN", 14);
-				ReleaseDC(hwnd, hdc);//освобождает контекст устройства  (hdc)  для использования другими приложениями. 
-				if (IsMaximized(hwnd)) // окно развёрнуто
-				{
-					// востановим окно
-					ShowWindow(hwnd, SW_RESTORE);
-					SetTimer(hWnd, 1, 10, NULL);
-				} // if
-				else
-				{
-					// развернём окно
-					ShowWindow(hwnd, SW_MAXIMIZE);
-				} // else
-				return 0;
-			}
+
 			case WM_LBUTTONUP:
 			{
 				ReleaseCapture();//освобождает мышь
@@ -162,46 +148,64 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			case WM_MOUSEWHEEL:
 			{
 				hdc = GetDC(hwnd);
-				//TextOut(hdc, 600, 50, L"WM_MOUSEWHEEL", 14);
 				KillTimer(hwnd, 1);
 				ReleaseDC(hwnd, hdc);
 				return 0;
 			}
 			case WM_SIZING:
 			{
-				hdc = GetDC(hwnd);
-				TextOut(hdc, 600, 50, L"WM_SIZING", 14);
-				/*сообщение вызываетя при изменении размеров окна пользователем
-				поэтому кодом ниже фиксируем заданные при создании окна размеры*/
-				RECT rc;
-				GetWindowRect(hWnd, &rc);
-				*((LPRECT)lParam) = rc;
-				SetTimer(hWnd, 1, 5, NULL);
-				ReleaseDC(hwnd, hdc);
-				return 0;
-			}
-			case WM_LBUTTONDBLCLK:
+				/*измение одной стороны ведет за собой увеличение другой*/
+				static double fixedRate = 1.0;
+				LPRECT lpRect = (LPRECT)lParam;
+			int w = lpRect->right - lpRect->left;//ширина
+			int h = lpRect->bottom - lpRect->top;//высота
+			int dw = (int)(h * fixedRate - w);//диагональ при изменении ширины
+			int dh = (int)(w / fixedRate - h);//диагональ при изменении высоты
+			switch (wParam)
 			{
-				hdc = GetDC(hwnd);
-				TextOut(hdc, 600, 70, L"WM_LBUTTONDBLCLK", 14);
-				ReleaseDC(hwnd, hdc);
-				SetFocus(hwnd);
-				return 0;
+			case WMSZ_TOP:
+			case WMSZ_BOTTOM:
+				lpRect->right += dw;
+				break;
+			case WMSZ_LEFT:
+			case WMSZ_RIGHT:
+				lpRect->bottom += dh;
+				break;
+			case WMSZ_TOPLEFT:
+				if (dw > 0) lpRect->left -= dw;
+				else lpRect->top -= dh;
+				break;
+			case WMSZ_TOPRIGHT:
+				if (dw > 0) lpRect->right += dw;
+				else lpRect->top -= dh;
+				break;
+			case WMSZ_BOTTOMLEFT:
+				if (dw > 0) lpRect->left -= dw;
+				else lpRect->bottom += dh;
+				break;
+			case WMSZ_BOTTOMRIGHT:
+				if (dw > 0) lpRect->right += dw;
+				else lpRect->bottom += dh;
+				break;
+				}
+			
 			}
+
 			case WM_SYSCHAR:
 			{
 				hdc = GetDC(hwnd);
 				TextOut(hdc, 600, 50, L"WM_SYSCHAR", 14);
+				SetTimer(hWnd, 1, 5, NULL);
 				ReleaseDC(hwnd, hdc);
 				return 0;
 			}
-			case WM_SYSKEYUP:
-			{
-				hdc = GetDC(hwnd);
-				TextOut(hdc, 600, 50, L"WM_SYSKEYUP", 14);
-				ReleaseDC(hwnd, hdc);
-				return 0;
-			}
+			//case WM_SYSKEYUP:
+			//{
+			//	hdc = GetDC(hwnd);
+			//	TextOut(hdc, 600, 50, L"WM_SYSKEYUP", 14);
+			//	ReleaseDC(hwnd, hdc);
+			//	return 0;
+			//}
 			case WM_DESTROY:
 			{
 				PostQuitMessage(0);
@@ -339,6 +343,75 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			break;
 		}
 	}
+	void OnClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
+	{
+		// передаём фокус клавиатуры главному окну
+		SetFocus(hwnd);
+
+		if (fDoubleClick != FALSE) // двойной клик
+		{
+			if (IsMaximized(hwnd)) // окно развёрнуто
+			{
+				
+				ShowWindow(hwnd, SW_RESTORE);
+			} 
+			else
+			{
+				// развернём окно
+				ShowWindow(hwnd, SW_MAXIMIZE);
+			} 
+		} 
+	}
+
+	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags)
+	{
+		RECT rect; // размеры окна
+
+   // получим размеры окна
+		GetWindowRect(hwnd, &rect);
+
+		if (fDown)
+		{
+			switch (vk)
+			{
+			case VK_LEFT: // нажата стрелка влево
+				// перемещаем окно влево
+				SetWindowPos(hwnd, NULL, rect.left -10 , rect.top, 0, 0, SWP_NOSIZE);
+				break;
+
+			case VK_RIGHT: // нажата стрелка вправо
+				// перемещаем окно вправо
+				SetWindowPos(hwnd, NULL, rect.left + 10, rect.top, 0, 0, SWP_NOSIZE);
+				break;
+
+			case VK_UP: // нажата стрелка вверх
+				// перемещаем окно вверх
+				SetWindowPos(hwnd, NULL, rect.left, rect.top - 10, 0, 0, SWP_NOSIZE);
+				break;
+
+			case VK_DOWN: // нажата стрелка вниз
+				// перемещаем окно вниз
+				SetWindowPos(hwnd, NULL, rect.left, rect.top + 10, 0, 0, SWP_NOSIZE);
+				break;
+			} // switch
+		} // if
+		else
+		{
+			switch (vk)
+			{
+			case VK_LEFT: // отпущена стрелка влево
+				// перемещаем окно к левому краю
+				SetWindowPos(hwnd, NULL, 0, rect.top, 0, 0, SWP_NOSIZE);
+				break;
+
+			case VK_UP: // отпущена стрелка вверх
+				// перемещаем окно к верхнему краю
+				SetWindowPos(hwnd, NULL, rect.left, 0, 0, 0, SWP_NOSIZE);
+				break;
+			} 
+		} 
+	}
+	
 
 
 #pragma endregion
