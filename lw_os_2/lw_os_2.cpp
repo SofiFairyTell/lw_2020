@@ -16,7 +16,8 @@
 #pragma warning(disable : 4996) //отключает Ошибку deprecate. Возникает, когда используется устаревшая функция 
 
 #define WM_ADDITEM WM_USER+1
-
+#define BOLDDAY(ds, iDay)  \
+        if (iDay > 0 && iDay < 32)(ds) |= (0x00000001 << (iDay - 1))
 #pragma region Объявления
 	#pragma region Handle of Window
 	HWND hWnd = NULL; //дескриптор окна
@@ -37,7 +38,8 @@
 	TCHAR szBuffer[100] = TEXT("");
 	TCHAR szBuffer1[100] = TEXT("");
 	RECT rc;
-	
+	HBRUSH brushes[3];
+	int brush_index = 0;
 	#pragma region MainWindowFunction
 	LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr);
@@ -69,7 +71,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 {
 	MSG  msg;
 	BOOL bRet;
-	
+	brushes[0] = (HBRUSH)CreateSolidBrush(RGB(0, 0, 100)); //Радикально-синий цвет
+	brushes[1] = (HBRUSH)CreateSolidBrush(RGB(0, 100, 0)); //Радикально-зеленый цвет
+	brushes[2] = (HBRUSH)CreateSolidBrush(RGB(100, 0, 0)); //Радикально-красный цвет
 	// регистрируем оконный класс главного окна...
 
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
@@ -82,7 +86,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	wcex.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
 	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 100)); //Радикально-синий цвет
+	wcex.hbrBackground = brushes[brush_index];
 
 	if (0 == RegisterClassEx(&wcex)) return -1; //не удалось зарегистрировать новый оконный класс завершаем работу приложения
 
@@ -135,6 +139,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			HANDLE_MSG(hwnd, WM_LBUTTONDBLCLK, OnClick);
 			HANDLE_MSG(hwnd, WM_LBUTTONDOWN, OnClick);
 			HANDLE_MSG(hwnd, WM_SYSKEYUP, OnSysKey);
+
 			case WM_ADDITEM:
 			{
 				OnAddItem(hwnd);
@@ -193,25 +198,47 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 
 			case WM_SYSCHAR:
 			{
-				hdc = GetDC(hwnd);
-				TextOut(hdc, 600, 50, L"WM_SYSCHAR", 14);
-				SetTimer(hWnd, 1, 5, NULL);
-				ReleaseDC(hwnd, hdc);
+				/*ALT+<ANY KEY> перекрашивает экран одним из 3-х цветов*/
+				if (brush_index == 2) 
+					brush_index = 0;
+				else brush_index++;
+				InvalidateRect(hWnd, NULL, FALSE);
 				return 0;
 			}
-			//case WM_SYSKEYUP:
-			//{
-			//	hdc = GetDC(hwnd);
-			//	TextOut(hdc, 600, 50, L"WM_SYSKEYUP", 14);
-			//	ReleaseDC(hwnd, hdc);
-			//	return 0;
-			//}
+			case WM_PAINT:
+			{
+				PAINTSTRUCT ps;
+				BeginPaint(hWnd, &ps);
+				FillRect(ps.hdc, &ps.rcPaint, brushes[brush_index]);
+				EndPaint(hWnd, &ps);
+				return 0;
+			}
+			
 			case WM_DESTROY:
 			{
 				PostQuitMessage(0);
 				return 0;
 			}
 			
+			case WM_NOTIFY:
+			{
+				/*выделяет 1  и 15 день месяца*/
+				//*https://docs.microsoft.com/ru-ru/windows/win32/controls/set-day-states */
+			if (((LPNMHDR)lParam)->code == MCN_GETDAYSTATE)
+				{
+					MONTHDAYSTATE rgMonths[12] = { 0 };
+					int cMonths = ((NMDAYSTATE*)lParam)->cDayState;
+					for (int i = 0; i < cMonths; i++)
+					{
+						BOLDDAY(rgMonths[i], 1);
+						BOLDDAY(rgMonths[i], 15);
+					}
+					((NMDAYSTATE*)lParam)->prgDayState = rgMonths;
+					return TRUE;
+				}
+				break;
+			}
+				
 		}
 		if (uFindMsgString == msg) 
 		{
@@ -233,8 +260,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		SetWindowPos(hwndMonthCal, NULL, LEFT, TOP,	rc.right, rc.bottom, SWP_NOZORDER);
 		
 		MonthCal_SetCurrentView(hwndMonthCal, MCMV_YEAR);// Set the calendar to the annual view.
-		
-	
+			
 		CreateWindowEx(0, TEXT("Button"), TEXT("ДОБАВИТЬ ЗАПИСЬ"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 270, 10, 200, 40, hwnd, (HMENU)ID_NEW_RECORD, lpCRStr->hInstance, NULL);
 		// создаём кнопку "Добавить неск. записей"
 		CreateWindowEx(0, TEXT("Button"), TEXT("ДОБАВИТЬ ЗАПИСИ"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 270, 55, 200, 40, hwnd, (HMENU)ID_NEW_RECORD2, lpCRStr->hInstance, NULL);
@@ -352,7 +378,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		{
 			if (IsMaximized(hwnd)) // окно развёрнуто
 			{
-				
 				ShowWindow(hwnd, SW_RESTORE);
 			} 
 			else
@@ -448,7 +473,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			if (iItem != -1)
 			{
 					ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
-					//ListBox_AddString(hwndCtl, lpFindReplace->lpstrReplaceWith); //добавляет в конец списка 
 					ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
 					SetForegroundWindow(hwndCtl);
 			}
@@ -475,7 +499,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					{
 						int cch = GetDlgItemText(hWndlg, IDC_EDIT1, szBuffer, _countof(szBuffer));
 						SetDlgItemText(hWndlg, IDC_EDIT1, NULL);
-						SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0);
+						SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0); //отправка текста с сообщением
 					} break;
 					case IDCANCEL:
 					{
@@ -547,8 +571,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		} break;
 		case WM_CLOSE:
 		{
-			HANDLE_WM_CLOSE(hWndlg, wParam, lParam, DialogMany_OnClose);
-		}
+				HANDLE_WM_CLOSE(hWndlg, wParam, lParam, DialogMany_OnClose);
+			}
 		}
 		return FALSE;
 	}
