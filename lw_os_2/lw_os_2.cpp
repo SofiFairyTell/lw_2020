@@ -38,16 +38,16 @@
 	TCHAR szBuffer[100] = TEXT("");
 	TCHAR szBuffer1[100] = TEXT("");
 	RECT rc;
-	HBRUSH brushes[3];
+	HBRUSH brushes[3]; //кисти для изменения цвета окна
 	int brush_index = 0;
 	#pragma region MainWindowFunction
 	LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr);
+	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr);//создание окна и элементов на нем
 	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify);	
 	void OnDestroy(HWND hwnd);
-	void OnTimer(HWND hwnd, UINT id);
-	void OnClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);
-	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);
+	void OnTimer(HWND hwnd, UINT id);//SetTimer, KillTimer, запуск зведного неба
+	void OnClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);//для WM_LBUTTONDBLCLK и WM_LBUTTONDOWN
+	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);//для WM_SYSKEYUP
 	#pragma endregion
 	
 	#pragma region EditDialogFunction
@@ -58,15 +58,18 @@
 		void Dialog_OnClose(HWND hWnd);
 	#pragma endregion
 
-#pragma region SAVEFILEAS dialog
-	OPENFILENAME OpenFDLG;//для создания диалогового окна Сохранить как
-	UINT uOpenMSG = 0;
-	void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace);
+	#pragma region SAVEFILEAS dialog
+		OPENFILENAME OpenFDLG;//для создания диалогового окна Сохранить как
+		UINT uOpenMSG = 0;
+		void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace);
+	#pragma endregion
+	#pragma region  DialogProcMany
+		void DialogMany_OnClose(HWND hWnd);
+		BOOL Dialog_OnInitDialogMany(HWND hWnd, HWND hWndF, LPARAM lParam);
+		INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	#pragma endregion
 #pragma endregion
-#pragma endregion
-	void DialogMany_OnClose(HWND hWnd);
-	BOOL Dialog_OnInitDialogMany(HWND hWnd, HWND hWndF, LPARAM lParam);
-	INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLine,int  nCmdShow)
 {
 	MSG  msg;
@@ -271,11 +274,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	}
 	void OnDestroy(HWND hwnd)
 	{
-		int UserAnswer = MessageBox(hWnd, TEXT("Завершить работу?"), TEXT("Выход"), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1);
-		if (IDYES == UserAnswer)
-		{
-			DestroyWindow(hWnd);
-		}
+		//int UserAnswer = MessageBox(hWnd, TEXT("Завершить работу?"), TEXT("Выход"), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1);
+		//if (IDYES == UserAnswer)
+		//{
+		//	DestroyWindow(hWnd);
+		//}
+		PostQuitMessage(0); // отправляем сообщение WM_QUIT
 	}
 	void OnTimer(HWND hwnd, UINT id)
 	{
