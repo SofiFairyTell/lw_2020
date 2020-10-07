@@ -1,0 +1,3 @@
+[submodule "lw_toi_1/LW_TOI_1"]
+	path = lw_toi_1/LW_TOI_1
+	url = git://github.com/SofiFairyTell/labwork_os.git
