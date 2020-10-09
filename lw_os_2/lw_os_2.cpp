@@ -171,6 +171,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				else brush_index++;
 				InvalidateRect(hWnd, NULL, FALSE);
 				return 0;
+				
+
+				/*чтение элемента из строки */
+				HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
+				DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
+				char* buffer = new char[ssh + 1];
+				char kl = (wchar_t)wParam;
+				ListBox_GetText(hwndCtl, 0, buffer);
+				MessageBoxA(NULL, buffer, NULL, 0);
+				buffer = &kl;
+				MessageBoxA(NULL, buffer, NULL, 0);
+				delete[] buffer;
 			}
 			case WM_PAINT:
 			{
@@ -263,12 +275,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify)
 	{
 		HINSTANCE hInstance = GetWindowInstance(hWnd);
-		
+
 		switch (id)
 		{
 		case ID_NEW_RECORD:
 		{
-			int DialogResult = DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DialogProc),NULL);
+			int DialogResult = DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DialogProc), NULL);
 			if (IDOK == DialogResult)
 			{
 				SendMessage(hWnd, WM_ADDITEM, 0, 0);
@@ -282,7 +294,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				SendMessage(hWnd, WM_ADDITEM, 0, 0);
 			}
 		}
-			break;
+		break;
 		case ID_DEL_RECORD: // нажата кнопка "Удалить запись"
 		{
 			// получим дескриптор списка
@@ -299,8 +311,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				{
 					// удаляем выделенный элемент из списка
 					ListBox_DeleteString(hwndCtl, iItem);
-				} 
-			} 
+				}
+			}
 		}
 		break;
 		case ID_SAVE_AS:
@@ -313,7 +325,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			OpenFDLG.lpstrFile = szFileName;
 			OpenFDLG.nMaxFile = _countof(szFileName);
 			OpenFDLG.lpstrTitle = TEXT("Сохранить как");
-			OpenFDLG.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_CREATEPROMPT | OFN_OVERWRITEPROMPT| OFN_EXTENSIONDIFFERENT;
+			OpenFDLG.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_CREATEPROMPT | OFN_OVERWRITEPROMPT | OFN_EXTENSIONDIFFERENT;
 			OpenFDLG.lpstrDefExt = TEXT("txt");
 			if (GetSaveFileName(&OpenFDLG) != FALSE)
 			{
@@ -327,7 +339,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			if (0 == uFindMsgString)
 			{
 				uFindMsgString = RegisterWindowMessage(FINDMSGSTRING);// получим код сообщения FINDMSGSTRING
-			} 
+			}
 			if (IsWindow(hFindDlg) == FALSE)
 			{
 				findDlg.lStructSize = sizeof(FINDREPLACE);
@@ -335,221 +347,201 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				findDlg.hwndOwner = hWnd;			// указываем дескриптор окна владельца
 				findDlg.lpstrFindWhat = szBuffer;
 				findDlg.lpstrReplaceWith = szBuffer1;
-				findDlg.wReplaceWithLen  = _countof(szBuffer1);			// указываем размер буфера
-				findDlg.wFindWhatLen = _countof(szBuffer);	
+				findDlg.wReplaceWithLen = _countof(szBuffer1);			// указываем размер буфера
+				findDlg.wFindWhatLen = _countof(szBuffer);
 				hFindDlg = ReplaceText(&findDlg);
-			} 
-			break;
-		case IDC_LIST1: // двоной клик по списку просмотра
-		{
-			// получим дату из календаря
-			if (HIWORD(wParam) == LBN_DBLCLK)
-			{
-				MonthCal_GetCurSel(GetDlgItem(hWnd, IDC_MONTHCALENDAR1), &st);
-				TCHAR szText[100];
-				GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
-				HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
-				int iItem = ListBox_GetCurSel(hwndCtl);
-				ListBox_AddString(hwndCtl, iItem, szText); //добавление на то же место
 			}
-				
-			}
-		}
-	}
-	void OnLbuttonDClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
-	{
-		// передаём фокус клавиатуры главному окну
-		SetFocus(hwnd);
-
-		if (fDoubleClick != FALSE) // двойной клик
-		{
-			if (IsMaximized(hwnd)) // окно развёрнуто
-			{
-				ShowWindow(hwnd, SW_RESTORE);
-			} 
-			else
-			{
-				// развернём окно
-				ShowWindow(hwnd, SW_MAXIMIZE);
-			} 
-		} 
-
-	}
-	void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags)
-	{
-		ReleaseCapture(); // освободим мышь
-	} 
-	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags)
-	{
-		RECT rect; // размеры окна
-
-   // получим размеры окна
-		GetWindowRect(hwnd, &rect);
-
-		if (fDown)
-		{
-			switch (vk)
-			{
-			case VK_LEFT: // нажата стрелка влево
-				// перемещаем окно влево
-				SetWindowPos(hwnd, NULL, rect.left -10 , rect.top, 0, 0, SWP_NOSIZE);
-				break;
-
-			case VK_RIGHT: // нажата стрелка вправо
-				// перемещаем окно вправо
-				SetWindowPos(hwnd, NULL, rect.left + 10, rect.top, 0, 0, SWP_NOSIZE);
-				break;
-
-			case VK_UP: // нажата стрелка вверх
-				// перемещаем окно вверх
-				SetWindowPos(hwnd, NULL, rect.left, rect.top - 10, 0, 0, SWP_NOSIZE);
-				break;
-
-			case VK_DOWN: // нажата стрелка вниз
-				// перемещаем окно вниз
-				SetWindowPos(hwnd, NULL, rect.left, rect.top + 10, 0, 0, SWP_NOSIZE);
-				break;
-			} // switch
-		} // if
-		else
-		{
-			switch (vk)
-			{
-			case VK_LEFT: // отпущена стрелка влево
-				// перемещаем окно к левому краю
-				SetWindowPos(hwnd, NULL, 0, rect.top, 0, 0, SWP_NOSIZE);
-				break;
-
-			case VK_UP: // отпущена стрелка вверх
-				// перемещаем окно к верхнему краю
-				SetWindowPos(hwnd, NULL, rect.left, 0, 0, 0, SWP_NOSIZE);
-				break;
-			} 
-		} 
-	}
-
-	void OnSizing(HWND hwnd, LPRECT lpRect, WPARAM wParam)
-	{
-		/*изменение одной стороны ведет за собой увеличение другой*/
-		static double fixedRate = 1.0;
-		/*LPRECT lpRect = (LPRECT)lParam;*/
-		int w = lpRect->right - lpRect->left;//ширина
-		int h = lpRect->bottom - lpRect->top;//высота
-		int dw = (int)(h * fixedRate - w);//диагональ при изменении ширины
-		int dh = (int)(w / fixedRate - h);//диагональ при изменении высоты
-		switch (wParam)
-		{
-		case WMSZ_TOP:
-		case WMSZ_BOTTOM:
-			lpRect->right += dw;
-			break;
-		case WMSZ_LEFT:
-		case WMSZ_RIGHT:
-			lpRect->bottom += dh;
-			break;
-		case WMSZ_TOPLEFT:
-			if (dw > 0) lpRect->left -= dw;
-			else lpRect->top -= dh;
-			break;
-		case WMSZ_TOPRIGHT:
-			if (dw > 0) lpRect->right += dw;
-			else lpRect->top -= dh;
-			break;
-		case WMSZ_BOTTOMLEFT:
-			if (dw > 0) lpRect->left -= dw;
-			else lpRect->bottom += dh;
 			break;
 		}
-	}	// OnSizing
-	void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys)
-	{
-		if (fwKeys & MK_SHIFT) // нажата клавиша SHIFT
+		void OnLbuttonDClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
+		{
+			// передаём фокус клавиатуры главному окну
+			SetFocus(hwnd);
+
+			if (fDoubleClick != FALSE) // двойной клик
+			{
+				if (IsMaximized(hwnd)) // окно развёрнуто
+				{
+					ShowWindow(hwnd, SW_RESTORE);
+				}
+				else
+				{
+					// развернём окно
+					ShowWindow(hwnd, SW_MAXIMIZE);
+				}
+			}
+
+		}
+		void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags)
+		{
+			ReleaseCapture(); // освободим мышь
+		}
+		void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags)
 		{
 			RECT rect; // размеры окна
 
-			// получим размеры окна
+	   // получим размеры окна
 			GetWindowRect(hwnd, &rect);
 
-			// изменим размеры
+			if (fDown)
+			{
+				switch (vk)
+				{
+				case VK_LEFT: // нажата стрелка влево
+					// перемещаем окно влево
+					SetWindowPos(hwnd, NULL, rect.left - 10, rect.top, 0, 0, SWP_NOSIZE);
+					break;
 
-			int d = 5 * zDelta / WHEEL_DELTA;
-			InflateRect(&rect, d, d);
+				case VK_RIGHT: // нажата стрелка вправо
+					// перемещаем окно вправо
+					SetWindowPos(hwnd, NULL, rect.left + 10, rect.top, 0, 0, SWP_NOSIZE);
+					break;
 
-			MoveWindow(hwnd, rect.left, rect.top, (rect.right - rect.left), (rect.bottom - rect.top), TRUE);
-		} // if
-	} // OnMouseWheel
-	//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr)
-	//{
-	//	switch(lpnmhdr->code)
-	//	{
-	//	case LBN_DBLCLK: // двоной клик по списку просмотра
-	//		if (lpnmhdr->idFrom == IDC_LIST1)
-	//		{
-	//			LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)lpnmhdr;
-	//			// получим дату из календаря
-	//			MonthCal_GetCurSel(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
-	//			TCHAR szText[100];
-	//			GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
-	//			HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-	//			int iItem = ListBox_GetCurSel(hwndCtl);
-	//			ListBox_AddString(hwndCtl, lpnmitem, szText); //добавление на то же место
-	//		}
-	//	}
-	//} // OnNotify
+				case VK_UP: // нажата стрелка вверх
+					// перемещаем окно вверх
+					SetWindowPos(hwnd, NULL, rect.left, rect.top - 10, 0, 0, SWP_NOSIZE);
+					break;
+
+				case VK_DOWN: // нажата стрелка вниз
+					// перемещаем окно вниз
+					SetWindowPos(hwnd, NULL, rect.left, rect.top + 10, 0, 0, SWP_NOSIZE);
+					break;
+				} // switch
+			} // if
+			else
+			{
+				switch (vk)
+				{
+				case VK_LEFT: // отпущена стрелка влево
+					// перемещаем окно к левому краю
+					SetWindowPos(hwnd, NULL, 0, rect.top, 0, 0, SWP_NOSIZE);
+					break;
+
+				case VK_UP: // отпущена стрелка вверх
+					// перемещаем окно к верхнему краю
+					SetWindowPos(hwnd, NULL, rect.left, 0, 0, 0, SWP_NOSIZE);
+					break;
+				}
+			}
+		}
+
+		void OnSizing(HWND hwnd, LPRECT lpRect, WPARAM wParam)
+		{
+			/*изменение одной стороны ведет за собой увеличение другой*/
+			static double fixedRate = 1.0;
+			/*LPRECT lpRect = (LPRECT)lParam;*/
+			int w = lpRect->right - lpRect->left;//ширина
+			int h = lpRect->bottom - lpRect->top;//высота
+			int dw = (int)(h * fixedRate - w);//диагональ при изменении ширины
+			int dh = (int)(w / fixedRate - h);//диагональ при изменении высоты
+			switch (wParam)
+			{
+			case WMSZ_TOP:
+			case WMSZ_BOTTOM:
+				lpRect->right += dw;
+				break;
+			case WMSZ_LEFT:
+			case WMSZ_RIGHT:
+				lpRect->bottom += dh;
+				break;
+			case WMSZ_TOPLEFT:
+				if (dw > 0) lpRect->left -= dw;
+				else lpRect->top -= dh;
+				break;
+			case WMSZ_TOPRIGHT:
+				if (dw > 0) lpRect->right += dw;
+				else lpRect->top -= dh;
+				break;
+			case WMSZ_BOTTOMLEFT:
+				if (dw > 0) lpRect->left -= dw;
+				else lpRect->bottom += dh;
+				break;
+			}
+		}	// OnSizing
+		void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys)
+		{
+			if (fwKeys & MK_SHIFT) // нажата клавиша SHIFT
+			{
+				RECT rect; // размеры окна
+
+				// получим размеры окна
+				GetWindowRect(hwnd, &rect);
+
+				// изменим размеры
+
+				int d = 5 * zDelta / WHEEL_DELTA;
+				InflateRect(&rect, d, d);
+
+				MoveWindow(hwnd, rect.left, rect.top, (rect.right - rect.left), (rect.bottom - rect.top), TRUE);
+			} // if
+		} // OnMouseWheel
+		//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr)
+		//{
+		//	switch(lpnmhdr->code)
+		//	{
+		//	case LBN_DBLCLK: // двоной клик по списку просмотра
+		//		if (lpnmhdr->idFrom == IDC_LIST1)
+		//		{
+		//			LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)lpnmhdr;
+		//			// получим дату из календаря
+		//			MonthCal_GetCurSel(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
+		//			TCHAR szText[100];
+		//			GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
+		//			HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
+		//			int iItem = ListBox_GetCurSel(hwndCtl);
+		//			ListBox_AddString(hwndCtl, lpnmitem, szText); //добавление на то же место
+		//		}
+		//	}
+		//} // OnNotify
 
 #pragma endregion
 #pragma region For FINDREPLACE dialog
-	void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace)
-{
-	HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-	if (lpFindReplace->Flags&FR_FINDNEXT) // нажата кнопка "Найти далее"
-	{
-		
-		int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
-		iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);// выполним поиск указанного текста в списке
-		ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
-		if (LB_ERR == iItem) // элемент не найден
+		void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace)
 		{
-			MessageBox(hFindDlg, TEXT("Элемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
-		} 
-		/*чтение элемента из строки */
-		DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
-		char* buffer = new char[ssh + 1];
-		ListBox_GetText(hwndCtl, 0, buffer);
-		MessageBoxA(NULL,buffer,NULL,0);
-		delete[] buffer;
-	} 
-	else
-	if (lpFindReplace->Flags&FR_REPLACE) // нажата кнопка "Заменить"
-	{
-		/*LVFINDINFO fi = { LVFI_STRING };
-		fi.psz = szBuffer;*/
-		int iItem = -1;
-		for (;;)
-		{
-			int iItem = ListBox_GetCurSel(hwndCtl);
-			iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
-			ListBox_SetCurSel(hwndCtl, iItem);
-			if (LB_ERR == iItem) // элемент не найден
+			HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
+			if (lpFindReplace->Flags&FR_FINDNEXT) // нажата кнопка "Найти далее"
+			{
+
+				int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
+				iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);// выполним поиск указанного текста в списке
+				ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
+				if (LB_ERR == iItem) // элемент не найден
 				{
 					MessageBox(hFindDlg, TEXT("Элемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
-				} 
-			if (iItem != -1)
-			{
-					ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
-					ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
-					SetForegroundWindow(hwndCtl);
+				}
+
 			}
-			break;
+			else
+				if (lpFindReplace->Flags&FR_REPLACE) // нажата кнопка "Заменить"
+				{
+					/*LVFINDINFO fi = { LVFI_STRING };
+					fi.psz = szBuffer;*/
+					int iItem = -1;
+					for (;;)
+					{
+						int iItem = ListBox_GetCurSel(hwndCtl);
+						iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
+						ListBox_SetCurSel(hwndCtl, iItem);
+						if (LB_ERR == iItem) // элемент не найден
+						{
+							MessageBox(hFindDlg, TEXT("Элемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
+						}
+						if (iItem != -1)
+						{
+							ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
+							ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
+							SetForegroundWindow(hwndCtl);
+						}
+						break;
+					}
+				}
 		}
-	} 
-} 
 #pragma endregion
 #pragma region EditDialogFunction
-	INT_PTR CALLBACK DialogProc(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (uMsg)
+		INT_PTR CALLBACK DialogProc(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
+			switch (uMsg)
+			{
 			case WM_INITDIALOG:
 			{
 				BOOL bRet = HANDLE_WM_INITDIALOG(hWndlg, wParam, lParam, Dialog_OnInitDialog);
@@ -559,17 +551,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				switch (LOWORD(wParam))
 				{
-					case IDOK:
-					{
-						int cch = GetDlgItemText(hWndlg, IDC_EDIT1, szBuffer, _countof(szBuffer));
-						SetDlgItemText(hWndlg, IDC_EDIT1, NULL);
-						SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0); //отправка текста с сообщением
-					} break;
-					case IDCANCEL:
-					{
-						EndDialog(hWndlg, 0);
-						return TRUE;
-					}break;
+				case IDOK:
+				{
+					int cch = GetDlgItemText(hWndlg, IDC_EDIT1, szBuffer, _countof(szBuffer));
+					SetDlgItemText(hWndlg, IDC_EDIT1, NULL);
+					SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0); //отправка текста с сообщением
+				} break;
+				case IDCANCEL:
+				{
+					EndDialog(hWndlg, 0);
+					return TRUE;
+				}break;
 				}
 			} break;
 			case WM_CLOSE:
@@ -577,70 +569,71 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				HANDLE_WM_CLOSE(hWndlg, wParam, lParam, Dialog_OnClose);
 				return TRUE;
 			}break;
-		}
+			}
 			return FALSE;
-	}
+		}
 
-	BOOL Dialog_OnInitDialog(HWND hWnd, HWND hWndF, LPARAM lParam)
-	{
-		HWND hwndEdit = GetDlgItem(hWnd, IDC_EDIT1);
-		Edit_LimitText(hwndEdit, _countof(szBuffer)-1);
-		Edit_SetCueBannerText(hwndEdit, L"Новая запись");
-		return TRUE;
-	}
-	void OnAddItem(HWND hWnd)
-	{
-		HWND hWNDctrl = GetDlgItem(hWnd, IDC_LIST1);
-		int iItem = ListBox_AddString(hWNDctrl, szBuffer);
-		ListBox_SetCurSel(hWNDctrl, iItem);
-	}
-	void Dialog_OnClose(HWND hWnd)
-	{
-		if (hWnd == hDlg) { DestroyWindow(hWnd); }
-		else { EndDialog(hWnd, 0); }
-	}
+		BOOL Dialog_OnInitDialog(HWND hWnd, HWND hWndF, LPARAM lParam)
+		{
+			HWND hwndEdit = GetDlgItem(hWnd, IDC_EDIT1);
+			Edit_LimitText(hwndEdit, _countof(szBuffer) - 1);
+			Edit_SetCueBannerText(hwndEdit, L"Новая запись");
+			return TRUE;
+		}
+		void OnAddItem(HWND hWnd)
+		{
+			HWND hWNDctrl = GetDlgItem(hWnd, IDC_LIST1);
+			int iItem = ListBox_AddString(hWNDctrl, szBuffer);
+			ListBox_SetCurSel(hWNDctrl, iItem);
+		}
+		void Dialog_OnClose(HWND hWnd)
+		{
+			if (hWnd == hDlg) { DestroyWindow(hWnd); }
+			else { EndDialog(hWnd, 0); }
+		}
 #pragma endregion
 #pragma region ManyStringAdd
-	INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (uMsg)
+		INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
-		case WM_INITDIALOG:
-		{
-			BOOL bRet = HANDLE_WM_INITDIALOG(hWndlg, wParam, lParam, Dialog_OnInitDialogMany);
-			return SetDlgMsgResult(hWndlg, uMsg, bRet);
-		}break;
-		case WM_COMMAND:
-		{
-			TCHAR str[] = TEXT("");
-			switch (LOWORD(wParam))
+			switch (uMsg)
 			{
-			case IDOK:
+			case WM_INITDIALOG:
 			{
-				int counter = GetDlgItemInt(hWndlg,IDC_EDIT2,NULL,NULL);
-				int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
-				while (counter != 0)
-				{
-				SetDlgItemText(hWndlg, IDC_EDIT3, NULL);
-				SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0);
-				counter--;
-				}
-				
-			} break;
-			case IDCANCEL:
-			{
-				EndDialog(hWndlg, 0);
-				return FALSE;
+				BOOL bRet = HANDLE_WM_INITDIALOG(hWndlg, wParam, lParam, Dialog_OnInitDialogMany);
+				return SetDlgMsgResult(hWndlg, uMsg, bRet);
 			}break;
-			}
-		} break;
-		case WM_CLOSE:
-		{
+			case WM_COMMAND:
+			{
+				TCHAR str[] = TEXT("");
+				switch (LOWORD(wParam))
+				{
+					case IDOK:
+					{
+						int counter = GetDlgItemInt(hWndlg, IDC_EDIT2, NULL, NULL);
+						int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
+						while (counter != 0)
+						{
+							SetDlgItemText(hWndlg, IDC_EDIT3, NULL);
+							SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0);
+							counter--;
+						}
+
+					} break;
+					case IDCANCEL:
+					{
+						EndDialog(hWndlg, 0);
+						return FALSE;
+					}break;
+				}
+			} break;
+			case WM_CLOSE:
+			{
 				HANDLE_WM_CLOSE(hWndlg, wParam, lParam, DialogMany_OnClose);
 			}
+			}
+			return FALSE;
 		}
-		return FALSE;
-	}
+
 	BOOL Dialog_OnInitDialogMany(HWND hWnd, HWND hWndF, LPARAM lParam)
 	{
 		HWND hwndEdit = GetDlgItem(hWnd, IDC_EDIT3);
