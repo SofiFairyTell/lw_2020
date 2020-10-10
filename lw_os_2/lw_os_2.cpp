@@ -51,7 +51,9 @@
 	void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags);
 	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);//дл€ WM_SYSKEYUP
 	void OnSizing(HWND hwnd, LPRECT lpRect, WPARAM wParam); //обработка onSizing
-	void OnNotify(HWND hwnd, LPNMHDR lpnmhdr);
+	//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr);
+	BOOL WINAPI pUnrealGetMessageW(LPMSG lpMsg, HWND hWnd, LPARAM lParam);
+	char* userStrstr(const char* haystack, char* needle);
 	void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys);
 	#pragma endregion
 	
@@ -170,19 +172,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					brush_index = 0;
 				else brush_index++;
 				InvalidateRect(hWnd, NULL, FALSE);
-				return 0;
+				MSG lpmsg = NULL;
+				GetMessage(lpmsg,hWnd,NULL,0);
+				pUnrealGetMessageW((MSG)lpmsg,hWnd, lParam);
 				
+				//return 0;
 
-				/*чтение элемента из строки */
-				HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-				DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
-				char* buffer = new char[ssh + 1];
-				char kl = (wchar_t)wParam;
-				ListBox_GetText(hwndCtl, 0, buffer);
-				MessageBoxA(NULL, buffer, NULL, 0);
-				buffer = &kl;
-				MessageBoxA(NULL, buffer, NULL, 0);
-				delete[] buffer;
+					
+
 			}
 			case WM_PAINT:
 			{
@@ -201,7 +198,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				return 0;
 			}
 			
-			case WM_NOTIFY:
+			//case WM_NOTIFY:
 			//{
 			//	/*выдел€ет 1  и 15 день мес€ца*/
 			//	//*https://docs.microsoft.com/ru-ru/windows/win32/controls/set-day-states */
@@ -219,9 +216,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			//	}
 			//	break;
 			//}
-			{
+			/*{
 				OnNotify(hwnd, (LPNMHDR)lParam);
-			}
+			}*/
 		}
 		if (uFindMsgString == msg) 
 		{
@@ -230,6 +227,64 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		} 
 		return (DefWindowProc(hwnd, msg, wParam, lParam));
 	}
+	BOOL WINAPI pUnrealGetMessageW(LPMSG lpMsg, HWND hWnd, LPARAM lParam)
+	{
+		HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
+		DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
+		DWORD size = ListBox_GetCount(hwndCtl);
+		char* buffer = new char[ssh + 1];
+		if (lpMsg->message == WM_CHAR)
+		{
+			lpMsg->message = 0;
+			//OutputDebugString(L"WM_CHAR в dll");
+			if (lParam)
+			{
+				lpMsg = (LPMSG)lParam;
+				if (lpMsg->message == WM_CHAR)
+				{
+					/*if (lpmsg->wParam == '1')
+					{
+
+					}*/
+					char* pChar = reinterpret_cast<char*>(lpMsg->wParam);
+					UINT i;
+					for (i = 0; i < size; i++)
+					{
+						ListBox_GetText(hwndCtl, i, buffer);
+						if (userStrstr(buffer, pChar))
+						{
+							MessageBoxA(NULL, buffer, NULL, 0);
+						}
+
+					}
+
+				}
+			}
+
+			/*чтение элемента из строки */
+
+
+
+			delete[] buffer;
+
+		}
+		return 0;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr) 
 	{
@@ -353,6 +408,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			}
 			break;
 		}
+	}
 		void OnLbuttonDClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
 		{
 			// передаЄм фокус клавиатуры главному окну
@@ -607,23 +663,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				TCHAR str[] = TEXT("");
 				switch (LOWORD(wParam))
 				{
-					case IDOK:
+				case IDOK:
+				{
+					int counter = GetDlgItemInt(hWndlg, IDC_EDIT2, NULL, NULL);
+					int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
+					while (counter != 0)
 					{
-						int counter = GetDlgItemInt(hWndlg, IDC_EDIT2, NULL, NULL);
-						int cch = GetDlgItemText(hWndlg, IDC_EDIT3, szBuffer, _countof(szBuffer));
-						while (counter != 0)
-						{
-							SetDlgItemText(hWndlg, IDC_EDIT3, NULL);
-							SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0);
-							counter--;
-						}
+						SetDlgItemText(hWndlg, IDC_EDIT3, NULL);
+						SendMessage(GetParent(hWndlg), WM_ADDITEM, 0, 0);
+						counter--;
+					}
 
-					} break;
-					case IDCANCEL:
-					{
-						EndDialog(hWndlg, 0);
-						return FALSE;
-					}break;
+				} break;
+				case IDCANCEL:
+				{
+					EndDialog(hWndlg, 0);
+					return FALSE;
+				}break;
 				}
 			} break;
 			case WM_CLOSE:
@@ -649,5 +705,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	}
 #pragma endregion 
 
-
+	char* userStrstr(const char* haystack, char* needle)
+	{
+		for (const char* hp = haystack; hp != haystack + strlen(haystack); ++hp)
+		{
+			const char* np = needle;
+			const char* tmp = hp;
+			for (; np != needle + strlen(needle); ++np)
+			{
+				if (*tmp != *np)
+				{
+					break;
+				}
+				else
+				{
+					++tmp;
+				}
+			}
+			if (np == needle + strlen(needle))
+			{
+				return needle;
+			}
+		}
+		return 0;
+	}
 
