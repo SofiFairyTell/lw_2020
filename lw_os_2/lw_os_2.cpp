@@ -18,17 +18,20 @@
 #define WM_ADDITEM WM_USER+1
 #define BOLDDAY(ds, iDay)  \
         if (iDay > 0 && iDay < 32)(ds) |= (0x00000001 << (iDay - 1))
+
+
+
 #pragma region Объявления
 	#pragma region Handle of Window
 	HWND hWnd = NULL; //дескриптор окна
-	HWND hDlg = NULL;
+	HWND hDlg = NULL; //декприптор диалогового окна
 	HWND hSaveDlg = NULL; //save as
 	HWND hRlsDlg = NULL; //replace
 	#pragma endregion
 	#pragma region Handle of control elements
 		HWND hwndMonthCal = NULL; //для календаря
 		HACCEL hAccel = NULL; //дескриптор акселератора 
-		HWND hwndCtrl = NULL;
+		HWND hwndCtrl = NULL; //дескпритор элемента управления
 	#pragma endregion
 	#pragma region For FINDREPLACE dialog
 		FINDREPLACE findDlg; // структура для диалогового окна "Найти"
@@ -41,6 +44,8 @@
 	HBRUSH brushes[3]; //кисти для изменения цвета окна
 	int brush_index = 0;
 	SYSTEMTIME st;
+	TCHAR dateTime[32];
+	DWORD dwTimer = 0; // счётчик таймера
 	#pragma region MainWindowFunction
 	LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr);//создание окна и элементов на нем
@@ -51,17 +56,25 @@
 	void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags);
 	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);//для WM_SYSKEYUP
 	void OnSizing(HWND hwnd, LPRECT lpRect, WPARAM wParam); //обработка onSizing
+	// обработчик сообщения WM_TIMER
+	void OnTimer(HWND hwnd, UINT id);
+
+	/*	Массив для формирования строки - текущие дата и время*/
+	TCHAR szCurrentTime[40];
 	//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr);
 	BOOL WINAPI pUnrealGetMessageW(LPMSG lpMsg, HWND hWnd, LPARAM lParam);
 	char* userStrstr(const char* haystack, char* needle);
 	void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys);
-	#pragma endregion
+	//Timer
+	static int sec = 0;
+	char workTime[10];
+
+#pragma endregion
 	
 	#pragma region EditDialogFunction
 		INT_PTR CALLBACK DialogProc(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		BOOL Dialog_OnInitDialog(HWND hWnd, HWND hWndF, LPARAM lParam);
 		void OnAddItem(HWND hWnd);
-
 		void Dialog_OnClose(HWND hWnd);
 	#pragma endregion
 
@@ -106,24 +119,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	
 	/*создание главного окна на основе нового оконного класса*/
 	hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("LwOS"),	WS_OVERLAPPEDWINDOW|DS_CENTER, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
-	#pragma region Metrics
-		int x, y,x1,y1;
-		x = GetSystemMetrics(7);
-		y = GetSystemMetrics(8);
-		RECT rc;
-		BOOL bret = FALSE;
-		bret = SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
-		x = rc.right;
-		y1 = rc.top;
-		x1 = rc.bottom;
-		y = rc.left;
-	#pragma endregion
 	
 	if (NULL == hWnd) return -1; // завершаем работу приложения
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 	UpdateWindow(hWnd);
-	SetTimer(hWnd, 1, 10, NULL);
+	SetTimer(hWnd, 1, 1000, (TIMERPROC)NULL);
 	while ((bRet = GetMessage(&msg, NULL, 0, 0))!= FALSE)
 	{
 		if (!TranslateAccelerator(hWnd, hAccel, &msg))
@@ -145,13 +146,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		{
 			HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
 			HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
-			HANDLE_MSG(hwnd, WM_TIMER, OnTimer);
 			HANDLE_MSG(hwnd, WM_LBUTTONDBLCLK, OnLbuttonDClick);
 			HANDLE_MSG(hwnd, WM_LBUTTONDOWN, OnLbuttonDClick);
 			HANDLE_MSG(hwnd, WM_LBUTTONUP, OnLButtonUp);
 			HANDLE_MSG(hwnd, WM_SYSKEYUP, OnSysKey);
 			HANDLE_MSG(hwnd, WM_MOUSEWHEEL, MouseWheel);
 				
+		case WM_TIMER:
+		{
+			OnTimer(hwnd,0);
+			GetSystemTime(&st); //получаем системные дату и время
+			wsprintf(dateTime, _T("%d.%d.%d %d:%d:%d:%d"), st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+			wprintf(_T("%s"), dateTime);
+			sec++;
+			return 0;
+		}
 			case WM_ADDITEM:
 			{
 				OnAddItem(hwnd);
@@ -168,57 +177,72 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				//ввод символов в программу
 				/*ALT+<ANY KEY> перекрашивает экран одним из 3-х цветов*/
+				wchar_t x = (wchar_t)wParam;
+
 				if (brush_index == 2) 
 					brush_index = 0;
 				else brush_index++;
-				InvalidateRect(hWnd, NULL, FALSE);
-				MSG lpmsg = NULL;
-				GetMessage(lpmsg,hWnd,NULL,0);
-				pUnrealGetMessageW((MSG)lpmsg,hWnd, lParam);
+				InvalidateRect(hwnd, NULL, FALSE);
+				/*MSG* lpmsg = 0;
+				GetMessage(lpmsg,hwnd,NULL,0);*/
+				//pUnrealGetMessageW(lpmsg,hWnd, HIWORD(lParam));
 				
-				//return 0;
-
-					
-
+				return 0;
 			}
 			case WM_PAINT:
 			{
 				PAINTSTRUCT ps;
-				BeginPaint(hWnd, &ps);
+				BeginPaint(hwnd, &ps);
 				FillRect(ps.hdc, &ps.rcPaint, brushes[brush_index]);
-				EndPaint(hWnd, &ps);
+				EndPaint(hwnd, &ps);
 				return 0;
 			}
-			/*case WM_SIZING:
-				OnSizing(hWnd, (LPRECT)lParam);*/
+
 				return 0;
 			case WM_DESTROY:
 			{
-				PostQuitMessage(0);
+				KillTimer(hWnd, 1);
+				itoa(sec, workTime, 10); 
+				MessageBoxA(NULL, (LPSTR)workTime, "Время работы программы (сек.):", MB_ICONASTERISK | MB_OK);
+				PostQuitMessage(0);//without this app contie work after close messagebox
 				return 0;
 			}
 			
-			//case WM_NOTIFY:
-			//{
-			//	/*выделяет 1  и 15 день месяца*/
-			//	//*https://docs.microsoft.com/ru-ru/windows/win32/controls/set-day-states */
-			//if (((LPNMHDR)lParam)->code == MCN_GETDAYSTATE)
+			case WM_NOTIFY:
+			{
+				/*выделяет 1  и 15 день месяца*/
+				//*https://docs.microsoft.com/ru-ru/windows/win32/controls/set-day-states */
+			if (((LPNMHDR)lParam)->code == MCN_GETDAYSTATE)
+				{
+					MONTHDAYSTATE rgMonths[12] = { 0 };
+					int cMonths = ((NMDAYSTATE*)lParam)->cDayState;
+					for (int i = 0; i < cMonths; i++)
+					{
+						BOLDDAY(rgMonths[i], 1);
+						BOLDDAY(rgMonths[i], 15);
+					}
+					((NMDAYSTATE*)lParam)->prgDayState = rgMonths;
+					return TRUE;
+				}
+				break;
+			}
+			//	LPNMHDR l;
+			//	if (l->code == LBN_DBLCLK)// двоной клик по списку просмотра
 			//	{
-			//		MONTHDAYSTATE rgMonths[12] = { 0 };
-			//		int cMonths = ((NMDAYSTATE*)lParam)->cDayState;
-			//		for (int i = 0; i < cMonths; i++)
-			//		{
-			//			BOLDDAY(rgMonths[i], 1);
-			//			BOLDDAY(rgMonths[i], 15);
-			//		}
-			//		((NMDAYSTATE*)lParam)->prgDayState = rgMonths;
-			//		return TRUE;
+			//		LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)l;
+			//		// получим дату из календаря
+			//		MonthCal_GetCurSel(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
+			//		TCHAR szText[100];
+			//		GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
+			//		HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
+			//		int iItem = ListBox_GetCurSel(hwndCtl);
+			//		ListBox_AddString(hwndCtl, lpnmitem, szText); //добавление на то же место
+
 			//	}
-			//	break;
 			//}
-			/*{
-				OnNotify(hwnd, (LPNMHDR)lParam);
-			}*/
+			 
+			
+
 		}
 		if (uFindMsgString == msg) 
 		{
@@ -236,16 +260,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		if (lpMsg->message == WM_CHAR)
 		{
 			lpMsg->message = 0;
-			//OutputDebugString(L"WM_CHAR в dll");
 			if (lParam)
 			{
 				lpMsg = (LPMSG)lParam;
-				if (lpMsg->message == WM_CHAR)
-				{
-					/*if (lpmsg->wParam == '1')
-					{
 
-					}*/
+				if (lpMsg->message == WM_CHAR) 
+				{
+
 					char* pChar = reinterpret_cast<char*>(lpMsg->wParam);
 					UINT i;
 					for (i = 0; i < size; i++)
@@ -261,33 +282,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				}
 			}
 
-			/*чтение элемента из строки */
-
-
-
 			delete[] buffer;
 
 		}
 		return 0;
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr) 
 	{
+		
 		CreateWindowEx(0, TEXT("ListBox"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER| LBS_WANTKEYBOARDINPUT| LBS_NOTIFY, 10, 10, 250, 410, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 		hwndMonthCal = CreateWindowEx(0, TEXT("SysMonthCal32"), NULL, WS_CHILD | WS_VISIBLE|WS_BORDER| MCS_DAYSTATE| MCS_MULTISELECT, 163, 31, 140, 100, hwnd, (HMENU)IDC_MONTHCALENDAR1, lpCRStr->hInstance, NULL);
 		// Return if creating the month calendar failed. 
@@ -298,7 +301,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		SetWindowPos(hwndMonthCal, NULL, LEFT, TOP,	rc.right, rc.bottom, SWP_NOZORDER);
 		
 		MonthCal_SetCurrentView(hwndMonthCal, MCMV_YEAR);// Set the calendar to the annual view.
-			
+		
+														 
 		CreateWindowEx(0, TEXT("Button"), TEXT("ДОБАВИТЬ ЗАПИСЬ"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 270, 10, 200, 40, hwnd, (HMENU)ID_NEW_RECORD, lpCRStr->hInstance, NULL);
 		// создаём кнопку "Добавить неск. записей"
 		CreateWindowEx(0, TEXT("Button"), TEXT("ДОБАВИТЬ ЗАПИСИ"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 270, 55, 200, 40, hwnd, (HMENU)ID_NEW_RECORD2, lpCRStr->hInstance, NULL);
@@ -324,9 +328,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			x = rand() % 1600; //случайное число по х от 0 до 500
 			y = rand() % 900; //по у от 0 до 400
 			SetPixel(hdc, x, y, RGB(255, 255, 255)); //Выводим точку
-			ReleaseDC(hWnd, hdc);
+			ReleaseDC(hwnd, hdc);
+
 	}
-	
 	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify)
 	{
 		HINSTANCE hInstance = GetWindowInstance(hWnd);
@@ -414,7 +418,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			// передаём фокус клавиатуры главному окну
 			SetFocus(hwnd);
 
-			if (fDoubleClick != FALSE) // двойной клик
+			if (fDoubleClick == FALSE) // двойной клик
 			{
 				if (IsMaximized(hwnd)) // окно развёрнуто
 				{
@@ -480,7 +484,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				}
 			}
 		}
-
 		void OnSizing(HWND hwnd, LPRECT lpRect, WPARAM wParam)
 		{
 			/*изменение одной стороны ведет за собой увеличение другой*/
@@ -550,6 +553,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		//	}
 		//} // OnNotify
 
+
 #pragma endregion
 #pragma region For FINDREPLACE dialog
 		void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace)
@@ -568,6 +572,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 
 			}
 			else
+			{
+
+			
 				if (lpFindReplace->Flags&FR_REPLACE) // нажата кнопка "Заменить"
 				{
 					/*LVFINDINFO fi = { LVFI_STRING };
@@ -591,6 +598,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 						break;
 					}
 				}
+				else
+					if (lpFindReplace->Flags&FR_REPLACEALL)
+					{
+					int iItem = -1;
+					for (;;)
+					{
+						int iItem = ListBox_GetCurSel(hwndCtl);
+						iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
+						ListBox_SetCurSel(hwndCtl, iItem);//выделяем элемент
+						if (LB_ERR == iItem) // элемент не найден
+						{
+							MessageBox(hFindDlg, TEXT("Элемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
+						}
+						if (iItem != -1)
+						{
+							ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
+							ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
+							SetForegroundWindow(hwndCtl);
+						}
+						break;
+					}
+				}
+			}
 		}
 #pragma endregion
 #pragma region EditDialogFunction
@@ -705,6 +735,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	}
 #pragma endregion 
 
+	/*Naive search function. Use it, when read line from something and your what find char or searchline*/
 	char* userStrstr(const char* haystack, char* needle)
 	{
 		for (const char* hp = haystack; hp != haystack + strlen(haystack); ++hp)

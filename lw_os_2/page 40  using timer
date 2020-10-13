@@ -1,0 +1,122 @@
+Прототип функции получения текущего времени
+и преобразование его в символы
+*/
+void OutTimeDate(HWND);
+/*
+Массив для формирования строки - текущие дата и время
+*/
+TCHAR szCurrentTime[40]; 
+
+/*Переход по значению кода сообщения(msg)*/
+case WM_CREATE:
+/*
+Только здесь можно произвести модификацию класса
+окна. Например, SetClassLong(hWnd, GCL_HBRBACKGROUND,
+(LONG)CreateSolidBrush(RGB(200,160,255));
+Значение дескриптор экземпляра приложения (hInstance)
+определяется, вызовом одной из следующих функций:
+hInst = GetModuleHandle(NULL);
+hInst = (HINSTANCE)GetClassLong(hWnd,GCL_HMODULE);
+*/
+/*Обнуление всех членов структуры lf*/
+memset(&lf,0,sizeof(lf));
+/*Устанавливаем размер шрифта*/ 
+ 37
+ lf.lfHeight=30;
+/*Копируем в структуру имя шрифта*/
+ lstrcpy(lf.lfFaceName,lpszFace);
+ /*Создаем шрифт*/
+ hFont = CreateFontIndirect(&lf);
+ /*Первый немедленный вывод текущего времени*/
+ OutTimeDate(hWnd);
+/*
+Функция SetTimer создает системный таймер с периодом 1с
+*/
+ SetTimer(hWnd,1,1000,(TIMERPROC)NULL);
+ return TRUE;
+ case WM_TIMER:
+/*
+Функция OutTimeDate запрашивает у системы текущие значения даты и времени, а затем организует их обработку в
+главном окне приложения. */
+ OutTimeDate(hWnd);
+ break;
+ case WM_KEYDOWN:
+/*Обрабатываем сообщение-нажатие клавиши.*/
+ switch(wParam)
+ {
+ case VK_ESCAPE:
+/*
+Посылаем сообщение WM_CLOSE окну (hWnd), а после
+того, как оконная процедура обработает это сообщение, система передаст управление инструкции
+следующей за SendMessage.
+*/
+ SendMessage(hWnd,WM_CLOSE,0,0);
+ break;
+ }
+ break; 
+ 
+ /*
+Фунуция получения текущего времени и преобразование
+его в символы
+*/
+void OutTimeDate(HWND hWnd)
+{
+LPTSTR szDay[]={_T("Вск."),_T("Пнд."),_T("Втр."),
+_T("Ср."),_T("Чтв."),
+_T("Птн."),_T("Суб.")
+};
+LPTSTR szMonth[]={_T(""),_T("Янв."),_T("Февр."),
+_T("Март"),_T("Апр."),
+_T("Май"),_T("Июнь"),
+_T("Июль"),_T("Авг."),
+_T("Сент."),_T("Окт."),
+_T("Нояб."),_T("Дек.")
+};
+TCHAR szT[20];
+SYSTEMTIME SystemTime;
+/*
+Функция GetLocalTime осуществляет выборку местного времени, на которое настроен компьютер, т.е. функция
+заполняет структуру типа SYSTEMTIME в числовом виде.
+*/
+ GetLocalTime(&SystemTime);
+ /*День недели*/
+ lstrcpy(szCurrentTime,
+szDay[SystemTime.wDayOfWeek]);
+ /*Разделяющий пробел*/
+lstrcat((LPTSTR)szCurrentTime,_T(" "));
+ /*Месяц*/
+ lstrcat((LPTSTR)szCurrentTime,
+szMonth[SystemTime.wMonth]);
+ /*Разделяющий пробел*/
+ lstrcat((LPTSTR)szCurrentTime,_T(" "));
+ /*Дату переводим в символы*/ 
+ 40
+ wsprintf((LPTSTR)szT,_T("%d"),
+SystemTime.wDay);
+ lstrcat((LPTSTR)szCurrentTime,(LPTSTR)szT);
+ /*Разделяющий пробел*/
+ lstrcat((LPTSTR)szCurrentTime,_T(" "));
+ /*Год переводим в символы*/
+ wsprintf((LPTSTR)szT,_T("%d"),
+SystemTime.wYear);
+ lstrcat((LPTSTR)szCurrentTime,(LPTSTR)szT);
+ lstrcat((LPTSTR)szCurrentTime,_T("---"));
+ /**Часы переводим в символы*/
+ wsprintf((LPTSTR)szT,_T("%d"),
+SystemTime.wHour);
+ lstrcat((LPTSTR)szCurrentTime,(LPTSTR)szT);
+ /*Разделяющее двоеточие*/
+ lstrcat((LPTSTR)szCurrentTime,_T(":"));
+ /*Минуты переводим в символы*/
+ wsprintf((LPTSTR)szT,_T("%d"),
+SystemTime.wMinute);
+ lstrcat((LPTSTR)szCurrentTime,(LPTSTR)szT);
+/*Разделяющее двоеточие*/
+ lstrcat((LPTSTR)szCurrentTime,_T(":"));
+ /*Сеуцнды переводим в символы*/
+ wsprintf((LPTSTR)szT,_T("%d"),
+SystemTime.wSecond);
+ lstrcat((LPTSTR)szCurrentTime,(LPTSTR)szT);
+/*Перерисовка окна*/
+ InvalidateRect(hWnd,NULL,TRUE);
+} 
