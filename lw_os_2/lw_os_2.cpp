@@ -179,7 +179,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				/*ALT+<ANY KEY> перекрашивает экран одним из 3-х цветов*/
 				char x = (char)wParam;
 				char *pChar = &x;
-				pUnrealGetMessageW(hwnd, pChar);
+				//pUnrealGetMessageW(hwnd, pChar);
+				HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
+				DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
+				DWORD size = ListBox_GetCount(hwndCtl);
+				char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
+				ListBox_GetText(hwndCtl, 0, buffer);
+				//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
+				//iItem = ListBox_FindString(hwndCtl, iItem, x);// выполним поиск указанного текста в списке
+				//ListBox_SetCurSel(hwndCtl, iItem);// выдел€ем найденный элемент
+				userStrstr(buffer, pChar);
+				/*ListBox_FindString
+				MessageBoxA(NULL, buffer, NULL, 0);*/
+				delete[] buffer;//здесь ошибка Heap Debugg
+				return 0;
+
+
+
 				if (brush_index == 2) 
 					brush_index = 0;
 				else brush_index++;
@@ -199,7 +215,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				return 0;
 			}
 
-				return 0;
 			case WM_DESTROY:
 			{
 				KillTimer(hWnd, 1);
@@ -257,9 +272,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		DWORD size = ListBox_GetCount(hwndCtl);
 		char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
 		ListBox_GetText(hwndCtl, 0, buffer);
-		int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
-		iItem = ListBox_FindString(hwndCtl, iItem, x);// выполним поиск указанного текста в списке
-		ListBox_SetCurSel(hwndCtl, iItem);// выдел€ем найденный элемент
+
+		//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
+		//iItem = ListBox_FindString(hwndCtl,iItem x);// выполним поиск указанного текста в списке
+		//ListBox_SetCurSel(hwndCtl, iItem);// выдел€ем найденный элемент
 		
 		/*ListBox_FindString
 		MessageBoxA(NULL, buffer, NULL, 0);*/
@@ -513,24 +529,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				MoveWindow(hwnd, rect.left, rect.top, (rect.right - rect.left), (rect.bottom - rect.top), TRUE);
 			} // if
 		} // OnMouseWheel
-		//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr)
-		//{
-		//	switch(lpnmhdr->code)
-		//	{
-		//	case LBN_DBLCLK: // двоной клик по списку просмотра
-		//		if (lpnmhdr->idFrom == IDC_LIST1)
-		//		{
-		//			LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)lpnmhdr;
-		//			// получим дату из календар€
-		//			MonthCal_GetCurSel(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
-		//			TCHAR szText[100];
-		//			GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
-		//			HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-		//			int iItem = ListBox_GetCurSel(hwndCtl);
-		//			ListBox_AddString(hwndCtl, lpnmitem, szText); //добавление на то же место
-		//		}
-		//	}
-		//} // OnNotify
 
 
 #pragma endregion
@@ -552,55 +550,48 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			}
 			else
 			{
-
-			
 				if (lpFindReplace->Flags&FR_REPLACE) // нажата кнопка "«аменить"
 				{
-					/*LVFINDINFO fi = { LVFI_STRING };
-					fi.psz = szBuffer;*/
-					int iItem = -1;
-					for (;;)
+
+					int iItem = ListBox_GetCurSel(hwndCtl);
+					iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
+					ListBox_SetCurSel(hwndCtl, iItem);
+					if (LB_ERR == iItem) // элемент не найден
 					{
-						int iItem = ListBox_GetCurSel(hwndCtl);
-						iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
-						ListBox_SetCurSel(hwndCtl, iItem);
-						if (LB_ERR == iItem) // элемент не найден
-						{
-							MessageBox(hFindDlg, TEXT("Ёлемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
-						}
-						if (iItem != -1)
-						{
-							ListBox_DeleteString(hwndCtl, iItem);// удал€ем выделенный элемент из списка
-							ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
-							SetForegroundWindow(hwndCtl);
-						}
-						break;
+						MessageBox(hFindDlg, TEXT("Ёлемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
+					}
+					if (iItem != -1)
+					{
+						ListBox_DeleteString(hwndCtl, iItem);// удал€ем выделенный элемент из списка
+						ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
+						SetForegroundWindow(hwndCtl);
 					}
 				}
 				else
-					if (lpFindReplace->Flags&FR_REPLACEALL)
+				if (lpFindReplace->Flags&FR_REPLACEALL)
 					{
-					int iItem = -1;
-					for (;;)
-					{
-						int iItem = ListBox_GetCurSel(hwndCtl);
-						iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
-						ListBox_SetCurSel(hwndCtl, iItem);//выдел€ем элемент
-						if (LB_ERR == iItem) // элемент не найден
+						int iItem = -1;
+						for (;;)
 						{
-							MessageBox(hFindDlg, TEXT("Ёлемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
-						}
-						if (iItem != -1)
-						{
-							ListBox_DeleteString(hwndCtl, iItem);// удал€ем выделенный элемент из списка
-							ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
-							SetForegroundWindow(hwndCtl);
-						}
-						break;
-					}
-				}
+							int iItem = ListBox_GetCurSel(hwndCtl);
+							iItem = ListBox_FindString(hwndCtl, iItem, lpFindReplace->lpstrFindWhat);
+							ListBox_SetCurSel(hwndCtl, iItem);//выдел€ем элемент
+							if (LB_ERR == iItem) // элемент не найден
+							{
+								MessageBox(hFindDlg, TEXT("Ёлемент не найден"), TEXT("LWOS"), MB_OK | MB_ICONINFORMATION);
+								break;
+							}
+							if (iItem != -1)
+							{
+								ListBox_DeleteString(hwndCtl, iItem);// удал€ем выделенный элемент из списка
+								ListBox_InsertString(hwndCtl, iItem, lpFindReplace->lpstrReplaceWith); //добавление на то же место
+								SetForegroundWindow(hwndCtl);
+							}
+						}//for
+					}//if
 			}
 		}
+		
 #pragma endregion
 #pragma region EditDialogFunction
 		INT_PTR CALLBACK DialogProc(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
