@@ -3,6 +3,7 @@
 #include <CommCtrl.h>
 #include <tchar.h>
 #include <fstream>
+#include <string>
 #include "resource.h"
 #define LEFT 300
 #define TOP  240
@@ -178,32 +179,50 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				//ввод символов в программу
 				/*ALT+<ANY KEY> перекрашивает экран одним из 3-х цветов*/
 				char x = (char)wParam;
-				char *pChar = &x;
+				/*char *pChar = &x;*/
 				//pUnrealGetMessageW(hwnd, pChar);
-				HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
-				DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
-				DWORD size = ListBox_GetCount(hwndCtl);
-				char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
-				ListBox_GetText(hwndCtl, 0, buffer);
+				HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
+				
+				//DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
+				//*DWORD size = ListBox_GetCount(hwndCtl);*/
+				//char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
+				//TCHAR buffer[2];
+				//char *buffer = new char[ssh+1];
+				//char buffer[100];
+				int count = ListBox_GetCount(hwndCtl);
+				for (int i = 0; i < count; i++)
+				{
+					int len = ListBox_GetTextLen(hwndCtl, i);
+					char* buffer = new char[len + 1];
+					ListBox_GetText(hwndCtl, i, buffer);
+					MessageBoxA(NULL, buffer, "Время", MB_ICONASTERISK | MB_OK);
+					delete[]buffer;
+					//MessageBoxA(NULL, buffer, NULL, 0);			
+				}
+
+				/*Здесь ошибка не возникает
+				int len = ListBox_GetTextLen(hwndCtl, 0);
+				char* buffer = new char[len + 1];
+				delete[]buffer;*/
+
 				//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
 				//iItem = ListBox_FindString(hwndCtl, iItem, x);// выполним поиск указанного текста в списке
 				//ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
-				userStrstr(buffer, pChar);
+				//strcat(buffer, x);
+				//MessageBoxA(NULL, buffer, NULL, 0);
+				//userStrstr(buffer, pChar);
+				
 				/*ListBox_FindString
 				MessageBoxA(NULL, buffer, NULL, 0);*/
-				delete[] buffer;//здесь ошибка Heap Debugg
-				return 0;
-
-
-
+				//delete[] buffer;//здесь ошибка Heap Debugg
+/*
 				if (brush_index == 2) 
 					brush_index = 0;
 				else brush_index++;
-				InvalidateRect(hwnd, NULL, FALSE);
+				InvalidateRect(hwnd, NULL, FALSE);*/
 				/*MSG* lpmsg = 0;
 				GetMessage(lpmsg,hwnd,NULL,0);*/
 				//pUnrealGetMessageW(lpmsg,hWnd, HIWORD(lParam));
-				delete pChar;
 				return 0;
 			}
 			case WM_PAINT:
@@ -264,24 +283,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		} 
 		return (DefWindowProc(hwnd, msg, wParam, lParam));
 	}
-	BOOL WINAPI pUnrealGetMessageW(HWND hWnd, char* x)
-	{
-		/*x  и  buffer указывают на один участок 0X66 f, или это не память?*/
-		HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
-		DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
-		DWORD size = ListBox_GetCount(hwndCtl);
-		char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
-		ListBox_GetText(hwndCtl, 0, buffer);
+	//BOOL WINAPI pUnrealGetMessageW(HWND hWnd, char* x)
+	//{
+	//	/*x  и  buffer указывают на один участок 0X66 f, или это не память?*/
+	//	HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
+	//	DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
+	//	DWORD size = ListBox_GetCount(hwndCtl);
+	//	char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
+	//	ListBox_GetText(hwndCtl, 0, buffer);
 
-		//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
-		//iItem = ListBox_FindString(hwndCtl,iItem x);// выполним поиск указанного текста в списке
-		//ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
-		
-		/*ListBox_FindString
-		MessageBoxA(NULL, buffer, NULL, 0);*/
-		delete[] buffer;//здесь ошибка Heap Debugg
-		return 0;
-	}
+	//	//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
+	//	//iItem = ListBox_FindString(hwndCtl,iItem x);// выполним поиск указанного текста в списке
+	//	//ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
+	//	
+	//	/*ListBox_FindString
+	//	MessageBoxA(NULL, buffer, NULL, 0);*/
+	//	delete[] buffer;//здесь ошибка Heap Debugg
+	//	return 0;
+	//}
 
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr) 
 	{
@@ -371,6 +390,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		break;
 		case ID_SAVE_AS:
 		{
+			
+			
 			char pListBox[] = { GetListBoxInfo(hWnd) };
 			TCHAR szFileName[MAX_PATH] = TEXT("");
 			OpenFDLG.lStructSize = sizeof(OPENFILENAME);
@@ -708,6 +729,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	/*Naive search function. Use it, when read line from something and your what find char or searchline*/
 	char* userStrstr(const char* haystack, char* needle)
 	{
+		
 		for (const char* hp = haystack; hp != haystack + strlen(haystack); ++hp)
 		{
 			const char* np = needle;
