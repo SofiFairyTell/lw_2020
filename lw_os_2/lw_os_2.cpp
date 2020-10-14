@@ -62,7 +62,7 @@
 	/*	ћассив дл€ формировани€ строки - текущие дата и врем€*/
 	TCHAR szCurrentTime[40];
 	//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr);
-	BOOL WINAPI pUnrealGetMessageW(LPMSG lpMsg, HWND hWnd, LPARAM lParam);
+	BOOL WINAPI pUnrealGetMessageW(HWND hWnd, char* x);
 	char* userStrstr(const char* haystack, char* needle);
 	void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys);
 	//Timer
@@ -177,8 +177,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				//ввод символов в программу
 				/*ALT+<ANY KEY> перекрашивает экран одним из 3-х цветов*/
-				wchar_t x = (wchar_t)wParam;
-
+				char x = (char)wParam;
+				char *pChar = &x;
+				pUnrealGetMessageW(hwnd, pChar);
 				if (brush_index == 2) 
 					brush_index = 0;
 				else brush_index++;
@@ -186,7 +187,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				/*MSG* lpmsg = 0;
 				GetMessage(lpmsg,hwnd,NULL,0);*/
 				//pUnrealGetMessageW(lpmsg,hWnd, HIWORD(lParam));
-				
+				delete pChar;
 				return 0;
 			}
 			case WM_PAINT:
@@ -209,11 +210,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			}
 			
 			case WM_NOTIFY:
-			{
-				/*выдел€ет 1  и 15 день мес€ца*/
-				//*https://docs.microsoft.com/ru-ru/windows/win32/controls/set-day-states */
-			if (((LPNMHDR)lParam)->code == MCN_GETDAYSTATE)
+			{	
+				switch (((LPNMHDR)lParam)->code)
 				{
+				case MCN_GETDAYSTATE:
+				{
+					/*выдел€ет 1  и 15 день мес€ца*/
+				//*https://docs.microsoft.com/ru-ru/windows/win32/controls/set-day-states */
 					MONTHDAYSTATE rgMonths[12] = { 0 };
 					int cMonths = ((NMDAYSTATE*)lParam)->cDayState;
 					for (int i = 0; i < cMonths; i++)
@@ -224,24 +227,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					((NMDAYSTATE*)lParam)->prgDayState = rgMonths;
 					return TRUE;
 				}
-				break;
+				case MCN_SELECT:
+					{
+					TCHAR szText[100];			
+					MonthCal_GetSelRange(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
+					GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
+					//MessageBox(hwnd, szText, _T("Current Date"), 0);
+					HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
+					ListBox_AddString(hwndCtl, szText);//добавл€ем выделенную дату в список
+					return TRUE;
+					}
+				}
 			}
-			//	LPNMHDR l;
-			//	if (l->code == LBN_DBLCLK)// двоной клик по списку просмотра
-			//	{
-			//		LPNMITEMACTIVATE lpnmitem = (LPNMITEMACTIVATE)l;
-			//		// получим дату из календар€
-			//		MonthCal_GetCurSel(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
-			//		TCHAR szText[100];
-			//		GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
-			//		HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-			//		int iItem = ListBox_GetCurSel(hwndCtl);
-			//		ListBox_AddString(hwndCtl, lpnmitem, szText); //добавление на то же место
-
-			//	}
-			//}
-			 
-			
+		
 
 		}
 		if (uFindMsgString == msg) 
@@ -251,40 +249,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		} 
 		return (DefWindowProc(hwnd, msg, wParam, lParam));
 	}
-	BOOL WINAPI pUnrealGetMessageW(LPMSG lpMsg, HWND hWnd, LPARAM lParam)
+	BOOL WINAPI pUnrealGetMessageW(HWND hWnd, char* x)
 	{
+		/*x  и  buffer указывают на один участок 0X66 f, или это не пам€ть?*/
 		HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
 		DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
 		DWORD size = ListBox_GetCount(hwndCtl);
-		char* buffer = new char[ssh + 1];
-		if (lpMsg->message == WM_CHAR)
-		{
-			lpMsg->message = 0;
-			if (lParam)
-			{
-				lpMsg = (LPMSG)lParam;
-
-				if (lpMsg->message == WM_CHAR) 
-				{
-
-					char* pChar = reinterpret_cast<char*>(lpMsg->wParam);
-					UINT i;
-					for (i = 0; i < size; i++)
-					{
-						ListBox_GetText(hwndCtl, i, buffer);
-						if (userStrstr(buffer, pChar))
-						{
-							MessageBoxA(NULL, buffer, NULL, 0);
-						}
-
-					}
-
-				}
-			}
-
-			delete[] buffer;
-
-		}
+		char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
+		ListBox_GetText(hwndCtl, 0, buffer);
+		int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
+		iItem = ListBox_FindString(hwndCtl, iItem, x);// выполним поиск указанного текста в списке
+		ListBox_SetCurSel(hwndCtl, iItem);// выдел€ем найденный элемент
+		
+		/*ListBox_FindString
+		MessageBoxA(NULL, buffer, NULL, 0);*/
+		delete[] buffer;//здесь ошибка Heap Debugg
 		return 0;
 	}
 
