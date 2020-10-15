@@ -4,6 +4,8 @@
 #include <tchar.h>
 #include <fstream>
 #include <string>
+#include <codecvt>
+#include <comdef.h> //для bstr_t
 #include "resource.h"
 #define LEFT 300
 #define TOP  240
@@ -18,8 +20,7 @@
 
 #define WM_ADDITEM WM_USER+1
 #define BOLDDAY(ds, iDay)  \
-        if (iDay > 0 && iDay < 32)(ds) |= (0x00000001 << (iDay - 1))
-
+        if (iDay > 0 && iDay < 32)(ds) |= (0x00000001 << (iDay - 1)) //for process the MCN_GETDAYSTATE notification code
 
 
 #pragma region Объявления
@@ -32,63 +33,66 @@
 	#pragma region Handle of control elements
 		HWND hwndMonthCal = NULL; //для календаря
 		HACCEL hAccel = NULL; //дескриптор акселератора 
-		HWND hwndCtrl = NULL; //дескпритор элемента управления
 	#pragma endregion
 	#pragma region For FINDREPLACE dialog
 		FINDREPLACE findDlg; // структура для диалогового окна "Найти"
 		UINT uFindMsgString = 0; // код сообщения FINDMSGSTRING
 		HWND hFindDlg = NULL;
+		/*Для FINDREPLACE*/
+		TCHAR szBuffer[100] = TEXT("");
+		TCHAR szBuffer1[100] = TEXT("");	
+		void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace); //Поиск, замена в listbox		
 	#pragma endregion
-	TCHAR szBuffer[100] = TEXT("");
-	TCHAR szBuffer1[100] = TEXT("");
+
+	#pragma region MainWindowFunction
+	//Здесь функции, переменные, структуры и т.п. для работы с главным окном приложения
+	
+	LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr);//создание окна и элементов на нем
+	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify);//обработка сообщений от кнопок и SAVEAS
+	
+	//Обработка событий и сообщений мыши
+	void OnLbuttonDClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);//для WM_LBUTTONDBLCLK и WM_LBUTTONDOWN
+	void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags);
+	void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys);
+
+	//Обработка нажатия событий и сообщений клавиатуры
+	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);//для WM_SYSKEYUP
+	
+	/*Для изменения цвета окна, когда было обработано WM_SYSCHAR */
 	RECT rc;
 	HBRUSH brushes[3]; //кисти для изменения цвета окна
 	int brush_index = 0;
-	SYSTEMTIME st;
-	TCHAR dateTime[32];
-	DWORD dwTimer = 0; // счётчик таймера
-	#pragma region MainWindowFunction
-	LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr);//создание окна и элементов на нем
-	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify);	
-	void OnDestroy(HWND hwnd);
+	
+	// обработка сообщения WM_TIMER
 	void OnTimer(HWND hwnd, UINT id);//SetTimer, KillTimer, запуск зведного неба
-	void OnLbuttonDClick(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags);//для WM_LBUTTONDBLCLK и WM_LBUTTONDOWN
-	void OnLButtonUp(HWND hwnd, int x, int y, UINT keyFlags);
-	void OnSysKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags);//для WM_SYSKEYUP
+	static int sec = 0; //записывается время работы с программой
+	char workTime[10];//записывается время из sec для демонстрации пользователю
+	
+	SYSTEMTIME st;//структура для определения времени и даты
 	void OnSizing(HWND hwnd, LPRECT lpRect, WPARAM wParam); //обработка onSizing
-	// обработчик сообщения WM_TIMER
-	void OnTimer(HWND hwnd, UINT id);
+	
+	//SAVEFILE AS dialog обработка ID_SAVE_AS
+	OPENFILENAME OpenFDLG;//для создания диалогового окна Сохранить как
+	UINT uOpenMSG = 0;
 
-	/*	Массив для формирования строки - текущие дата и время*/
-	TCHAR szCurrentTime[40];
-	//void OnNotify(HWND hwnd, LPNMHDR lpnmhdr);
-	BOOL WINAPI pUnrealGetMessageW(HWND hWnd, char* x);
-	char* userStrstr(const char* haystack, char* needle);
-	void MouseWheel(HWND hwnd, int xPos, int yPos, int zDelta, UINT fwKeys);
-	//Timer
-	static int sec = 0;
-	char workTime[10];
-
-#pragma endregion
+	#pragma endregion
 	
 	#pragma region EditDialogFunction
+	//Здесь функции, переменные и т.п. для работы с диалоговым окном, добавляющим строки в listbox	
 		INT_PTR CALLBACK DialogProc(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		BOOL Dialog_OnInitDialog(HWND hWnd, HWND hWndF, LPARAM lParam);
 		void OnAddItem(HWND hWnd);
 		void Dialog_OnClose(HWND hWnd);
 	#pragma endregion
-
-	#pragma region SAVEFILEAS dialog
-		OPENFILENAME OpenFDLG;//для создания диалогового окна Сохранить как
-		UINT uOpenMSG = 0;
-		void OnFindMsgString(HWND hwnd, LPFINDREPLACE lpFindReplace);
-	#pragma endregion
 	#pragma region  DialogProcMany
-		void DialogMany_OnClose(HWND hWnd);
-		BOOL Dialog_OnInitDialogMany(HWND hWnd, HWND hWndF, LPARAM lParam);
-		INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	//Здесь функции, переменные и т.п. если необходимо добавить более чем 1 запись в listbox*/
+			void DialogMany_OnClose(HWND hWnd);
+			BOOL Dialog_OnInitDialogMany(HWND hWnd, HWND hWndF, LPARAM lParam);
+			INT_PTR CALLBACK DialogProcMany(HWND hWndlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	#pragma endregion
+	
 #pragma endregion
 	
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLine,int  nCmdShow)
@@ -99,7 +103,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	brushes[1] = (HBRUSH)CreateSolidBrush(RGB(0, 100, 0)); //Радикально-зеленый цвет
 	brushes[2] = (HBRUSH)CreateSolidBrush(RGB(100, 0, 0)); //Радикально-красный цвет
 	// регистрируем оконный класс главного окна...
-
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = MainWindowProc; // оконная процедура
@@ -125,7 +128,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 	UpdateWindow(hWnd);
-	SetTimer(hWnd, 1, 1000, (TIMERPROC)NULL);
+
+	SetTimer(hWnd, 1, 1000, (TIMERPROC)NULL);//установка таймера, который считает время работы с приложением и показывает "звезды"
 	while ((bRet = GetMessage(&msg, NULL, 0, 0))!= FALSE)
 	{
 		if (!TranslateAccelerator(hWnd, hAccel, &msg))
@@ -133,7 +137,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
 	}
 }
 
@@ -150,15 +153,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			HANDLE_MSG(hwnd, WM_LBUTTONDBLCLK, OnLbuttonDClick);
 			HANDLE_MSG(hwnd, WM_LBUTTONDOWN, OnLbuttonDClick);
 			HANDLE_MSG(hwnd, WM_LBUTTONUP, OnLButtonUp);
+			HANDLE_MSG(hwnd, WM_SYSKEYDOWN, OnSysKey);
 			HANDLE_MSG(hwnd, WM_SYSKEYUP, OnSysKey);
 			HANDLE_MSG(hwnd, WM_MOUSEWHEEL, MouseWheel);
 				
 		case WM_TIMER:
 		{
 			OnTimer(hwnd,0);
-			GetSystemTime(&st); //получаем системные дату и время
-			wsprintf(dateTime, _T("%d.%d.%d %d:%d:%d:%d"), st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
-			wprintf(_T("%s"), dateTime);
 			sec++;
 			return 0;
 		}
@@ -178,26 +179,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			{
 				//ввод символов в программу
 				/*ALT+<ANY KEY> перекрашивает экран одним из 3-х цветов*/
-				char x = (char)wParam;
-				/*char *pChar = &x;*/
-				//pUnrealGetMessageW(hwnd, pChar);
+				wchar_t x = wParam;
 				HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
-				
-				//DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
-				//*DWORD size = ListBox_GetCount(hwndCtl);*/
-				//char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
-				//TCHAR buffer[2];
-				//char *buffer = new char[ssh+1];
-				//char buffer[100];
 				int count = ListBox_GetCount(hwndCtl);
 				for (int i = 0; i < count; i++)
 				{
 					int len = ListBox_GetTextLen(hwndCtl, i);
-					char* buffer = new char[len + 1];
+					wchar_t* buffer = new wchar_t[len + 1];
 					ListBox_GetText(hwndCtl, i, buffer);
-					MessageBoxA(NULL, buffer, "Время", MB_ICONASTERISK | MB_OK);
-					delete[]buffer;
-					//MessageBoxA(NULL, buffer, NULL, 0);			
+					/*Найдет первое где встречается введенный символ*/
+					for (int j = 0; j < len + 1; j++)
+					{
+						if (wcschr(buffer,x))
+						{
+							ListBox_SetCurSel(hwndCtl, i);
+							break;
+						}
+						else j++;
+					}
+					delete[]buffer;	
 				}
 
 				/*Здесь ошибка не возникает
@@ -205,24 +205,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 				char* buffer = new char[len + 1];
 				delete[]buffer;*/
 
-				//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
-				//iItem = ListBox_FindString(hwndCtl, iItem, x);// выполним поиск указанного текста в списке
-				//ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
-				//strcat(buffer, x);
-				//MessageBoxA(NULL, buffer, NULL, 0);
-				//userStrstr(buffer, pChar);
-				
-				/*ListBox_FindString
-				MessageBoxA(NULL, buffer, NULL, 0);*/
-				//delete[] buffer;//здесь ошибка Heap Debugg
-/*
 				if (brush_index == 2) 
 					brush_index = 0;
 				else brush_index++;
-				InvalidateRect(hwnd, NULL, FALSE);*/
-				/*MSG* lpmsg = 0;
-				GetMessage(lpmsg,hwnd,NULL,0);*/
-				//pUnrealGetMessageW(lpmsg,hWnd, HIWORD(lParam));
+				InvalidateRect(hwnd, NULL, FALSE);		
 				return 0;
 			}
 			case WM_PAINT:
@@ -237,7 +223,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			case WM_DESTROY:
 			{
 				KillTimer(hWnd, 1);
-				itoa(sec, workTime, 10); 
+				itoa(sec, workTime, 10); //преобразование подсчитанных секунд в символы
 				MessageBoxA(NULL, (LPSTR)workTime, "Время работы программы (сек.):", MB_ICONASTERISK | MB_OK);
 				PostQuitMessage(0);//without this app contie work after close messagebox
 				return 0;
@@ -260,22 +246,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					}
 					((NMDAYSTATE*)lParam)->prgDayState = rgMonths;
 					return TRUE;
-				}
+				}//MCN_GETDAYSTATE
 				case MCN_SELECT:
-					{
+				{
 					TCHAR szText[100];			
 					MonthCal_GetSelRange(GetDlgItem(hwnd, IDC_MONTHCALENDAR1), &st);
 					GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, szText, _countof(szText));
-					//MessageBox(hwnd, szText, _T("Current Date"), 0);
 					HWND hwndCtl = GetDlgItem(hwnd, IDC_LIST1);
 					ListBox_AddString(hwndCtl, szText);//добавляем выделенную дату в список
 					return TRUE;
-					}
+				}//MCN_SELECT
 				}
 			}
-		
-
-		}
+			
+			}
 		if (uFindMsgString == msg) 
 		{
 			OnFindMsgString(hwnd, (LPFINDREPLACE)lParam);
@@ -283,24 +267,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		} 
 		return (DefWindowProc(hwnd, msg, wParam, lParam));
 	}
-	//BOOL WINAPI pUnrealGetMessageW(HWND hWnd, char* x)
-	//{
-	//	/*x  и  buffer указывают на один участок 0X66 f, или это не память?*/
-	//	HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
-	//	DWORD ssh = ListBox_GetTextLen(hwndCtl, 0);
-	//	DWORD size = ListBox_GetCount(hwndCtl);
-	//	char* buffer = new char[ssh + 1];//байт на нуль-символ конца строки
-	//	ListBox_GetText(hwndCtl, 0, buffer);
-
-	//	//int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
-	//	//iItem = ListBox_FindString(hwndCtl,iItem x);// выполним поиск указанного текста в списке
-	//	//ListBox_SetCurSel(hwndCtl, iItem);// выделяем найденный элемент
-	//	
-	//	/*ListBox_FindString
-	//	MessageBoxA(NULL, buffer, NULL, 0);*/
-	//	delete[] buffer;//здесь ошибка Heap Debugg
-	//	return 0;
-	//}
+	
 
 	BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr) 
 	{
@@ -325,15 +292,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	
 		return TRUE;
 	}
-	void OnDestroy(HWND hwnd)
-	{
-		//int UserAnswer = MessageBox(hWnd, TEXT("Завершить работу?"), TEXT("Выход"), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1);
-		//if (IDYES == UserAnswer)
-		//{
-		//	DestroyWindow(hWnd);
-		//}
-		PostQuitMessage(0); // отправляем сообщение WM_QUIT
-	}
+	
 	void OnTimer(HWND hwnd, UINT id)
 	{
 		int x, y;
@@ -343,8 +302,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			y = rand() % 900; //по у от 0 до 400
 			SetPixel(hdc, x, y, RGB(255, 255, 255)); //Выводим точку
 			ReleaseDC(hwnd, hdc);
-
 	}
+
 	void OnCommand(HWND hWnd, int id, HWND hwnCTRL, UINT codeNotify)
 	{
 		HINSTANCE hInstance = GetWindowInstance(hWnd);
@@ -370,28 +329,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		break;
 		case ID_DEL_RECORD: // нажата кнопка "Удалить запись"
 		{
-			// получим дескриптор списка
-			HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
-
-			// определим текущий выделенный элемент в списке
-			int iItem = ListBox_GetCurSel(hwndCtl);
-
+			HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);	// получим дескриптор списка
+			int iItem = ListBox_GetCurSel(hwndCtl);// определим текущий выделенный элемент в списке
 			if (iItem != -1)
 			{
 				int mbResult = MessageBox(hWnd, TEXT("Удалить выбранный элемент?"), TEXT("LW_OS_2"), MB_YESNO | MB_ICONQUESTION);
 
 				if (mbResult == IDYES)
 				{
-					// удаляем выделенный элемент из списка
-					ListBox_DeleteString(hwndCtl, iItem);
+					ListBox_DeleteString(hwndCtl, iItem);// удаляем выделенный элемент из списка
 				}
 			}
 		}
 		break;
 		case ID_SAVE_AS:
-		{
-			
-			
+		{			
 			char pListBox[] = { GetListBoxInfo(hWnd) };
 			TCHAR szFileName[MAX_PATH] = TEXT("");
 			OpenFDLG.lStructSize = sizeof(OPENFILENAME);
@@ -402,12 +354,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			OpenFDLG.lpstrTitle = TEXT("Сохранить как");
 			OpenFDLG.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_CREATEPROMPT | OFN_OVERWRITEPROMPT | OFN_EXTENSIONDIFFERENT;
 			OpenFDLG.lpstrDefExt = TEXT("txt");
+
 			if (GetSaveFileName(&OpenFDLG) != FALSE)
 			{
 				MessageBox(hWnd, szFileName, TEXT("Сохранить как"), MB_OK | MB_ICONINFORMATION);
-				std::ofstream fout(szFileName); // создаём объект класса ofstream для записи 
-				fout << "Файл создан в программе LWOS";
+				std::ofstream fout(szFileName); // создаём объект класса ofstream для записи
+				fout << "Файл создан в программе LWOS\n";
+				/*Соберем данные из listbox и добавим их в файл*/
+				HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
+				int count = ListBox_GetCount(hwndCtl);
+				for (int i = 0; i < count; i++)
+				{
+					int len = ListBox_GetTextLen(hwndCtl, i);
+					wchar_t* buffer = new wchar_t[len + 1];
+					ListBox_GetText(hwndCtl, i, buffer);
+					//std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+					//std::wstring ws(buffer);
+
+					fout << buffer << "\n";
+					//fout.write(reinterpret_cast<char const*>(buffer), sizeof(buffer)); //<< "\n";
+					delete[]buffer;
+				}
 				fout.close();
+
 			}
 		}break;
 		case ID_REPLACE: // нажата кнопка "Найти запись"
@@ -458,7 +427,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 
 	   // получим размеры окна
 			GetWindowRect(hwnd, &rect);
-
+			
 			if (fDown)
 			{
 				switch (vk)
@@ -726,30 +695,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 	}
 #pragma endregion 
 
-	/*Naive search function. Use it, when read line from something and your what find char or searchline*/
-	char* userStrstr(const char* haystack, char* needle)
-	{
-		
-		for (const char* hp = haystack; hp != haystack + strlen(haystack); ++hp)
-		{
-			const char* np = needle;
-			const char* tmp = hp;
-			for (; np != needle + strlen(needle); ++np)
-			{
-				if (*tmp != *np)
-				{
-					break;
-				}
-				else
-				{
-					++tmp;
-				}
-			}
-			if (np == needle + strlen(needle))
-			{
-				return needle;
-			}
-		}
-		return 0;
-	}
+	//void OnDestroy(HWND hwnd)
+	//{
+	//	//int UserAnswer = MessageBox(hWnd, TEXT("Завершить работу?"), TEXT("Выход"), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1);
+	//	//if (IDYES == UserAnswer)
+	//	//{
+	//	//	DestroyWindow(hWnd);
+	//	//}
+	//	PostQuitMessage(0); // отправляем сообщение WM_QUIT
+	//}
+
+
 
