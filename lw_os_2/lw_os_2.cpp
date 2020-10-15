@@ -7,6 +7,8 @@
 #include <codecvt>
 #include <comdef.h> //дл€ bstr_t
 #include "resource.h"
+
+#define BEEP_TIMER 1
 #define LEFT 300
 #define TOP  240
 
@@ -155,12 +157,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			HANDLE_MSG(hwnd, WM_LBUTTONUP, OnLButtonUp);
 			HANDLE_MSG(hwnd, WM_SYSKEYDOWN, OnSysKey);
 			HANDLE_MSG(hwnd, WM_SYSKEYUP, OnSysKey);
+			HANDLE_MSG(hwnd, WM_KEYDOWN, OnSysKey);//чтобы поймать стрелки
+			HANDLE_MSG(hwnd, WM_KEYUP, OnSysKey);//чтобы поймать стрелки
 			HANDLE_MSG(hwnd, WM_MOUSEWHEEL, MouseWheel);
 				
 		case WM_TIMER:
 		{
 			OnTimer(hwnd,0);
 			sec++;
+			// ¬ ответ на сообщение таймера выдаем
+			 // звуковой сигнал
+			MessageBeep(-1);
 			return 0;
 		}
 			case WM_ADDITEM:
@@ -193,22 +200,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 						if (wcschr(buffer,x))
 						{
 							ListBox_SetCurSel(hwndCtl, i);
+							if (brush_index == 2) 
+							brush_index = 0;
+							else brush_index++;
+							InvalidateRect(hwnd, NULL, FALSE);	
 							break;
 						}
 						else j++;
 					}
 					delete[]buffer;	
 				}
-
 				/*«десь ошибка не возникает
 				int len = ListBox_GetTextLen(hwndCtl, 0);
 				char* buffer = new char[len + 1];
-				delete[]buffer;*/
-
-				if (brush_index == 2) 
-					brush_index = 0;
-				else brush_index++;
-				InvalidateRect(hwnd, NULL, FALSE);		
+				delete[]buffer;*/			
 				return 0;
 			}
 			case WM_PAINT:
@@ -222,7 +227,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 
 			case WM_DESTROY:
 			{
-				KillTimer(hWnd, 1);
+				KillTimer(hwnd, 1);
+				KillTimer(hwnd, BEEP_TIMER);
 				itoa(sec, workTime, 10); //преобразование подсчитанных секунд в символы
 				MessageBoxA(NULL, (LPSTR)workTime, "¬рем€ работы программы (сек.):", MB_ICONASTERISK | MB_OK);
 				PostQuitMessage(0);//without this app contie work after close messagebox
@@ -290,6 +296,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 		CreateWindowEx(0, TEXT("Button"), TEXT("”ƒјЋ»“№  «јѕ»—№"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 270, 100, 200, 40, hwnd, (HMENU)ID_DEL_RECORD, lpCRStr->hInstance, NULL);
 		CreateWindowEx(0, TEXT("Button"), TEXT("«јћ≈Ќ»“№ «јѕ»—№"),	WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 270, 145, 200, 40, hwnd, (HMENU)ID_REPLACE, lpCRStr->hInstance, NULL);
 	
+		SetTimer(hwnd, BEEP_TIMER, 1000, NULL);
 		return TRUE;
 	}
 	
@@ -358,7 +365,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			if (GetSaveFileName(&OpenFDLG) != FALSE)
 			{
 				MessageBox(hWnd, szFileName, TEXT("—охранить как"), MB_OK | MB_ICONINFORMATION);
-				std::ofstream fout(szFileName); // создаЄм объект класса ofstream дл€ записи
+				std::wofstream fout(szFileName); // создаЄм объект класса ofstream дл€ записи
 				fout << "‘айл создан в программе LWOS\n";
 				/*—оберем данные из listbox и добавим их в файл*/
 				HWND hwndCtl = GetDlgItem(hWnd, IDC_LIST1);
@@ -370,8 +377,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					ListBox_GetText(hwndCtl, i, buffer);
 					//std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 					//std::wstring ws(buffer);
-
 					fout << buffer << "\n";
+					//fout << ws << "\n";
 					//fout.write(reinterpret_cast<char const*>(buffer), sizeof(buffer)); //<< "\n";
 					delete[]buffer;
 				}
@@ -430,6 +437,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 			
 			if (fDown)
 			{
+				
 				switch (vk)
 				{
 				case VK_LEFT: // нажата стрелка влево
@@ -451,6 +459,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					// перемещаем окно вниз
 					SetWindowPos(hwnd, NULL, rect.left, rect.top + 10, 0, 0, SWP_NOSIZE);
 					break;
+				case VK_MENU:
+					SetWindowPos(hwnd, NULL,0, 0, 0, 0, SWP_NOSIZE);//левый верхний угол
+					break;
+				
+				case VK_HOME:
+						break;
 				} // switch
 			} // if
 			else
