@@ -459,9 +459,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,	LPSTR lpszCmdLi
 					// перемещаем окно вниз
 					SetWindowPos(hwnd, NULL, rect.left, rect.top + 10, 0, 0, SWP_NOSIZE);
 					break;
-				case VK_MENU:
-					SetWindowPos(hwnd, NULL,0, 0, 0, 0, SWP_NOSIZE);//левый верхний угол
-					break;
+				//case VK_MENU:
+				//	SetWindowPos(hwnd, NULL,0, 0, 0, 0, SWP_NOSIZE);//левый верхний угол
+				//	break;
 				
 				case VK_HOME:
 						break;
