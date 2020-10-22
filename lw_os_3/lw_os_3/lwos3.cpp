@@ -12,7 +12,7 @@
 HANDLE hSampleJob = NULL; // дескриптор задания
 
 // оконная процедура главного окна
-LRESULT CALLBACK MyWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // обработчик сообщения WM_CREATE
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
@@ -52,36 +52,35 @@ BOOL EnumProcessesInJob(HANDLE hJob, DWORD* lpidProcess, DWORD cb, LPDWORD lpcbN
 // ------------------------------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
-	// далее идет регистрация оконного  класса...
+	// регистрируем оконный класс главного окна...
 
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
 
 	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	wcex.lpfnWndProc = MyWindowProc; // оконная процедура
+	wcex.lpfnWndProc = MainWindowProc; // оконная процедура
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
+	wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 2);
 	wcex.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
-	wcex.lpszClassName = TEXT("Class"); // имя класса
+	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	
+
 
 	if (0 == RegisterClassEx(&wcex)) // регистрируем класс
 	{
-		// не удалось зарегистрировать новый оконный класс
 		return -1; // завершаем работу приложения
-	} // if
+	} 
 
-	// загружаем библиотеку 
-	// элементов управления общего пользования
-	LoadLibrary(TEXT("ComCtl32.dll"));
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования
 
 	// загружаем таблицу быстрых клавиш
 	HACCEL hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	// создаем главное окно на основе нового оконного класса
 
-	HWND hWnd = CreateWindowEx(0, TEXT("Class"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
+	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
 	if (NULL == hWnd)
@@ -92,11 +91,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	
 	// создаем задание
-	hSampleJob = CreateJobObject(NULL, TEXT("SampleJob"));
+	hSampleJob = CreateJobObject(NULL, TEXT("FirstJob"));
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
-
-	// далее идет цикл обработки сообщения...
 
 	MSG  msg;
 	BOOL bRet;
@@ -105,7 +102,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	{
 		if (bRet == -1)
 		{
-			/* обработка ошибки и возможно выход из цикла */
+			
 		} // if
 		else if (!TranslateAccelerator(hWnd, hAccel, &msg))
 		{
@@ -118,10 +115,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	CloseHandle(hSampleJob);
 
 	return (int)msg.wParam;
-} // _tWinMain
+} 
 
 // ------------------------------------------------------------------------------------------------
-LRESULT CALLBACK MyWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -129,14 +126,11 @@ LRESULT CALLBACK MyWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 		HANDLE_MSG(hWnd, WM_DESTROY, OnDestroy);
 		HANDLE_MSG(hWnd, WM_SIZE, OnSize);
 		HANDLE_MSG(hWnd, WM_COMMAND, OnCommand);
-	} // switch
+	} 
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);	// передача необработанного сообщения
+}
 
-	// передача необработанного сообщения
-	// оконной процедуре по умолчанию
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-} // MyWindowProc
-
-// ------------------------------------------------------------------------------------------------
+/*Создание оконного приложения с 2-мя listbox и меню*/
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
 	CreateWindowEx(0, TEXT("Static"), TEXT("Процессы:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
@@ -149,23 +143,23 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	HWND hwndCtl = CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | LBS_STANDARD,
 		10, 30, 400, 400, hwnd, (HMENU)IDC_LIST_PROCESSES, lpCreateStruct->hInstance, NULL);
 
-	// получаем список процессов
-	//LoadProcessesToListBox(hwndCtl);
+	// получаем список процессов активных сейчас
+	LoadProcessesToListBox(hwndCtl);
 
 	// создаем список для перечисления загруженных модулей
 	CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER,
 		420, 30, 400, 400, hwnd, (HMENU)IDC_LIST_MODULES, lpCreateStruct->hInstance, NULL);
 
 	return TRUE;
-} // OnCreate
+} 
 
-// ------------------------------------------------------------------------------------------------
+/*При завершении работы с приложением*/
 void OnDestroy(HWND hwnd)
 {
 	PostQuitMessage(0); // отправляем сообщение WM_QUIT
-} // OnDestroy
+} 
 
-// --------------------------------------------------------------
+/*Список меняет ширину и высоту*/
 void OnSize(HWND hwnd, UINT state, int cx, int cy)
 {
 	if (state != SIZE_MINIMIZED)
@@ -184,20 +178,20 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 	case IDC_LIST_PROCESSES:
 	{
+		/*При выборе строки из списка процессов, для процесса определяются модули*/
 		if (LBN_SELCHANGE == codeNotify) // выбран другой элемент в списке процессов
 		{
-			// определяем индекс выбранного элемента
-		int iItem = ListBox_GetCurSel(hwndCtl);
+	
+		int iItem = ListBox_GetCurSel(hwndCtl);//выделенная строка
 
 		if (iItem != -1)
 			{
-			// определяем идентификатор процесса
-			DWORD dwProcessId = (DWORD)ListBox_GetItemData(hwndCtl, iItem);
-
-			// получаем список загруженных модулей
-			LoadModulesToListBox(GetDlgItem(hwnd, IDC_LIST_MODULES), dwProcessId);
-			} // if
-		} // if
+			
+			DWORD dwProcessId = (DWORD)ListBox_GetItemData(hwndCtl, iItem);// определяем идентификатор 
+		
+			LoadModulesToListBox(GetDlgItem(hwnd, IDC_LIST_MODULES), dwProcessId);// получаем список загруженных модулей
+			} 
+		} 
 	}
 		break;
 
@@ -328,38 +322,38 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		ofn.lpstrFilter = TEXT("Программы (*.exe)\0*.exe\0");
 		ofn.lpstrFile = szFileName;
 		ofn.nMaxFile = _countof(szFileName);
-		ofn.lpstrTitle = TEXT("Выбор программ");
+		ofn.lpstrTitle = TEXT("Запустить программу");
 		ofn.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT;
 		ofn.lpstrDefExt = TEXT("exe");
 
-		if (GetOpenFileName(&ofn) != FALSE) // открываем диалоговое окно для выбора файлов
+		if (GetOpenFileName(&ofn) != FALSE) 
 		{
 			BOOL bRet = FALSE;
 
-			// определяем количество выбранных файлов
-			UINT nCount = 0;
+			//(?Кажется не работает)
+			UINT nCount = 0;// определяем количество выбранных файлов
 			for (LPCTSTR p = szFileName; (*p) != 0; p += _tcslen(p) + 1) ++nCount;
 
 			if (nCount-- > 1) // если выбрано несколько файлов
 			{
 				LPCTSTR lpszName = szFileName + _tcslen(szFileName) + 1;
 
-				// создаём массив строк
-				LPTSTR *aCmdLine = new LPTSTR[nCount];
+				
+				LPTSTR *aCmdLine = new LPTSTR[nCount];// создаём массив строк для нескольких файлов
 
 				for (UINT i = 0; i < nCount; ++i)
 				{
-					// выделяем память для командной строки
-					aCmdLine[i] = new TCHAR[MAX_PATH];
+					
+					aCmdLine[i] = new TCHAR[MAX_PATH];// выделяем память для командной строки
 
-					// формируем командную строку
-					StringCchPrintf(aCmdLine[i], MAX_PATH, TEXT("%s\\%s"), szFileName, lpszName);
+					
+					StringCchPrintf(aCmdLine[i], MAX_PATH, TEXT("%s\\%s"), szFileName, lpszName);// формируем командную строку
 
 					lpszName += _tcslen(lpszName) + 1;
 				} // for
 
-				// создаём группу процессов в одном задании
-				bRet = StartGroupProcessesAsJob(hSampleJob, (LPCTSTR *)aCmdLine, nCount, FALSE, 0);
+				
+				bRet = StartGroupProcessesAsJob(hSampleJob, (LPCTSTR *)aCmdLine, nCount, FALSE, 0);// создаём группу процессов в одном задании
 
 				// освобождаем выделенную память
 				for (UINT i = 0; i < nCount; ++i) delete[] aCmdLine[i];
