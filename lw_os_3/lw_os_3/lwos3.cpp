@@ -9,7 +9,7 @@
 #define IDC_LIST_PROCESSES        2001
 #define IDC_LIST_MODULES          2002
 
-HANDLE hSampleJob = NULL; // дескриптор задания
+HANDLE hJob = NULL; // дескриптор задания
 
 // оконная процедура главного окна
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -24,26 +24,23 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
 
-// процедура диалогового окна
-INT_PTR CALLBACK DialProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-// обработчик сообщения WM_INITDIALOG
-BOOL Dialog_InitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);
-// обработчик сообщения WM_CLOSE
-void Dialog_Close(HWND hwnd);
-// обработчик сообщения WM_COMMAND
+INT_PTR CALLBACK DialProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);// процедура диалогового окна
 
-void Dialog_Command(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
-// функция, перечисляющая процессы системы
-void LoadProcessesToListBox(HWND hwndCtl);
-// функция, перечисляющая загруженный модули
-void LoadModulesToListBox(HWND hwndCtl, DWORD dwProcessId);
-// функция, перечисляющая процессы в задании
-void LoadProcessesInJobToListBox(HWND hwndCtl, HANDLE hJob = NULL);
+BOOL Dialog_InitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);//инициализация диалогового окна
 
-// функция, ожидающая завершения процесса
-BOOL WaitProcessById(DWORD dwProcessId, DWORD dwMilliseconds, LPDWORD lpExitCode);
+void Dialog_Close(HWND hwnd);//закрытие диалогового окна
+
+void Dialog_Command(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);//когда надо изменить приоритет
+
+
+void ToLB_LoadProcesses(HWND hwndCtl);//процессы в LB
+
+void ToLB_LoadModules(HWND hwndCtl, DWORD dwProcessId);//перечисление модулей в LB
+
+void ToLB_LoadProcessesInJob(HWND hwndCtl, HANDLE hJob = NULL);//  процессы в задании
+
 // функция, запускающая группу процессов в одном задании
 BOOL StartGroupProcessesAsJob(HANDLE hJob, LPCTSTR lpszCmdLine[], DWORD nCount, BOOL bInheritHandles, DWORD dwCreationFlags);
 // функция, которая возвращает список идентификаторов включенных в задание процессов
@@ -91,7 +88,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	
 	// создаем задание
-	hSampleJob = CreateJobObject(NULL, TEXT("FirstJob"));
+	hJob = CreateJobObject(NULL, TEXT("FirstJob"));
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 
@@ -112,7 +109,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	} // while
 
 	// закрываем дескриптор задания
-	CloseHandle(hSampleJob);
+	CloseHandle(hJob);
 
 	return (int)msg.wParam;
 } 
@@ -144,7 +141,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 		10, 30, 400, 400, hwnd, (HMENU)IDC_LIST_PROCESSES, lpCreateStruct->hInstance, NULL);
 
 	// получаем список процессов активных сейчас
-	LoadProcessesToListBox(hwndCtl);
+	ToLB_LoadProcesses(hwndCtl);
 
 	// создаем список для перечисления загруженных модулей
 	CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER,
@@ -189,7 +186,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			
 			DWORD dwProcessId = (DWORD)ListBox_GetItemData(hwndCtl, iItem);// определяем идентификатор 
 		
-			LoadModulesToListBox(GetDlgItem(hwnd, IDC_LIST_MODULES), dwProcessId);// получаем список загруженных модулей
+			ToLB_LoadModules(GetDlgItem(hwnd, IDC_LIST_MODULES), dwProcessId);// получаем список загруженных модулей
 			} 
 		} 
 	}
@@ -199,7 +196,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 		HWND hwndList = GetDlgItem(hwnd, IDC_LIST_PROCESSES);
 
-		LoadProcessesToListBox(hwndList);// получаем список процессов
+		ToLB_LoadProcesses(hwndList);// получаем список процессов
 		
 		ListBox_ResetContent(GetDlgItem(hwnd, IDC_LIST_MODULES));// очистим список модулей
 	}
@@ -353,7 +350,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				} // for
 
 				
-				bRet = StartGroupProcessesAsJob(hSampleJob, (LPCTSTR *)aCmdLine, nCount, FALSE, 0);// создаём группу процессов в одном задании
+				bRet = StartGroupProcessesAsJob(hJob, (LPCTSTR *)aCmdLine, nCount, FALSE, 0);// создаём группу процессов в одном задании
 
 				// освобождаем выделенную память
 				for (UINT i = 0; i < nCount; ++i) delete[] aCmdLine[i];
@@ -365,7 +362,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				LPCTSTR aCmdLine[1] = { szFileName };
 
 				// создаём процесс в одном задании
-				bRet = StartGroupProcessesAsJob(hSampleJob, aCmdLine, 1, FALSE, 0);
+				bRet = StartGroupProcessesAsJob(hJob, aCmdLine, 1, FALSE, 0);
 			} // else
 
 			if (FALSE != bRet)
@@ -373,14 +370,14 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				HWND hwndList = GetDlgItem(hwnd, IDC_LIST_PROCESSES);
 
 				// получаем список процессов в созданном задании
-				LoadProcessesInJobToListBox(hwndList, hSampleJob);
+				ToLB_LoadProcessesInJob(hwndList, hJob);
 
 				// очистим список модулей
 				ListBox_ResetContent(GetDlgItem(hwnd, IDC_LIST_MODULES));
 			} // if
 			else
 			{
-				MessageBox(hwnd, TEXT("Возникла ошибка"), NULL, MB_ICONERROR | MB_OK);
+				MessageBox(hwnd, TEXT("Ошибка"), NULL, MB_ICONERROR | MB_OK);
 			} // else
 		} // if
 	}
@@ -389,9 +386,10 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	case ID_CURRENT_WORKING_PROCESS : // Процессы в текущем задании
 	{
 		HWND hwndList = GetDlgItem(hwnd, IDC_LIST_PROCESSES);
-		// получаем список процессов в текущем задании
-		LoadProcessesInJobToListBox(hwndList);
-		// очистим список модулей
+		
+		ToLB_LoadProcessesInJob(hwndList);// получаем список процессов в текущем задании
+
+
 		ListBox_ResetContent(GetDlgItem(hwnd, IDC_LIST_MODULES));
 	}
 	break;
@@ -402,7 +400,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		HWND hwndList = GetDlgItem(hwnd, IDC_LIST_PROCESSES);
 
 		// получаем список процессов в созданном задании
-		LoadProcessesInJobToListBox(hwndList, hSampleJob);
+		ToLB_LoadProcessesInJob(hwndList, hJob);
 
 		// очистим список модулей
 		ListBox_ResetContent(GetDlgItem(hwnd, IDC_LIST_MODULES));
@@ -475,7 +473,7 @@ BOOL Dialog_InitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	{
 		int iItem = ComboBox_AddString(hwndCtl, szPriorityClasses[i]);
 		ComboBox_SetItemData(hwndCtl, iItem, dwPriorityClasses[i]);
-
+		
 		if (dwPriorityClasses[i] == dwPriorityClass)
 		{
 			ComboBox_SetCurSel(hwndCtl, iItem);
@@ -573,7 +571,7 @@ void Dialog_Command(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 
 
-void LoadProcessesToListBox(HWND hwndCtl)
+void ToLB_LoadProcesses(HWND hwndCtl)
 {
 	ListBox_ResetContent(hwndCtl);//очистка списка
 
@@ -609,12 +607,11 @@ void LoadProcessesToListBox(HWND hwndCtl)
 			int iItem = ListBox_AddString(hwndCtl, szBuffer);
 
 			ListBox_SetItemData(hwndCtl, iItem, dwProcessId);//запись в ListBox имени процесса
-		} // for
-	} // if
-} // LoadProcessesToListBox
+		} 
+	} 
+} 
 
-
-void LoadModulesToListBox(HWND hwndCtl, DWORD dwProcessId)
+void ToLB_LoadModules(HWND hwndCtl, DWORD dwProcessId)
 {
 	// удалим все строки из списка
 	ListBox_ResetContent(hwndCtl);
@@ -655,7 +652,7 @@ void LoadModulesToListBox(HWND hwndCtl, DWORD dwProcessId)
 	} // if
 } // LoadModulesToListBox
 
-void LoadProcessesInJobToListBox(HWND hwndCtl, HANDLE hJob)
+void ToLB_LoadProcessesInJob(HWND hwndCtl, HANDLE hJob)
 {
 	// удалим все строки из списка
 	ListBox_ResetContent(hwndCtl);
@@ -684,18 +681,17 @@ void LoadProcessesInJobToListBox(HWND hwndCtl, HANDLE hJob)
 			} // if
 
 			if (0 == cch)
-				StringCchCopy(szName, MAX_PATH, TEXT("Неизвестный процесс"));//в каких случаях появляется?
+				StringCchCopy(szName, MAX_PATH, TEXT("Неизвестный процесс"));
 
 			// формируем строку для списка
 			StringCchPrintf(szBuffer, _countof(szBuffer), TEXT("%s (PID: %u)"), szName, dwProcessId);
-
-			// добавляем в список новую строку
+						
 			int iItem = ListBox_AddString(hwndCtl, szBuffer);
-			// сохраняем в новой строке идентификатор процесса
-			ListBox_SetItemData(hwndCtl, iItem, dwProcessId);
-		} // for
-	} // if
-} // LoadProcessesInJobToListBox
+			
+			ListBox_SetItemData(hwndCtl, iItem, dwProcessId);// сохраняем в новой строке идентификатор процесса
+		} 
+	} 
+} 
 
 
 BOOL EnumProcessesInJob(HANDLE hJob, DWORD* lpidProcess, DWORD cb, LPDWORD lpcbNeeded)
@@ -706,29 +702,25 @@ BOOL EnumProcessesInJob(HANDLE hJob, DWORD* lpidProcess, DWORD cb, LPDWORD lpcbN
 
 	if (NULL != lpidProcess && nCount > 0)
 	{
-		// определеям размер блока памяти (в байтах)
-		// для хранения идентификаторов и структуры
-		DWORD cbJobPIL = sizeof(JOBOBJECT_BASIC_PROCESS_ID_LIST) + (nCount - 1) * sizeof(ULONG_PTR);
-
-		// выделяем блок памяти
-		JOBOBJECT_BASIC_PROCESS_ID_LIST *pJobPIL = (JOBOBJECT_BASIC_PROCESS_ID_LIST *)malloc(cbJobPIL);
-
-		if (NULL != pJobPIL)
+		DWORD jobProcessStructSize = sizeof(JOBOBJECT_BASIC_PROCESS_ID_LIST) + sizeof(ULONG_PTR) * 1024;//блок памяти для структуры
+		JOBOBJECT_BASIC_PROCESS_ID_LIST* jobProcessIdList = static_cast<JOBOBJECT_BASIC_PROCESS_ID_LIST*>(malloc(jobProcessStructSize));
+		
+		if (NULL != jobProcessIdList)
 		{
 			// указываем максимальное число процессов,
 			// на которое расчитана выделенная память
-			pJobPIL->NumberOfAssignedProcesses = nCount;
+			jobProcessIdList->NumberOfAssignedProcesses = nCount;
 
 			// запрашиваем список идентификаторов процессов
-			BOOL bRet = QueryInformationJobObject(hJob, JobObjectBasicProcessIdList, pJobPIL, cbJobPIL, NULL);
+			BOOL bRet = QueryInformationJobObject(hJob, JobObjectBasicProcessIdList, jobProcessIdList, jobProcessStructSize, NULL);
 
 			if (FALSE != bRet)
 			{
 				// определяем количество идетификаторов
-				nCount = pJobPIL->NumberOfProcessIdsInList;  
+				nCount = jobProcessIdList->NumberOfProcessIdsInList;
 
 				// копируем в буфер список идентификаторов
-				CopyMemory(lpidProcess, pJobPIL->ProcessIdList, nCount * sizeof(ULONG_PTR));
+				CopyMemory(lpidProcess, jobProcessIdList->ProcessIdList, nCount * sizeof(ULONG_PTR));
 
 				// возвращаем размер блока памяти (в байтах),
 				// в который скопирован список идентификаторов
@@ -736,7 +728,7 @@ BOOL EnumProcessesInJob(HANDLE hJob, DWORD* lpidProcess, DWORD cb, LPDWORD lpcbN
 					*lpcbNeeded = nCount * sizeof(ULONG_PTR);
 			} // if
 
-			free(pJobPIL); // освобождаем память
+			free(jobProcessIdList); // освобождаем память
 			return bRet;
 		} // if
 	} // if
@@ -746,9 +738,9 @@ BOOL EnumProcessesInJob(HANDLE hJob, DWORD* lpidProcess, DWORD cb, LPDWORD lpcbN
 
 BOOL StartGroupProcessesAsJob(HANDLE hJob, LPCTSTR lpszCmdLine[], DWORD nCount, BOOL bInheritHandles, DWORD dwCreationFlags)
 {
-	// определим, включен ли вызывающий процесс в задание
+	
 	BOOL bInJob = FALSE;
-	IsProcessInJob(GetCurrentProcess(), NULL, &bInJob);
+	IsProcessInJob(GetCurrentProcess(), NULL, &bInJob);// определим, включен ли вызывающий процесс в задание
 
 	if (FALSE != bInJob) // если да (!)
 	{
