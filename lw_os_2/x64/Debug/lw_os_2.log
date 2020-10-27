@@ -1,0 +1,10 @@
+﻿  lw_os_2.cpp
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(189): warning C4244: инициализация: преобразование "WPARAM" в "wchar_t", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(148): warning C4101: hdc: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(149): warning C4101: ps: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(322): warning C4244: инициализация: преобразование "INT_PTR" в "int", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(330): warning C4244: инициализация: преобразование "INT_PTR" в "int", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(354): warning C4838: преобразование из "DWORD" в "char" требует сужающего преобразования
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(354): warning C4244: инициализация: преобразование "DWORD" в "char", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_2\lw_os_2.cpp(143): warning C4715: WinMain: значение возвращается не при всех путях выполнения
+  lw_os_2.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_os_2\lw_os_2\x64\Debug\lw_os_2.exe
