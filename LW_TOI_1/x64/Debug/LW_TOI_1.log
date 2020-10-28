@@ -1,0 +1,6 @@
+﻿  naivesearch.cpp
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_toi_1\naivesearch.cpp(40): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_toi_1\naivesearch.cpp(41): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_toi_1\naivesearch.cpp(72): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_os_2\lw_toi_1\naivesearch.cpp(73): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+  LW_TOI_1.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_os_2\LW_TOI_1\x64\Debug\LW_TOI_1.exe
