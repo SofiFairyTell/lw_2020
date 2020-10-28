@@ -10,10 +10,7 @@
 #include <locale.h>
 #include <iostream>
 
-// фунrция, дублирующая дескриптор
-BOOL DuplicateHandle(DWORD dwProcessId, HANDLE hSourceHandle, LPHANDLE lpTargetHandle, DWORD dwDesiredAccess);
 
-// ------------------------------------------------------------------------------------------------
 int _tmain(int argc, LPCTSTR argv[])
 {
 	setlocale(LC_ALL, "");
@@ -26,16 +23,17 @@ int _tmain(int argc, LPCTSTR argv[])
 		std::cout << std::endl;
 		HANDLE hObject = NULL;
 
-		TCHAR szCmdLine[MAX_PATH + 40];
+		TCHAR commandline[MAX_PATH + 40];
+		LPCTSTR  sinchtype = TEXT("%s semaphore-duplicate %d %p");
 		/*дескриптор объекта ядра и идентификатор родительского процесса перадются в дочерний процесс как аргументы в командной строке*/
 	
 		hObject = CreateSemaphore(NULL, 1, 2, TEXT("Semaphor"));
 
 		if (hObject != NULL)
 		{
-			// формируем командную строку для создания дочерних процессов
-			StringCchPrintf(szCmdLine, _countof(szCmdLine), TEXT("%s semaphore-duplicate %d %p"), argv[0], (int)GetCurrentProcessId(), hObject);
-		} // if
+			/*формируем командную строку для создания дочерних процессов*/
+			StringCchPrintf(commandline, _countof(commandline), sinchtype, argv[0], (int)GetCurrentProcessId(), hObject);
+		} 
 
 		if (hObject != NULL)
 		{
@@ -48,12 +46,11 @@ int _tmain(int argc, LPCTSTR argv[])
 			for (int i = 0; i < n_processes; ++i)
 			{
 				// порождаем новый процесс
-				BOOL bRet = CreateProcess(NULL, szCmdLine, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &procinfo);
+				BOOL bRet = CreateProcess(NULL, commandline, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &procinfo);
 
 				if (FALSE != bRet)
-				{
-					/*записать дескриптор в массив и закрыть дескриптор потока*/
-					ProcArray[i] = procinfo.hProcess;
+				{				
+					ProcArray[i] = procinfo.hProcess;/*записать дескриптор в массив и закрыть дескриптор потока*/
 					CloseHandle(procinfo.hThread);
 				} 
 				else
@@ -61,7 +58,7 @@ int _tmain(int argc, LPCTSTR argv[])
 					ProcArray[i] = NULL;
 				} 
 			} 
-			
+
 			WaitForMultipleObjects(n_processes, ProcArray, TRUE, INFINITE);// ожидаем завершения всех дочерних процессов
 
 			for (int i = 0; i < n_processes; ++i) 
@@ -76,19 +73,23 @@ int _tmain(int argc, LPCTSTR argv[])
 	{
 		std::cout << "Аргументы командной строки:" << std::endl;
 		HANDLE hSemaphore = NULL; // дескриптор семафора
-		if ((4 == argc) && (_tcsicmp(argv[1], TEXT("semaphore-duplicate")) == 0))
+		if ((4 == argc) && (lstrcmpi(argv[1], TEXT("semaphore-duplicate")) == 0))
 			{
-				// получаем из командной строки идентификатор родительского процесса
 				UINT parentPID = (UINT)_ttoi(argv[2]);
 				
 				HANDLE hObject = (HANDLE)_tcstoui64(argv[3], NULL, 16);//значение дескриптора семафора в 16-м формате
-			
-				DuplicateHandle(parentPID, hObject, &hSemaphore, SEMAPHORE_ALL_ACCESS);// дублируем полученный дескриптор семафора
+
+				HANDLE hProcessChild = OpenProcess(PROCESS_DUP_HANDLE, FALSE, parentPID);// открываем процесс
+				if (NULL != hProcessChild)
+				{
+					DuplicateHandle(hProcessChild, hObject, GetCurrentProcess(), &hSemaphore, SEMAPHORE_ALL_ACCESS, FALSE, 0);// дублируем полученный дескриптор
+					CloseHandle(hProcessChild);// закрываем дескриптор процесса
+				}			
 			} 
 
 			if (NULL != hSemaphore)
 			{
-				std::cout<<"> Счет (семафор):"<<std::endl;
+				std::cout<<"> Счетчик при семафоре:"<<std::endl;
 
 				for (int i = 0; i < 3; ++i)
 				{
@@ -104,25 +105,8 @@ int _tmain(int argc, LPCTSTR argv[])
 				} 
 				
 				CloseHandle(hSemaphore);// закрываем дескриптор семафора
-			} // if
+			} 
 	}
 } 
  
-// ------------------------------------------------------------------------------------------------
-BOOL DuplicateHandle(DWORD dwProcessId, HANDLE hSourceHandle, LPHANDLE lpTargetHandle, DWORD dwDesiredAccess)
-{
-	BOOL bRet = FALSE;
 
-	// открываем процесс
-	HANDLE hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, dwProcessId);
-
-	if (NULL != hProcess)
-	{
-		// дублируем полученный дескриптор
-		bRet = DuplicateHandle(hProcess, hSourceHandle, GetCurrentProcess(), lpTargetHandle, dwDesiredAccess, FALSE, 0);
-		// закрываем дескриптор процесса
-		CloseHandle(hProcess);
-	} // if
-
-	return bRet;
-} // DuplicateHandle
