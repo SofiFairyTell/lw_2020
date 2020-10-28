@@ -25,11 +25,12 @@ int _tmain(int argc, LPCTSTR argv[])
 		std::cin >> n_processes;
 		std::cout << std::endl;
 		HANDLE hObject = NULL;
-		TCHAR szCmdLine[MAX_PATH + 40];
-		// значение дескриптора объекта ядра и идентификатор родительского процесса
-		// будем передавать в дочерний процесс как аргументы в командной строке
 
-		hObject = CreateSemaphoreEx(NULL, 1, 1, NULL, 0, SEMAPHORE_ALL_ACCESS);
+		TCHAR szCmdLine[MAX_PATH + 40];
+		/*дескриптор объекта ядра и идентификатор родительского процесса перадются в дочерний процесс как аргументы в командной строке*/
+	
+		hObject = CreateSemaphore(NULL, 1, 2, TEXT("Semaphor"));
+
 		if (hObject != NULL)
 		{
 			// формируем командную строку для создания дочерних процессов
@@ -39,86 +40,73 @@ int _tmain(int argc, LPCTSTR argv[])
 		if (hObject != NULL)
 		{
 			// создаем массив процессов
-			HANDLE* processes = new HANDLE[n_processes];
-
-			// порождаем дочерние процессы...
+			HANDLE* ProcArray = new HANDLE[n_processes];
 
 			STARTUPINFO si = { sizeof(STARTUPINFO) };
-			PROCESS_INFORMATION pi = { 0 };
+			PROCESS_INFORMATION procinfo = { 0 };
 
 			for (int i = 0; i < n_processes; ++i)
 			{
 				// порождаем новый процесс
-				BOOL bRet = CreateProcess(NULL, szCmdLine, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+				BOOL bRet = CreateProcess(NULL, szCmdLine, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &procinfo);
 
 				if (FALSE != bRet)
 				{
-					// записываем дескриптор нового процесса в массив
-					processes[i] = pi.hProcess;
-					// закрывает дескриптор потока нового процесса
-					CloseHandle(pi.hThread);
-				} // if
+					/*записать дескриптор в массив и закрыть дескриптор потока*/
+					ProcArray[i] = procinfo.hProcess;
+					CloseHandle(procinfo.hThread);
+				} 
 				else
 				{
-					processes[i] = NULL;
-				} // else
-			} // for
+					ProcArray[i] = NULL;
+				} 
+			} 
+			
+			WaitForMultipleObjects(n_processes, ProcArray, TRUE, INFINITE);// ожидаем завершения всех дочерних процессов
 
-			// ожидаем завершения всех дочерних процессов
-			WaitForMultipleObjects(n_processes, processes, TRUE, INFINITE);
-
-			// закрываем дескрипторы дочерних процессов
-			for (int i = 0; i < n_processes; ++i) CloseHandle(processes[i]);
+			for (int i = 0; i < n_processes; ++i) 
+				CloseHandle(ProcArray[i]);
 		
-			delete[] processes;	// удаляем массив процессов
+			delete[] ProcArray;
 		
 			CloseHandle(hObject);// закрываем дескриптор
-		} // if
-	} // if
+		} 
+	} 
 	else if (argc > 1) // (!) ветка дочернего процесса
 	{
 		std::cout << "Аргументы командной строки:" << std::endl;
-		if(_tcsnicmp(argv[1], TEXT("semaphore-"), 10) == 0)
-		{
-			HANDLE hSemaphore = NULL; // дескриптор семафора
-			if ((4 == argc) && (_tcsicmp(argv[1], TEXT("semaphore-duplicate")) == 0))
+		HANDLE hSemaphore = NULL; // дескриптор семафора
+		if ((4 == argc) && (_tcsicmp(argv[1], TEXT("semaphore-duplicate")) == 0))
 			{
 				// получаем из командной строки идентификатор родительского процесса
-				DWORD dwProcessId = (DWORD)_ttoi(argv[2]);
-				// получаем из командной строки дескриптор семафора
-				HANDLE hObject = (HANDLE)_tcstoui64(argv[3], NULL, 16);
-
-				// дублируем полученный дескриптор семафора
-				DuplicateHandle(dwProcessId, hObject, &hSemaphore, SEMAPHORE_ALL_ACCESS);
+				UINT parentPID = (UINT)_ttoi(argv[2]);
+				
+				HANDLE hObject = (HANDLE)_tcstoui64(argv[3], NULL, 16);//значение дескриптора семафора в 16-м формате
+			
+				DuplicateHandle(parentPID, hObject, &hSemaphore, SEMAPHORE_ALL_ACCESS);// дублируем полученный дескриптор семафора
 			} 
 
 			if (NULL != hSemaphore)
 			{
-				_tprintf(TEXT("> \n"));
-				_tprintf(TEXT("> Счет (семафор):\n"));
+				std::cout<<"> Счет (семафор):"<<std::endl;
 
 				for (int i = 0; i < 3; ++i)
 				{
-					// ожидаем освобождения семафора,
-					// а затем захватываем его
-					WaitForSingleObject(hSemaphore, INFINITE);
-
-					for (int j = 0; j < 10; ++j)
+					WaitForSingleObject(hSemaphore, INFINITE);//жждать пока освободится семафор
+					int j;
+					for (j = 0; j < 10; ++j)
 					{
-						_tprintf(TEXT("> %d\n"), j + 1);
-						Sleep(500);
-					} // for
-
-					ReleaseSemaphore(hSemaphore, 1, NULL);// Поток увеличивает значение счетчика текущего числа ресурсов
-				} // for
-
-				// закрываем дескриптор семафора
-				CloseHandle(hSemaphore);
+						std::cout << j + 1;
+						Sleep(500);	//задержка вывода цифр			
+					} 
+					if (j == 10) std::cout << std::endl;
+					ReleaseSemaphore(hSemaphore, 1, NULL);// Поток увеличивает значение счетчика текущего числа ресурсов 
+				} 
+				
+				CloseHandle(hSemaphore);// закрываем дескриптор семафора
 			} // if
-		} // if
 	}
-	
-	} // _tmain
+} 
  
 // ------------------------------------------------------------------------------------------------
 BOOL DuplicateHandle(DWORD dwProcessId, HANDLE hSourceHandle, LPHANDLE lpTargetHandle, DWORD dwDesiredAccess)
@@ -132,7 +120,6 @@ BOOL DuplicateHandle(DWORD dwProcessId, HANDLE hSourceHandle, LPHANDLE lpTargetH
 	{
 		// дублируем полученный дескриптор
 		bRet = DuplicateHandle(hProcess, hSourceHandle, GetCurrentProcess(), lpTargetHandle, dwDesiredAccess, FALSE, 0);
-
 		// закрываем дескриптор процесса
 		CloseHandle(hProcess);
 	} // if
