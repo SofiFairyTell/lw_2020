@@ -1,0 +1,10 @@
+﻿  keycmd.cpp
+  keyfoo.cpp
+C:\Users\student\Downloads\keyboardcmd\keyboardcmd\keycmd.cpp(12,26): warning C4101:  file: неиспользованная локальная переменная
+C:\Users\student\Downloads\keyboardcmd\keyboardcmd\keyfoo.cpp(85,9): warning C4101:  sPath: неиспользованная локальная переменная
+  taskkill.cpp
+C:\Users\student\Downloads\keyboardcmd\keyboardcmd\keyfoo.cpp(90,23): warning C4101:  pi: неиспользованная локальная переменная
+C:\Users\student\Downloads\keyboardcmd\keyboardcmd\taskkill.cpp(16,9): warning C4101:  hProcess: неиспользованная локальная переменная
+  Создание кода...
+C:\Users\student\Downloads\keyboardcmd\keyboardcmd\taskkill.cpp(18,8): warning C4101:  dwPriorityClass: неиспользованная локальная переменная
+  keyboardcmd.vcxproj -> C:\Users\student\Downloads\keyboardcmd\x64\Debug\keyboardcmd.exe
