@@ -1,4 +1,0 @@
-﻿  lw_os_3_p2.cpp
-c:\users\kurbatova\source\lw2020\lw_os_2\lw_os_3\lw_os_3_p2\lw_os_3_p2.cpp(32): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-MSVCRTD.lib(exe_winmain.obj) : error LNK2019: ссылка на неразрешенный внешний символ WinMain в функции "int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ)
-C:\Users\Kurbatova\source\LW2020\lw_os_2\lw_os_2\x64\Debug\lw_os_3_p2.exe : fatal error LNK1120: неразрешенных внешних элементов: 1
