@@ -77,10 +77,7 @@ namespace Stemmer.RU
         private bool Replace(ref string replace, string cleaningPattern, string by)
         {
             string original = replace;
-            replace = new Regex(cleaningPattern,
-                        RegexOptions.ExplicitCapture |
-                        RegexOptions.Singleline
-                        ).Replace(replace, by);
+            replace = new Regex(cleaningPattern, RegexOptions.ExplicitCapture | RegexOptions.Singleline).Replace(replace, by);
             return original != replace;
         }
     }
