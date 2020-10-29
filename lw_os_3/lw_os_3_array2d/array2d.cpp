@@ -16,16 +16,15 @@ int max = 0, min = 999; // максимальное и минимальное значения
 
 CRITICAL_SECTION cs; // критическая секция
 
-int _tmain()
+void matrix()
 {
-	setlocale(LC_ALL, "");
 	do
 	{
 		std::cout << "Введите количество строк: ";
 		std::cin >> rows;
 		if (rows < 2)
 		{
-			std::cout <<"Слишком мало!" <<"\n";
+			std::cout << "Слишком мало!" << "\n";
 		}
 	} while (rows < 2);
 	do
@@ -39,48 +38,47 @@ int _tmain()
 	} while (cols < 2);
 
 	/*Создание матрицы с числами от 0 до 999*/
-		srand(time(NULL)); // Инициализируем генератор случайных чисел. 
-		int** array2D = new int*[rows];
-		for (int i = 0; i < rows; ++i)
+	srand(time(NULL)); // Инициализируем генератор случайных чисел. 
+	int** array2D = new int*[rows];
+	for (int i = 0; i < rows; ++i)
+	{
+		array2D[i] = new int[cols];
+		for (int j = 0; j < cols; ++j)
 		{
-			array2D[i] = new int[cols];
-			for (int j = 0; j < cols; ++j)
-			{
-				array2D[i][j] = rand() % 1000; // генерируем случайное число от 0 до 999;
-				std::cout << array2D[i][j] << "\t";
-			}
-			std::cout << std::endl;
+			array2D[i][j] = rand() % 1000; // генерируем случайное число от 0 до 999;
+			std::cout << array2D[i][j] << "\t";
 		}
 		std::cout << std::endl;
+	}
+	std::cout << std::endl;
 
-		// создаём массив потоков для строк матрицы
-		HANDLE* threads = new HANDLE[rows];
-		InitializeCriticalSection(&cs); // инициализируем критическию секцию
-		for (int i = 0; i < rows; ++i)
-		{
-			//_beginthreadex потому что CreateThread and ExitThread не учитывают возникновение некоторых проблем 
-			threads[i] = (HANDLE)_beginthreadex(NULL, 0, ThreadFuncWithCriticalSection, (void *)array2D[i], 0, NULL);
-		}
-		
-		WaitForMultipleObjects(rows, threads, TRUE, INFINITE);// ожидание завершения всех созданных потоков
+	// создаём массив потоков для строк матрицы
+	HANDLE* threads = new HANDLE[rows];
+	InitializeCriticalSection(&cs); // инициализируем критическию секцию
+	for (int i = 0; i < rows; ++i)
+	{
+		//_beginthreadex потому что CreateThread and ExitThread не учитывают возникновение некоторых проблем 
+		threads[i] = (HANDLE)_beginthreadex(NULL, 0, ThreadFuncWithCriticalSection, (void *)array2D[i], 0, NULL);
+	}
 
-		
-		std::cout	<< "Количество двузначных чисел: " << total << std::endl 
-					<< "Максимальный элемент: " << max << std::endl
-					<< "Минимальный элемент: " << min<<std::endl;
+	WaitForMultipleObjects(rows, threads, TRUE, INFINITE);// ожидание завершения всех созданных потоков
 
 
-		for (int i = 0; i < rows; ++i)
-		{
-			delete[] array2D[i];			// удаляем строку матрицы	
-			CloseHandle(threads[i]);// закрываем дискриптор созданного потока
-		}
+	std::cout << "Количество двузначных чисел: " << total << std::endl
+		<< "Максимальный элемент: " << max << std::endl
+		<< "Минимальный элемент: " << min << std::endl;
 
-		delete[] threads;// удаляем массив потоков
-		delete[] array2D;// удаляем матрицу
-		DeleteCriticalSection(&cs); // удаляем критическию секцию
+
+	for (int i = 0; i < rows; ++i)
+	{
+		delete[] array2D[i];			// удаляем строку матрицы	
+		CloseHandle(threads[i]);// закрываем дискриптор созданного потока
+	}
+
+	delete[] threads;// удаляем массив потоков
+	delete[] array2D;// удаляем матрицу
+	DeleteCriticalSection(&cs); // удаляем критическию секцию
 }
-
 unsigned __stdcall ThreadFuncWithCriticalSection(void *lpParameter)
 {
 	const int *row = (const int *)lpParameter; // указатель на строку матрицы
@@ -91,15 +89,11 @@ unsigned __stdcall ThreadFuncWithCriticalSection(void *lpParameter)
 	for (int j = 0; j < cols; ++j)
 	{
 		if (row[j] > row[Max])
-		{
-			Max = j; // запомним индекс максимального значения
-		}
+		{	Max = j;	}// запомним индекс максимального значения
 		else 
 			if (row[j] < row[Min])
-		{
-			Min = j; // запомним индекс минимального значения
-		}
-		if (9 < row[j] && row[j] < 100) // двузначное число
+			{	Min = j;	} // запомним индекс минимального значения
+		if (row[j] > 9 && row[j] < 100) // двузначное число
 		{
 			++count;// увеличим на единицу количество двузначных чисел
 		}
@@ -120,3 +114,18 @@ unsigned __stdcall ThreadFuncWithCriticalSection(void *lpParameter)
 	
 	return 0;
 } // HandlerRowMatrixCriticalSection
+
+int _tmain()
+{
+	int answer;
+	setlocale(LC_ALL, "");
+	do
+	{
+		std::cout << "Для завершения работы программы нажмите 0 иначе 1\n";
+		std::cin >> answer;
+		if (answer == 1)
+			matrix();
+	} while (answer != 0);
+	
+}
+

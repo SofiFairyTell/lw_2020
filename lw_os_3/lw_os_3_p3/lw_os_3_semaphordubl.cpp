@@ -32,6 +32,7 @@ int _tmain(int argc, LPCTSTR argv[])
 		if (hObject != NULL)
 		{
 			/*формируем командную строку для создания дочерних процессов*/
+			//std::wstring commandline = sinchtype + *argv[0] + (int)GetCurrentProcessId() + hObject;
 			StringCchPrintf(commandline, _countof(commandline), sinchtype, argv[0], (int)GetCurrentProcessId(), hObject);
 		} 
 
@@ -47,10 +48,11 @@ int _tmain(int argc, LPCTSTR argv[])
 			{
 				// порождаем новый процесс
 				BOOL bRet = CreateProcess(NULL, commandline, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &procinfo);
-
+				std::cout << "PID: argc"<<argc << argv << std::endl;
 				if (FALSE != bRet)
 				{				
 					ProcArray[i] = procinfo.hProcess;/*записать дескриптор в массив и закрыть дескриптор потока*/
+					std::cout << "PID: argc argv" << argc << argv << std::endl;
 					CloseHandle(procinfo.hThread);
 				} 
 				else
@@ -69,9 +71,10 @@ int _tmain(int argc, LPCTSTR argv[])
 			CloseHandle(hObject);// закрываем дескриптор
 		} 
 	} 
-	else if (argc > 1) // (!) ветка дочернего процесса
+	else if (argc > 1) // ветка дочернего процесса
 	{
 		std::cout << "Аргументы командной строки:" << std::endl;
+		std::cout << "PID: argc" << argc <<" "<< argv[1] << std::endl;
 		HANDLE hSemaphore = NULL; // дескриптор семафора
 		if ((4 == argc) && (lstrcmpi(argv[1], TEXT("semaphore-duplicate")) == 0))
 			{
