@@ -27,7 +27,7 @@ int _tmain(int argc, LPCTSTR argv[])
 		LPCTSTR  sinchtype = TEXT("%s semaphore-duplicate %d %p");
 		/*дескриптор объекта ядра и идентификатор родительского процесса перадются в дочерний процесс как аргументы в командной строке*/
 	
-		hObject = CreateSemaphore(NULL, 1, 2, TEXT("Semaphor"));
+		hObject = CreateSemaphore(NULL, 2, 2, TEXT("Semaphor"));
 
 		if (hObject != NULL)
 		{

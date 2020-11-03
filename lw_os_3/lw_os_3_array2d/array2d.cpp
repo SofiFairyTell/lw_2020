@@ -99,21 +99,18 @@ unsigned __stdcall ThreadFuncWithCriticalSection(void *lpParameter)
 		}
 
 	}
-	/*никогда не приостанавливает выполнение вызывающего потока*/
-	if (TryEnterCriticalSection(&cs) != FALSE)
-	{
+	
+	//if (TryEnterCriticalSection(&cs) != FALSE)
+	//{
+		EnterCriticalSection(&cs);
 		total += count; // увеличиваем количество двузначных чисел
 		if (row[Max] > max) max = row[Max]; // определяем максимальный элемент
 		if (row[Min] < min) min = row[Min]; // определяем минимальный элемент
 		LeaveCriticalSection(&cs); // покидаем критическую секцию
 
-	}
-//	EnterCriticalSection(&cs); // входим в критическую секцию
-	
-
-	
+	//}
 	return 0;
-} // HandlerRowMatrixCriticalSection
+} 
 
 int _tmain()
 {

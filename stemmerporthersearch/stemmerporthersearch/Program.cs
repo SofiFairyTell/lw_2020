@@ -126,7 +126,8 @@ namespace Stemmer
                         {
 
                             a = line;
-                            if (a.IndexOf(word) > -1)
+                            int l = word.Length;
+                            if (a.IndexOf(word,0,l) > -1)
                             {
                                 Console.WriteLine(a);
                                 writer.WriteLine(a);
