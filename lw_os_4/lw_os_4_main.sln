@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fileditor", "fileditor\fileditor.vcxproj", "{4D199110-51A4-4265-9B50-917D890ED828}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57EDF18C-C3EF-408A-A7FA-2504182D73D4}"
+	ProjectSection(SolutionItems) = preProject
+		..\lw_os_3\lw_os_3\lwos3.cpp = ..\lw_os_3\lw_os_3\lwos3.cpp
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
