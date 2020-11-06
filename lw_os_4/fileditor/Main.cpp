@@ -50,7 +50,7 @@ void OnIdle(HWND hwnd);
 POINT wndPos; // положение окна
 SIZE wndSize; // размер окна
 
-TCHAR szFileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
+TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 
 LOGFONT logFont; // параметры шрифта
@@ -154,6 +154,24 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 } 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void OnIdle(HWND hwnd)
 {
 	if (NULL != lpszBufferText)
@@ -210,6 +228,17 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	// создаёи поле ввода для редактирования текста
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT | ES_WANTRETURN;
 	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 100, 100, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
+	
+	/*
+	// Создаем орган управления Rich Edit
+  hwndEdit = CreateWindowEx(0L, "RICHEDIT", "",
+    WS_VISIBLE | WS_CHILD | WS_BORDER | 
+    WS_HSCROLL | WS_VSCROLL |
+    ES_NOHIDESEL | ES_AUTOVSCROLL | ES_MULTILINE | 
+    ES_SAVESEL | ES_SUNKEN,
+    0, 0, rc.right - rc.left, rc.bottom - rc.top,
+    hWnd, (HMENU) IDC_RTFEDIT, hInst, NULL);*/
+
 
 	// задаем ограничение на размер текста
 	Edit_LimitText(hwndCtl, (DWORD)-1);
@@ -221,18 +250,18 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	{
 		// устанавливаем шрифт для поля ввода
 		SendMessage(hwndCtl, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);
-	} // if
+	} 
 
 	// открываем последний редактируемый текстовый фал
 	if (OpenFileAsync(hwndCtl) != FALSE)
 	{
 		// задаём заголовок главного окна
-		SetWindowText(hwnd, szFileName);
+		SetWindowText(hwnd, FileName);
 	} // if
 	else
 	{
 		// очищаем имя редактируемого текстового файла
-		szFileName[0] = _T('\0');
+		FileName[0] = _T('\0');
 		// задаём заголовок главного окна
 		SetWindowText(hwnd, TEXT("Безымянный"));
 	} // else
@@ -306,7 +335,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		Edit_SetText(hEdit, NULL);
 
 		// очищаем имя редактируемого текстового файла
-		szFileName[0] = _T('\0');
+		FileName[0] = _T('\0');
 		// задаём заголовок главного окна
 		SetWindowText(hwnd, TEXT("Безымянный"));
 	}
@@ -318,8 +347,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		ofn.hInstance = GetWindowInstance(hwnd);
 		ofn.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
-		ofn.lpstrFile = szFileName;
-		ofn.nMaxFile = _countof(szFileName);
+		ofn.lpstrFile = FileName;
+		ofn.nMaxFile = _countof(FileName);
 		ofn.lpstrTitle = TEXT("Открыть");
 		ofn.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
 		ofn.lpstrDefExt = TEXT("txt");
@@ -329,14 +358,14 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			if (OpenFileAsync(hEdit) != FALSE) // открываем файл
 			{
 				// задаём заголовок главного окна
-				SetWindowText(hwnd, szFileName);
+				SetWindowText(hwnd, FileName);
 			} // if
 			else
 			{
 				MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
 
 				// очищаем имя редактируемого текстового файла
-				szFileName[0] = _T('\0');
+				FileName[0] = _T('\0');
 				// задаём заголовок главного окна
 				SetWindowText(hwnd, TEXT("Безымянный"));
 			} // else
@@ -355,8 +384,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		ofn.hInstance = GetWindowInstance(hwnd);
 		ofn.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
-		ofn.lpstrFile = szFileName;
-		ofn.nMaxFile = _countof(szFileName);
+		ofn.lpstrFile = FileName;
+		ofn.nMaxFile = _countof(FileName);
 		ofn.lpstrTitle = TEXT("Сохранить как");
 		ofn.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_CREATEPROMPT | OFN_OVERWRITEPROMPT;
 		ofn.lpstrDefExt = TEXT("txt");
@@ -366,7 +395,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			if (SaveFileAsync(hEdit, TRUE) != FALSE) // пересохраняем файл
 			{
 				// задаём заголовок главного окна
-				SetWindowText(hwnd, szFileName);
+				SetWindowText(hwnd, FileName);
 			} // if
 			else
 			{
@@ -444,7 +473,7 @@ void LoadProfile(LPCTSTR lpFileName)
 
 	// загружаем имя последнего редактируемого текстового файла
 
-	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, szFileName, MAX_PATH, lpFileName);
+	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, FileName, MAX_PATH, lpFileName);
 
 	// загружаем параметры шрифта
 
@@ -485,7 +514,7 @@ void SaveProfile(LPCTSTR lpFileName)
 
 	// сохраняем имя последнего редактируемого текстового файла
 
-	WritePrivateProfileString(TEXT("File"), TEXT("Filename"), szFileName, lpFileName);
+	WritePrivateProfileString(TEXT("File"), TEXT("Filename"), FileName, lpFileName);
 
 	// сохраняем параметры шрифта
 
@@ -534,7 +563,7 @@ void SaveProfile(LPCTSTR lpFileName)
 BOOL OpenFileAsync(HWND hwndCtl)
 {
 	// открываем существующий файл для чтения и записи
-	HANDLE hExistingFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+	HANDLE hExistingFile = CreateFile(FileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
 	if (INVALID_HANDLE_VALUE == hExistingFile) // не удалось открыть файл
 	{
@@ -581,7 +610,7 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	if (FALSE != fSaveAs)
 	{
 		// создаём и открываем файл для чтения и записи
-		HANDLE hNewFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
+		HANDLE hNewFile = CreateFile(FileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 
 		if (INVALID_HANDLE_VALUE == hNewFile) // не удалось открыть файл
 		{
@@ -606,7 +635,7 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	else
 	{
 		// создаём и открываем файл для чтения и записи
-		hFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
+		hFile = CreateFile(FileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 
 		if (INVALID_HANDLE_VALUE == hFile) // не удалось открыть файл
 		{
