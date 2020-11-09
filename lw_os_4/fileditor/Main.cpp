@@ -7,13 +7,10 @@
 
 
 #define IDC_EDIT_TEXT        2001
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#pragma comment(linker,"\"/manifestdependency:type                  = 'win32' \
-                                              name                  = 'Microsoft.Windows.Common-Controls' \
-                                              version               = '6.0.0.0' \
-                                              processorArchitecture = '*' \
-                                              publicKeyToken        = '6595b64144ccf1df' \
-                                              language              = '*'\"")
 // оконная процедура главного окна
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 /*Обработчики сообщений WM_CREATE WM_DESTROY WM_SIZE WM_COMMAND */
@@ -137,21 +134,47 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	// сохраняем параметры приложения в файл инициализации
 	SaveProfile(szIniFileName);
-
+ 
 	return (int)msg.wParam;
 }
 
-LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	switch (uMsg)
+	switch (uMsg) 
 	{
-		HANDLE_MSG(hWnd, WM_CREATE, OnCreate);
-		HANDLE_MSG(hWnd, WM_DESTROY, OnDestroy);
-		HANDLE_MSG(hWnd, WM_SIZE, OnSize);
-		HANDLE_MSG(hWnd, WM_CLOSE, OnClose);
-		HANDLE_MSG(hWnd, WM_COMMAND, OnCommand);
+		HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
+		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
+
+	case WM_SIZE:
+			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
+			// изменяем размеры поля ввода
+			MoveWindow(hwndCtl, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+		break;
+	case WM_DESTROY:
+		if (INVALID_HANDLE_VALUE != hFile)
+		{
+			FinishIo(&_oWrite);	// ожидаем завершения операции ввода/вывода
+			CloseHandle(hFile), hFile = INVALID_HANDLE_VALUE;// закрываем дескриптор файла
+		} 
+	
+		if (NULL != hFont)
+			DeleteObject(hFont), hFont = NULL;// удаляем созданный шрифт
+		PostQuitMessage(0); // отправляем сообщение WM_QUIT
+		break;
+	case WM_CLOSE:
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+
+		wndPos.x = rect.left;
+		wndPos.y = rect.top;
+
+		wndSize.cx = rect.right - rect.left;
+		wndSize.cy = rect.bottom - rect.top;
+
+		DestroyWindow(hwnd); // уничтожаем окно
+		break;
 	} 
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 } 
 
 
@@ -226,8 +249,8 @@ void OnIdle(HWND hwnd)
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
 	// создаёи поле ввода для редактирования текста
-	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT | ES_WANTRETURN;
-	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 100, 100, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
+	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL |WS_BORDER| ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_CENTER | ES_WANTRETURN;
+	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 0, 0, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
 	
 	/*
 	// Создаем орган управления Rich Edit
@@ -271,49 +294,11 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 
 void OnDestroy(HWND hwnd)
 {
-	if (INVALID_HANDLE_VALUE != hFile)
-	{
-		// ожидаем завершения операции ввода/вывода
-		FinishIo(&_oWrite);
-		// закрываем дескриптор файла
-		CloseHandle(hFile), hFile = INVALID_HANDLE_VALUE;
-	} // if
 
-	// удаляем созданный шрифт
-	if (NULL != hFont)
-		DeleteObject(hFont), hFont = NULL;
-
-	PostQuitMessage(0); // отправляем сообщение WM_QUIT
 } // OnDestroy
 
-void OnSize(HWND hwnd, UINT state, int cx, int cy)
-{
-	if (SIZE_MINIMIZED != state)
-	{
-		// получим дескриптор поля ввода
-		HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
-		// изменяем размеры поля ввода
-		MoveWindow(hwndCtl, 0, 0, cx, cy, TRUE);
-	} // if
-} // OnSize
 
-void OnClose(HWND hwnd)
-{
-	// определяем положение и размер окна
 
-	RECT rect;
-	GetWindowRect(hwnd, &rect);
-
-	wndPos.x = rect.left;
-	wndPos.y = rect.top;
-
-	wndSize.cx = rect.right - rect.left;
-	wndSize.cy = rect.bottom - rect.top;
-
-	// /// //
-
-	DestroyWindow(hwnd); // уничтожаем окно
-} // OnClose
 
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
