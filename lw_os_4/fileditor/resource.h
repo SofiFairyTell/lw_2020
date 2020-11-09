@@ -13,13 +13,16 @@
 #define ID_SELECT_ALL                   40007
 #define ID_UNDO                         40008
 #define ID_FONT_EDIT                    40015
+#define IDM_EDCOPY                      40016
+#define IDM_EDCUT                       40017
+#define IDM_EDPASTE                     40018
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40016
+#define _APS_NEXT_COMMAND_VALUE         40019
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

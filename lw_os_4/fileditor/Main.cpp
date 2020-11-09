@@ -146,11 +146,15 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
 
 	case WM_SIZE:
+	{
 			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
 			// изменяем размеры поля ввода
 			MoveWindow(hwndCtl, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+	}
+
 		break;
 	case WM_DESTROY:
+	{
 		if (INVALID_HANDLE_VALUE != hFile)
 		{
 			FinishIo(&_oWrite);	// ожидаем завершения операции ввода/вывода
@@ -160,7 +164,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		if (NULL != hFont)
 			DeleteObject(hFont), hFont = NULL;// удаляем созданный шрифт
 		PostQuitMessage(0); // отправляем сообщение WM_QUIT
-		break;
+	}break;
 	case WM_CLOSE:
 		RECT rect;
 		GetWindowRect(hwnd, &rect);
@@ -249,20 +253,9 @@ void OnIdle(HWND hwnd)
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
 	// создаёи поле ввода для редактирования текста
-	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL |WS_BORDER| ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_CENTER | ES_WANTRETURN;
+	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL |WS_BORDER| ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT| ES_WANTRETURN;
 	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 0, 0, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
 	
-	/*
-	// Создаем орган управления Rich Edit
-  hwndEdit = CreateWindowEx(0L, "RICHEDIT", "",
-    WS_VISIBLE | WS_CHILD | WS_BORDER | 
-    WS_HSCROLL | WS_VSCROLL |
-    ES_NOHIDESEL | ES_AUTOVSCROLL | ES_MULTILINE | 
-    ES_SAVESEL | ES_SUNKEN,
-    0, 0, rc.right - rc.left, rc.bottom - rc.top,
-    hWnd, (HMENU) IDC_RTFEDIT, hInst, NULL);*/
-
-
 	// задаем ограничение на размер текста
 	Edit_LimitText(hwndCtl, (DWORD)-1);
 
@@ -280,22 +273,19 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	{
 		// задаём заголовок главного окна
 		SetWindowText(hwnd, FileName);
-	} // if
+	} 
 	else
 	{
 		// очищаем имя редактируемого текстового файла
 		FileName[0] = _T('\0');
 		// задаём заголовок главного окна
 		SetWindowText(hwnd, TEXT("Безымянный"));
-	} // else
+	} 
 
 	return TRUE;
-} // OnCreate
+} 
 
-void OnDestroy(HWND hwnd)
-{
 
-} // OnDestroy
 
 
 
@@ -328,17 +318,17 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	case ID_OPEN: // Открыть
 	{
-		OPENFILENAME ofn = { sizeof(OPENFILENAME) };
+		OPENFILENAME openfile = { sizeof(OPENFILENAME) };
 
-		ofn.hInstance = GetWindowInstance(hwnd);
-		ofn.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
-		ofn.lpstrFile = FileName;
-		ofn.nMaxFile = _countof(FileName);
-		ofn.lpstrTitle = TEXT("Открыть");
-		ofn.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
-		ofn.lpstrDefExt = TEXT("txt");
+		openfile.hInstance = GetWindowInstance(hwnd);
+		openfile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
+		openfile.lpstrFile = FileName;
+		openfile.nMaxFile = _countof(FileName);
+		openfile.lpstrTitle = TEXT("Открыть");
+		openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
+		openfile.lpstrDefExt = TEXT("txt");
 
-		if (GetOpenFileName(&ofn) != FALSE)
+		if (GetOpenFileName(&openfile) != FALSE)
 		{
 			if (OpenFileAsync(hEdit) != FALSE) // открываем файл
 			{
@@ -362,36 +352,35 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		if (SaveFileAsync(hEdit) != FALSE) // сохраняем файл
 		{
 			break;
-		} // if
+		} 
 	case ID_SAVE_AS: // Сохранить как
 	{
-		OPENFILENAME ofn = { sizeof(OPENFILENAME) };
+		OPENFILENAME savefile = { sizeof(OPENFILENAME) };
 
-		ofn.hInstance = GetWindowInstance(hwnd);
-		ofn.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
-		ofn.lpstrFile = FileName;
-		ofn.nMaxFile = _countof(FileName);
-		ofn.lpstrTitle = TEXT("Сохранить как");
-		ofn.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_CREATEPROMPT | OFN_OVERWRITEPROMPT;
-		ofn.lpstrDefExt = TEXT("txt");
+		savefile.hInstance = GetWindowInstance(hwnd);
+		savefile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
+		savefile.lpstrFile = FileName;
+		savefile.nMaxFile = _countof(FileName);
+		savefile.lpstrTitle = TEXT("Сохранить как");
+		savefile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_CREATEPROMPT | OFN_OVERWRITEPROMPT;
+		savefile.lpstrDefExt = TEXT("txt");
 
-		if (GetSaveFileName(&ofn) != FALSE)
+		if (GetSaveFileName(&savefile) != FALSE)
 		{
 			if (SaveFileAsync(hEdit, TRUE) != FALSE) // пересохраняем файл
-			{
-				// задаём заголовок главного окна
-				SetWindowText(hwnd, FileName);
-			} // if
+			{		
+				SetWindowText(hwnd, FileName);// задаём заголовок главного окна
+			}
 			else
 			{
 				MessageBox(NULL, TEXT("Не удалось сохранить текстовый файл."), NULL, MB_OK | MB_ICONERROR);
-			} // else
-		} // if
+			}
+		} 
 	}
 	break;
 
-	case ID_EXIT: // Выход
-		OnClose(hwnd);
+	case ID_EXIT:
+		SendMessage(hwnd, WM_CLOSE, 0, 0);
 		break;
 
 	case ID_UNDO: // Отменить
@@ -405,8 +394,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	case ID_SELECT_ALL: // Выделить все
 	{
-		// выделяем текст в поле ввода
-		Edit_SetSel(hEdit, 0, -1);
+		Edit_SetSel(hEdit, 0, -1);// выделяем текст в поле ввода
 		// передаём фокус клавиатуы в поле ввода
 		SetFocus(hEdit);
 	}
@@ -414,20 +402,20 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	case ID_FONT_EDIT: // Шрифт
 	{
-		CHOOSEFONT cf = { sizeof(CHOOSEFONT) };
+		CHOOSEFONT choosef = { sizeof(CHOOSEFONT) };
 
-		cf.hInstance = GetWindowInstance(hwnd); // указываем дескриптор экземпляра приложения
-		cf.hwndOwner = hwnd; // указываем дескриптор окна владельца
+		choosef.hInstance = GetWindowInstance(hwnd); // указываем дескриптор экземпляра приложения
+		choosef.hwndOwner = hwnd; // указываем дескриптор окна владельца
 
-		LOGFONT lf;
+		LOGFONT lf; //для определения логического шрифта
 		ZeroMemory(&lf, sizeof(lf));
 
-		cf.lpLogFont = &lf; // указываем структуру, которая будет использоваться для создания шрифта
+		choosef.lpLogFont = &lf; // указываем структуру, которая будет использоваться для создания шрифта
 
-		if (ChooseFont(&cf) != FALSE)
+		if (ChooseFont(&choosef) != FALSE)
 		{
 			// создаём новый шрифт
-			HFONT hNewFont = CreateFontIndirect(cf.lpLogFont);
+			HFONT hNewFont = CreateFontIndirect(choosef.lpLogFont);
 
 			if (NULL != hNewFont)
 			{
@@ -438,12 +426,23 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				SendDlgItemMessage(hwnd, IDC_EDIT_TEXT, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);
 
 				// копируем параметры шрифта
-				CopyMemory(&logFont, cf.lpLogFont, sizeof(LOGFONT));
-			} // if
-		} // if
+				CopyMemory(&logFont, choosef.lpLogFont, sizeof(LOGFONT));
+			} 
+		} 
 	}
 	break;
-	} // switch
+	case IDM_EDCUT:
+		SendMessage(hEdit, WM_CUT, 0, 0);
+		break;
+
+	case IDM_EDCOPY:
+		SendMessage(hEdit, WM_COPY, 0, 0);
+		break;
+
+	case IDM_EDPASTE:
+		SendMessage(hEdit, WM_PASTE, 0, 0);
+		break;
+	} 
 } // OnCommand
 
 void LoadProfile(LPCTSTR lpFileName)
