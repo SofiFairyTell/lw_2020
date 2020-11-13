@@ -70,7 +70,7 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 	{
 		// выполняем операцию с файлом/каталогом
 		bRet = lpFunc(lpszFileName, &fad, (LPVOID)lpTargetDirectory);
-	} // if
+	} 
 
 	return bRet;
 } 
@@ -95,7 +95,6 @@ BOOL __stdcall FileCopy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA 
 
 		return Ret;
 	} 
-
 	return CopyFile(lpszFileName, NewFileName, FALSE);
 } 
 
@@ -107,7 +106,6 @@ BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR lpszDirName, LPSEARCHFUNC lpSearch
 {
 	
 	WIN32_FIND_DATA  fd;
-
 	TCHAR FileName[MAX_PATH];
 
 	//path for search

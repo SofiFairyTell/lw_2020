@@ -16,10 +16,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 /*Обработчики сообщений WM_CREATE WM_DESTROY WM_SIZE WM_COMMAND */
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
-void OnDestroy(HWND hwnd);
-void OnSize(HWND hwnd, UINT state, int cx, int cy);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
-void OnClose(HWND hwnd);
 
 /*Работа с файлами инициализации*/
 void LoadProfile(LPCTSTR lpFileName);//загрузка параметров
@@ -89,22 +86,22 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 	
-	TCHAR szIniFileName[MAX_PATH];
+	TCHAR InitFN[MAX_PATH];//имя файла инициализации
 
 	{
-		GetModuleFileName(NULL, szIniFileName, MAX_PATH);
+		GetModuleFileName(NULL, InitFN, MAX_PATH);
 
-		LPTSTR str = _tcsrchr(szIniFileName, TEXT('.'));
+		LPTSTR str = _tcsrchr(InitFN, TEXT('.'));
 		if (NULL != str) str[0] = TEXT('\0');
 
-		StringCchCat(szIniFileName, MAX_PATH, TEXT(".ini"));
+		StringCchCat(InitFN, MAX_PATH, TEXT(".ini"));
 	}
 
 	// загружаем параметры приложения из файла инициализации
-	LoadProfile(szIniFileName);
+	LoadProfile(InitFN);
 	   	  
 	MSG  msg;
-	BOOL bRet;
+	BOOL Ret;
 
 	for (;;)
 	{
@@ -115,13 +112,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 		} 
 
 		// извлекаем сообщение из очереди
-		bRet = GetMessage(&msg, NULL, 0, 0);
-
-		if (bRet == -1)
-		{
-			/* обработка ошибки и возможно выход из цикла */
-		} // if
-		else if (FALSE == bRet)
+		Ret = GetMessage(&msg, NULL, 0, 0);
+		if ( Ret == FALSE )
 		{
 			break; // получено WM_QUIT, выход из цикла
 		} 
@@ -131,9 +123,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 			DispatchMessage(&msg);
 		} 
 	} 
-
-	// сохраняем параметры приложения в файл инициализации
-	SaveProfile(szIniFileName);
+	SaveProfile(InitFN);//сохранение параметров
  
 	return (int)msg.wParam;
 }
@@ -148,8 +138,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	case WM_SIZE:
 	{
 			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
-			// изменяем размеры поля ввода
-			MoveWindow(hwndCtl, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+			MoveWindow(hwndCtl, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE); // изменяем размеры поля ввода
 	}
 
 		break;
@@ -180,19 +169,6 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	} 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 } 
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -254,7 +230,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
 	// создаёи поле ввода для редактирования текста
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL |WS_BORDER| ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT| ES_WANTRETURN;
-	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 0, 0, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
+	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 600, 600, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
 	
 	// задаем ограничение на размер текста
 	Edit_LimitText(hwndCtl, (DWORD)-1);
@@ -276,10 +252,8 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	} 
 	else
 	{
-		// очищаем имя редактируемого текстового файла
-		FileName[0] = _T('\0');
-		// задаём заголовок главного окна
-		SetWindowText(hwnd, TEXT("Безымянный"));
+		FileName[0] = _T('\0');// очищаем имя редактируемого текстового файла	
+		SetWindowText(hwnd, TEXT("Безымянный"));// задаём заголовок главного окна
 	} 
 
 	return TRUE;
@@ -300,18 +274,13 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 		if (INVALID_HANDLE_VALUE != hFile)
 		{
-			// ожидаем завершения операции ввода/вывода
-			FinishIo(&_oWrite);
-			// закрываем дескриптор файла
+			
+			FinishIo(&_oWrite);// ожидаем завершения операции ввода/вывода
 			CloseHandle(hFile), hFile = INVALID_HANDLE_VALUE;
-		} // if
+		} 	
+		Edit_SetText(hEdit, NULL);// удаляем текст из поля ввода
 
-		// удаляем текст из поля ввода
-		Edit_SetText(hEdit, NULL);
-
-		// очищаем имя редактируемого текстового файла
 		FileName[0] = _T('\0');
-		// задаём заголовок главного окна
 		SetWindowText(hwnd, TEXT("Безымянный"));
 	}
 	break;
@@ -331,20 +300,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		if (GetOpenFileName(&openfile) != FALSE)
 		{
 			if (OpenFileAsync(hEdit) != FALSE) // открываем файл
-			{
-				// задаём заголовок главного окна
-				SetWindowText(hwnd, FileName);
-			} // if
+			{		
+				SetWindowText(hwnd, FileName);// задаём заголовок главного окна
+			} 
 			else
 			{
 				MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
-
-				// очищаем имя редактируемого текстового файла
 				FileName[0] = _T('\0');
-				// задаём заголовок главного окна
 				SetWindowText(hwnd, TEXT("Безымянный"));
-			} // else
-		} // if
+			} 
+		}
 	}
 	break;
 
@@ -385,18 +350,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	case ID_UNDO: // Отменить
 	{
-		// отменяем последне изменения в поле ввода
-		Edit_Undo(hEdit);
-		// передаём фокус клавиатуы в поле ввода
-		SetFocus(hEdit);
+		
+		Edit_Undo(hEdit);// отменяем последне изменения в поле ввода	
+		SetFocus(hEdit);// передаём фокус клавиатуы в поле ввода
 	}
 	break;
 
 	case ID_SELECT_ALL: // Выделить все
 	{
 		Edit_SetSel(hEdit, 0, -1);// выделяем текст в поле ввода
-		// передаём фокус клавиатуы в поле ввода
-		SetFocus(hEdit);
+		SetFocus(hEdit);// передаём фокус клавиатуы в поле ввода
 	}
 	break;
 
@@ -412,21 +375,18 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		choosef.lpLogFont = &lf; // указываем структуру, которая будет использоваться для создания шрифта
 
-		if (ChooseFont(&choosef) != FALSE)
+		if (ChooseFont(&choosef) != FALSE) //открытие диалогового окна для выбора шрифта
 		{
 			// создаём новый шрифт
-			HFONT hNewFont = CreateFontIndirect(choosef.lpLogFont);
+			HFONT NewFont = CreateFontIndirect(choosef.lpLogFont);
 
-			if (NULL != hNewFont)
+			if (NULL != NewFont)
 			{
 				// удаляем созданный ранее шрифт
 				if (NULL != hFont) DeleteObject(hFont);
-				// устанавливаем шрифт для поля ввода
-				hFont = hNewFont;
-				SendDlgItemMessage(hwnd, IDC_EDIT_TEXT, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);
-
-				// копируем параметры шрифта
-				CopyMemory(&logFont, choosef.lpLogFont, sizeof(LOGFONT));
+				hFont = NewFont;// устанавливаем шрифт для поля ввода
+				SendDlgItemMessage(hwnd, IDC_EDIT_TEXT, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);			
+				CopyMemory(&logFont, choosef.lpLogFont, sizeof(LOGFONT));// копируем параметры шрифта
 			} 
 		} 
 	}
@@ -542,6 +502,7 @@ void SaveProfile(LPCTSTR lpFileName)
 	WritePrivateProfileString(TEXT("Font"), TEXT("lfPitchAndFamily"), szString, lpFileName);
 
 	WritePrivateProfileString(TEXT("Font"), TEXT("lfFaceName"), logFont.lfFaceName, lpFileName);
+
 } // SaveProfile
 
 BOOL OpenFileAsync(HWND hwndCtl)
