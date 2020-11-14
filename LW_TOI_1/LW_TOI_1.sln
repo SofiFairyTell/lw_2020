@@ -7,7 +7,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LW_TOI_1", "LW_TOI_1.vcxpro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stemmerporthersearch", "..\stemmerporthersearch\stemmerporthersearch\stemmerporthersearch.csproj", "{BB58191C-A52C-4239-92AE-337B462442DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "..\ConsoleApp1\ConsoleApp1.csproj", "{82BCC9DF-386F-4A10-B3A3-A8B718CF598A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "invertsearch", "..\ConsoleApp1\invertsearch.csproj", "{82BCC9DF-386F-4A10-B3A3-A8B718CF598A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kmeans", "kmeans\kmeans.vcxproj", "{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,16 @@ Global
 		{82BCC9DF-386F-4A10-B3A3-A8B718CF598A}.Release|x64.Build.0 = Release|Any CPU
 		{82BCC9DF-386F-4A10-B3A3-A8B718CF598A}.Release|x86.ActiveCfg = Release|Any CPU
 		{82BCC9DF-386F-4A10-B3A3-A8B718CF598A}.Release|x86.Build.0 = Release|Any CPU
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Debug|x64.ActiveCfg = Debug|x64
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Debug|x64.Build.0 = Debug|x64
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Debug|x86.ActiveCfg = Debug|Win32
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Debug|x86.Build.0 = Debug|Win32
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Release|Any CPU.ActiveCfg = Release|Win32
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Release|x64.ActiveCfg = Release|x64
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Release|x64.Build.0 = Release|x64
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Release|x86.ActiveCfg = Release|Win32
+		{48FDA4E8-009E-407D-8044-EB2C07AC2E9E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace TOI4
+namespace invertindexsearch
 {
     class Library
     {
@@ -55,12 +55,13 @@ namespace TOI4
                     flag[i] = 0;
                 string text = "";
                 string[] textword;
-                text = File.ReadAllText(String.Concat(l.path, l.name));
+                text = File.ReadAllText(String.Concat(l.path, l.name));//чтение текста из документа
                 textword = text.Split(' ');
                 for (i = 0; i < textword.Length; i++)
                 {
                     for (int j = 0; j < requestword.Length; j++)
                     {
+                        /*сравнение текста из поискового запроса с найденным текстом документа*/
                         if (String.Compare(textword[i], requestword[j]) == 0)
                         {
                             Wsingle++;
@@ -108,18 +109,23 @@ namespace TOI4
 
         static void Main(string[] args)
         {
-            string path = @"C:\Users\Risha\Desktop\1\";
+            char ch;
+            string path = @"C:\test\libr\";
             string name = ".txt";
             List<Library> libraries = new List<Library>();
             for (int i = 0; i < 5; i++)
             {
                 libraries.Add(new Library(String.Concat(i + 1, name), path));
             }
-            Console.WriteLine("Введите запрос");
-            string request = Console.ReadLine();
-            Find(ref libraries, request);
-            Ranging(libraries);
-            Console.ReadKey();
+            do
+            {
+                Console.WriteLine("Введите запрос");
+                string request = Console.ReadLine();
+                Find(ref libraries, request);
+                Ranging(libraries);
+                ch = Console.ReadKey().KeyChar;
+            } while (ch != 8);
+                    
         }
     }
 }
