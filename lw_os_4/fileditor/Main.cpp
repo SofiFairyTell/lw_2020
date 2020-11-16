@@ -2,7 +2,7 @@
 #include <WindowsX.h>
 #include <tchar.h>
 #include <strsafe.h>
-
+#include <richedit.h>
 #include "resource.h"
 
 
@@ -41,12 +41,14 @@ BOOL TryFinishIo(LPOVERLAPPED lpOverlapped);
 void OnIdle(HWND hwnd);
 
 /*Переменные*/
-POINT wndPos; // положение окна
-SIZE wndSize; // размер окна
+POINT WindowPosition; // положение окна
+SIZE WindowSize; // размер окна
 
 TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 
+CHARFORMAT cf;//параметры символов
+PARAFORMAT pf;//параметры абзацев
 LOGFONT logFont; // параметры шрифта
 HFONT hFont = NULL; // дескриптор шрифта
 
@@ -55,7 +57,11 @@ OVERLAPPED _oRead = { 0 }, _oWrite = { 0 };
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования								
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования	
+	HINSTANCE relib = LoadLibrary(TEXT("riched32.dll"));    //load the dll don't forget this   
+											//and don't forget to free it (see wm_destroy) 
+	if (relib == NULL)
+		MessageBox(NULL, TEXT("Failed to load riched32.dll!"), TEXT("Error"), MB_ICONEXCLAMATION);
 	HACCEL hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 	
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
@@ -134,7 +140,10 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	{
 		HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
 		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
+	
+	case WM_KEYDOWN:
 
+			break;
 	case WM_SIZE:
 	{
 			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
@@ -158,11 +167,11 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		RECT rect;
 		GetWindowRect(hwnd, &rect);
 
-		wndPos.x = rect.left;
-		wndPos.y = rect.top;
+		WindowPosition.x = rect.left;
+		WindowPosition.y = rect.top;
 
-		wndSize.cx = rect.right - rect.left;
-		wndSize.cy = rect.bottom - rect.top;
+		WindowSize.cx = rect.right - rect.left;
+		WindowSize.cy = rect.bottom - rect.top;
 
 		DestroyWindow(hwnd); // уничтожаем окно
 		break;
@@ -229,11 +238,28 @@ void OnIdle(HWND hwnd)
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
 	// создаёи поле ввода для редактирования текста
-	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL |WS_BORDER| ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT| ES_WANTRETURN;
-	HWND hwndCtl = CreateWindowEx(0, TEXT("Edit"), TEXT(""), dwStyle, 0, 0, 600, 600, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
+	DWORD Styles = WS_VISIBLE | WS_CHILD | WS_BORDER | WS_HSCROLL | WS_VSCROLL | ES_NOHIDESEL | ES_AUTOVSCROLL | ES_MULTILINE | ES_SAVESEL| ES_SUNKEN;
+
+	// Создаем орган управления Rich Edit
+	HWND hwndCtl = CreateWindowEx(0, TEXT( "RICHEDIT"), TEXT(""), Styles, 0, 0, 100, 100, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
 	
+	if (hwndCtl == NULL)
+		return FALSE;
+	
+	// Передаем фокус ввода органу управления Rich Edit
+	SetFocus(hwndCtl);
+
+
 	// задаем ограничение на размер текста
-	Edit_LimitText(hwndCtl, (DWORD)-1);
+	//Edit_LimitText(hwndCtl, (DWORD)-1); //If it will be return RichEdit will be block for edit and entering text
+
+	logFont.lfCharSet = DEFAULT_CHARSET; //значение по умолчанию
+	logFont.lfPitchAndFamily = DEFAULT_PITCH; //значения по умолчанию
+	wcscpy_s(logFont.lfFaceName, L"Times New Roman"); //копируем в строку название шрифта
+	logFont.lfHeight = 20; //высота
+	logFont.lfWidth = 10; //ширина
+	logFont.lfWeight = 40; //толщина
+	logFont.lfEscapement = 0; //шрифт без поворота
 
 	// создаём шрифт
 	hFont = CreateFontIndirect(&logFont);
@@ -255,7 +281,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 		FileName[0] = _T('\0');// очищаем имя редактируемого текстового файла	
 		SetWindowText(hwnd, TEXT("Безымянный"));// задаём заголовок главного окна
 	} 
-
+	
 	return TRUE;
 } 
 
@@ -267,6 +293,9 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	static HWND hEdit = GetDlgItem(hwnd, IDC_EDIT_TEXT);
+	CHOOSEFONT choosef = { sizeof(CHOOSEFONT) };
+	HDC hDC;
+
 
 	switch (id)
 	{
@@ -362,36 +391,134 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		SetFocus(hEdit);// передаём фокус клавиатуы в поле ввода
 	}
 	break;
+#pragma region Font
+
+	case ID_BOLD_FONT:
+	{
+		cf.cbSize = sizeof(cf);
+
+		// Определяем формат символов
+		SendMessage(hEdit, EM_GETCHARFORMAT, TRUE, (LPARAM)&cf);
+
+		// Изменяем бит поля dwEffects, с помощью которого
+		// можно выделить символы как bold (жирное начертание)
+		cf.dwMask = CFM_BOLD;
+
+		// Инвертируем бит, определяющий жирное начертание
+		cf.dwEffects ^= CFE_BOLD;
+
+		// Изменяем формат символов
+		SendMessage(hEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
+		break;
+	}
+
+	// Устанавливаем или отменяем наклонное
+	// начертание символов
+	case ID_ITALIC_FONT:
+	{
+		cf.cbSize = sizeof(cf);
+		SendMessage(hEdit, EM_GETCHARFORMAT,
+			TRUE, (LPARAM)&cf);
+
+		cf.dwMask = CFM_ITALIC;
+		cf.dwEffects ^= CFE_ITALIC;
+		SendMessage(hEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
+		break;
+	}
+
 
 	case ID_FONT_EDIT: // Шрифт
 	{
-		CHOOSEFONT choosef = { sizeof(CHOOSEFONT) };
+		// Определяем текущий формат символов
+		SendMessage(hEdit, EM_GETCHARFORMAT, TRUE, (LPARAM)&cf);
+	
+		memset(&choosef, 0, sizeof(choosef));
+		memset(&logFont, 0, sizeof(logFont));
 
 		choosef.hInstance = GetWindowInstance(hwnd); // указываем дескриптор экземпляра приложения
 		choosef.hwndOwner = hwnd; // указываем дескриптор окна владельца
+			   		 
+		// Если было задано выделение наклоном или жирным
+			// шрифтом,подбираем шрифт с соответствующими атрибутами
+		logFont.lfItalic = (BOOL)(cf.dwEffects & CFE_ITALIC);
+		logFont.lfUnderline = (BOOL)(cf.dwEffects & CFE_UNDERLINE);
 
-		LOGFONT lf; //для определения логического шрифта
-		ZeroMemory(&lf, sizeof(lf));
+		// Преобразуем высоту из TWIPS-ов в пикселы.
+		// Устанавливаем отрицательный знак, чтобы 
+		// выполнялось преобразование и использовалось
+		// абсолютное значение высоты символов
+		logFont.lfHeight = -cf.yHeight / 20;
 
-		choosef.lpLogFont = &lf; // указываем структуру, которая будет использоваться для создания шрифта
+		// Набор символов, принятый по умолчанию
+		logFont.lfCharSet = ANSI_CHARSET;
 
-		if (ChooseFont(&choosef) != FALSE) //открытие диалогового окна для выбора шрифта
+		// Качество символов, принятое по умолчанию
+		logFont.lfQuality = DEFAULT_QUALITY;
+
+		// Выбираем семейство шрифтов
+		logFont.lfPitchAndFamily = cf.bPitchAndFamily;
+
+		// Название начертания шрифта
+		lstrcpy(logFont.lfFaceName, cf.szFaceName);
+
+		// Устанавливаем вес шрифта в зависимости от того,
+		// было использовано выделение жирным шрифтом 
+		// или нет
+		if (cf.dwEffects & CFE_BOLD)
+			logFont.lfWeight = FW_BOLD;
+		else
+			logFont.lfWeight = FW_NORMAL;
+		hDC = GetDC(hwnd);
+		// Заполняем структуру для функции выбора шрифта
+		choosef.lStructSize = sizeof(choosef);
+		choosef.Flags = CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT;
+		choosef.hDC = hDC;
+		choosef.hwndOwner = hwnd;
+		choosef.lpLogFont = &logFont;
+		choosef.rgbColors = RGB(0, 0, 0);
+		choosef.nFontType = SCREEN_FONTTYPE;
+
+		// Выводим на экран диалоговую панель для
+		// выбора шрифта
+		if (ChooseFont(&choosef))
 		{
-			// создаём новый шрифт
-			HFONT NewFont = CreateFontIndirect(choosef.lpLogFont);
+			// Можно использовать все биты поля dwEffects
+			cf.dwMask = CFM_BOLD | CFM_FACE | CFM_ITALIC |
+				CFM_UNDERLINE | CFM_SIZE | CFM_OFFSET;
 
-			if (NULL != NewFont)
-			{
-				// удаляем созданный ранее шрифт
-				if (NULL != hFont) DeleteObject(hFont);
-				hFont = NewFont;// устанавливаем шрифт для поля ввода
-				SendDlgItemMessage(hwnd, IDC_EDIT_TEXT, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);			
-				CopyMemory(&logFont, choosef.lpLogFont, sizeof(LOGFONT));// копируем параметры шрифта
-			} 
-		} 
+			// Преобразование в TWIPS-ы
+			cf.yHeight = -logFont.lfHeight * 20;
+
+			// Устанавливаем поле dwEffects 
+			cf.dwEffects = 0;
+			if (logFont.lfUnderline)
+				cf.dwEffects |= CFE_UNDERLINE;
+
+			if (logFont.lfWeight == FW_BOLD)
+				cf.dwEffects |= CFE_BOLD;
+
+			if (logFont.lfItalic)
+				cf.dwEffects |= CFE_ITALIC;
+
+			// Устанавливаем семейство шрифта
+			cf.bPitchAndFamily = logFont.lfPitchAndFamily;
+
+			// Устанавливаем название начертания шрифта
+			lstrcpy(cf.szFaceName, logFont.lfFaceName);
+
+			// Изменяем шрифтовое оформление символов
+			SendMessage(hEdit, EM_SETCHARFORMAT,
+				SCF_SELECTION, (LPARAM)&cf);
+		}
+
+		// Освобождаем контекст отображения
+		ReleaseDC(hwnd, hDC);
+
 	}
 	break;
-	case IDM_EDCUT:
+
+#pragma endregion	
+case IDM_EDCUT:
 		SendMessage(hEdit, WM_CUT, 0, 0);
 		break;
 
@@ -402,41 +529,65 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	case IDM_EDPASTE:
 		SendMessage(hEdit, WM_PASTE, 0, 0);
 		break;
+
+	// Устанавливаем выравнивание параграфа по правой границе
+	// окна органа управления Rich Edit
+	case ID_FORMAT_PARAGRAPH_RIGHT:
+		{
+		pf.cbSize = sizeof(pf);
+		pf.dwMask = PFM_ALIGNMENT;
+		pf.wAlignment = PFA_RIGHT;
+		SendMessage(hEdit, EM_SETPARAFORMAT, 0, (LPARAM)&pf);
+		break;
+		}
+
+	// Выполняем центровку текущего параграфа
+	case ID_FORMAT_PARAGRAPH_CENTER:
+	{
+		pf.cbSize = sizeof(pf);
+		pf.dwMask = PFM_ALIGNMENT;
+		pf.wAlignment = PFA_CENTER;
+		SendMessage(hEdit, EM_SETPARAFORMAT, 0, (LPARAM)&pf);
+
+		break;
+	}
+	// Устанавливаем выравнивание параграфа по левой границе
+// окна органа управления Rich Edit
+	case ID_FORMAT_PARAGRAPH_LEFT:
+		{
+			pf.cbSize = sizeof(pf);
+			pf.dwMask = PFM_ALIGNMENT;
+			pf.wAlignment = PFA_LEFT;
+
+			// Изменяем тип выравнивания текущего параграфа
+			SendMessage(hEdit, EM_SETPARAFORMAT, 0, (LPARAM)&pf);
+			break;
+		}
 	} 
+
+    
+
 } // OnCommand
 
 void LoadProfile(LPCTSTR lpFileName)
 {
 	// загружаем положение и размер окна
 
-	wndPos.x = GetPrivateProfileInt(TEXT("Window"), TEXT("X"), CW_USEDEFAULT, lpFileName);
-	wndPos.y = GetPrivateProfileInt(TEXT("Window"), TEXT("Y"), 0, lpFileName);
+	WindowPosition.x = GetPrivateProfileInt(TEXT("Window"), TEXT("X"), CW_USEDEFAULT, lpFileName);
+	WindowPosition.y = GetPrivateProfileInt(TEXT("Window"), TEXT("Y"), 0, lpFileName);
 
-	wndSize.cx = GetPrivateProfileInt(TEXT("Window"), TEXT("Width"), CW_USEDEFAULT, lpFileName);
-	wndSize.cy = GetPrivateProfileInt(TEXT("Window"), TEXT("Height"), 600, lpFileName);
+	WindowSize.cx = GetPrivateProfileInt(TEXT("Window"), TEXT("Width"), CW_USEDEFAULT, lpFileName);
+	WindowSize.cy = GetPrivateProfileInt(TEXT("Window"), TEXT("Height"), 600, lpFileName);
+	
+	//загрузка типа выравнивания
+	pf.wAlignment = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName);
 
 	// загружаем имя последнего редактируемого текстового файла
 
 	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, FileName, MAX_PATH, lpFileName);
 
-	// загружаем параметры шрифта
 
-	logFont.lfHeight = (LONG)GetPrivateProfileInt(TEXT("Font"), TEXT("lfHeight"), 0, lpFileName);
-	logFont.lfWidth = (LONG)GetPrivateProfileInt(TEXT("Font"), TEXT("lfWidth"), 0, lpFileName);
-	logFont.lfEscapement = (LONG)GetPrivateProfileInt(TEXT("Font"), TEXT("lfEscapement"), 0, lpFileName);
-	logFont.lfOrientation = (LONG)GetPrivateProfileInt(TEXT("Font"), TEXT("lfOrientation"), 0, lpFileName);
-	logFont.lfWeight = (LONG)GetPrivateProfileInt(TEXT("Font"), TEXT("lfWeight"), 0, lpFileName);
-	logFont.lfItalic = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfItalic"), 0, lpFileName);
-	logFont.lfUnderline = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfUnderline"), 0, lpFileName);
-	logFont.lfStrikeOut = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfStrikeOut"), 0, lpFileName);
-	logFont.lfCharSet = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfCharSet"), 0, lpFileName);
-	logFont.lfOutPrecision = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfOutPrecision"), 0, lpFileName);
-	logFont.lfClipPrecision = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfClipPrecision"), 0, lpFileName);
-	logFont.lfQuality = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfQuality"), 0, lpFileName);
-	logFont.lfPitchAndFamily = (BYTE)GetPrivateProfileInt(TEXT("Font"), TEXT("lfPitchAndFamily"), 0, lpFileName);
-
-	GetPrivateProfileString(TEXT("Font"), TEXT("lfFaceName"), NULL, logFont.lfFaceName, LF_FACESIZE, lpFileName);
-} // LoadProfile
+} 
 
 void SaveProfile(LPCTSTR lpFileName)
 {
@@ -444,66 +595,28 @@ void SaveProfile(LPCTSTR lpFileName)
 
 	// сохраняем положение и размер окна
 
-	StringCchPrintf(szString, 10, TEXT("%d"), wndPos.x);
+	StringCchPrintf(szString, 10, TEXT("%d"), WindowPosition.x);
 	WritePrivateProfileString(TEXT("Window"), TEXT("X"), szString, lpFileName);
 
-	StringCchPrintf(szString, 10, TEXT("%d"), wndPos.y);
+	StringCchPrintf(szString, 10, TEXT("%d"), WindowPosition.y);
 	WritePrivateProfileString(TEXT("Window"), TEXT("Y"), szString, lpFileName);
 
-	StringCchPrintf(szString, 10, TEXT("%d"), wndSize.cx);
+	StringCchPrintf(szString, 10, TEXT("%d"), WindowSize.cx);
 	WritePrivateProfileString(TEXT("Window"), TEXT("Width"), szString, lpFileName);
 
-	StringCchPrintf(szString, 10, TEXT("%d"), wndSize.cy);
+	StringCchPrintf(szString, 10, TEXT("%d"), WindowSize.cy);
 	WritePrivateProfileString(TEXT("Window"), TEXT("Height"), szString, lpFileName);
+	
+	StringCchPrintf(szString, 10, TEXT("%d"), pf.wAlignment);
+	WritePrivateProfileString(TEXT("Paraformat"), TEXT("wAlignment"), szString, lpFileName);
 
 	// сохраняем имя последнего редактируемого текстового файла
 
 	WritePrivateProfileString(TEXT("File"), TEXT("Filename"), FileName, lpFileName);
 
-	// сохраняем параметры шрифта
+	
 
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfHeight);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfHeight"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfWidth);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfWidth"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfEscapement);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfEscapement"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfOrientation);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfOrientation"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfWeight);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfWeight"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfItalic);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfItalic"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfUnderline);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfUnderline"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfStrikeOut);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfStrikeOut"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfCharSet);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfCharSet"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfOutPrecision);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfOutPrecision"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfClipPrecision);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfClipPrecision"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfQuality);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfQuality"), szString, lpFileName);
-
-	StringCchPrintf(szString, 10, TEXT("%d"), logFont.lfPitchAndFamily);
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfPitchAndFamily"), szString, lpFileName);
-
-	WritePrivateProfileString(TEXT("Font"), TEXT("lfFaceName"), logFont.lfFaceName, lpFileName);
-
-} // SaveProfile
+} 
 
 BOOL OpenFileAsync(HWND hwndCtl)
 {
