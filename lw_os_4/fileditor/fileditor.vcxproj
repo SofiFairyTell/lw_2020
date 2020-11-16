@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Richedit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
