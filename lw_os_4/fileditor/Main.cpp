@@ -398,133 +398,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		SetFocus(hEdit);// передаём фокус клавиатуы в поле ввода
 	}
 	break;
-#pragma region Font
 
-	case ID_BOLD_FONT:
-	{
-		cf.cbSize = sizeof(cf);
-
-		// Определяем формат символов
-		SendMessage(hEdit, EM_GETCHARFORMAT, TRUE, (LPARAM)&cf);
-
-		// Изменяем бит поля dwEffects, с помощью которого
-		// можно выделить символы как bold (жирное начертание)
-		cf.dwMask = CFM_BOLD;
-
-		// Инвертируем бит, определяющий жирное начертание
-		cf.dwEffects ^= CFE_BOLD;
-
-		// Изменяем формат символов
-		SendMessage(hEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
-		break;
-	}
-
-	// Устанавливаем или отменяем наклонное
-	// начертание символов
-	case ID_ITALIC_FONT:
-	{
-		cf.cbSize = sizeof(cf);
-		SendMessage(hEdit, EM_GETCHARFORMAT,
-			TRUE, (LPARAM)&cf);
-
-		cf.dwMask = CFM_ITALIC;
-		cf.dwEffects ^= CFE_ITALIC;
-		SendMessage(hEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
-		break;
-	}
-
-
-	case ID_FONT_EDIT: // Шрифт
-	{
-		// Определяем текущий формат символов
-		SendMessage(hEdit, EM_GETCHARFORMAT, TRUE, (LPARAM)&cf);
 	
-		memset(&choosef, 0, sizeof(choosef));
-		memset(&logFont, 0, sizeof(logFont));
-
-		choosef.hInstance = GetWindowInstance(hwnd); // указываем дескриптор экземпляра приложения
-		choosef.hwndOwner = hwnd; // указываем дескриптор окна владельца
-			   		 
-		// Если было задано выделение наклоном или жирным
-			// шрифтом,подбираем шрифт с соответствующими атрибутами
-		logFont.lfItalic = (BOOL)(cf.dwEffects & CFE_ITALIC);
-		logFont.lfUnderline = (BOOL)(cf.dwEffects & CFE_UNDERLINE);
-
-		// Преобразуем высоту из TWIPS-ов в пикселы.
-		// Устанавливаем отрицательный знак, чтобы 
-		// выполнялось преобразование и использовалось
-		// абсолютное значение высоты символов
-		logFont.lfHeight = -cf.yHeight / 20;
-
-		// Набор символов, принятый по умолчанию
-		logFont.lfCharSet = ANSI_CHARSET;
-
-		// Качество символов, принятое по умолчанию
-		logFont.lfQuality = DEFAULT_QUALITY;
-
-		// Выбираем семейство шрифтов
-		logFont.lfPitchAndFamily = cf.bPitchAndFamily;
-
-		// Название начертания шрифта
-		lstrcpy(logFont.lfFaceName, cf.szFaceName);
-
-		// Устанавливаем вес шрифта в зависимости от того,
-		// было использовано выделение жирным шрифтом 
-		// или нет
-		if (cf.dwEffects & CFE_BOLD)
-			logFont.lfWeight = FW_BOLD;
-		else
-			logFont.lfWeight = FW_NORMAL;
-		hDC = GetDC(hwnd);
-		// Заполняем структуру для функции выбора шрифта
-		choosef.lStructSize = sizeof(choosef);
-		choosef.Flags = CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT;
-		choosef.hDC = hDC;
-		choosef.hwndOwner = hwnd;
-		choosef.lpLogFont = &logFont;
-		choosef.rgbColors = RGB(0, 0, 0);
-		choosef.nFontType = SCREEN_FONTTYPE;
-
-		// Выводим на экран диалоговую панель для
-		// выбора шрифта
-		if (ChooseFont(&choosef))
-		{
-			// Можно использовать все биты поля dwEffects
-			cf.dwMask = CFM_BOLD | CFM_FACE | CFM_ITALIC |
-				CFM_UNDERLINE | CFM_SIZE | CFM_OFFSET;
-
-			// Преобразование в TWIPS-ы
-			cf.yHeight = -logFont.lfHeight * 20;
-
-			// Устанавливаем поле dwEffects 
-			cf.dwEffects = 0;
-			if (logFont.lfUnderline)
-				cf.dwEffects |= CFE_UNDERLINE;
-
-			if (logFont.lfWeight == FW_BOLD)
-				cf.dwEffects |= CFE_BOLD;
-
-			if (logFont.lfItalic)
-				cf.dwEffects |= CFE_ITALIC;
-
-			// Устанавливаем семейство шрифта
-			cf.bPitchAndFamily = logFont.lfPitchAndFamily;
-
-			// Устанавливаем название начертания шрифта
-			lstrcpy(cf.szFaceName, logFont.lfFaceName);
-
-			// Изменяем шрифтовое оформление символов
-			SendMessage(hEdit, EM_SETCHARFORMAT,
-				SCF_SELECTION, (LPARAM)&cf);
-		}
-
-		// Освобождаем контекст отображения
-		ReleaseDC(hwnd, hDC);
-
-	}
-	break;
-
-#pragma endregion	
 case IDM_EDCUT:
 		SendMessage(hEdit, WM_CUT, 0, 0);
 		break;
@@ -587,8 +462,6 @@ void LoadProfile(LPCTSTR lpFileName)
 	WindowSize.cy = GetPrivateProfileInt(TEXT("Window"), TEXT("Height"), 600, lpFileName);
 	
 	//загрузка типа выравнивания
-	/*Работает*/
-
 	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName)==3)
 	{
 		pf.cbSize = sizeof(pf);
@@ -607,31 +480,6 @@ void LoadProfile(LPCTSTR lpFileName)
 		pf.dwMask = PFM_ALIGNMENT;
 		pf.wAlignment = PFA_LEFT;
 	}
-		
-
-	/*HOW DO THIS in another way????*/
-	
-	/*
-	pf.dwMask = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("dwMask"), 0, lpFileName);
-	pf.wAlignment = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName);
-	*/
-
-	/*
-	switch ((GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName)))
-	{
-		pf.cbSize = sizeof(pf);
-		pf.dwMask = PFM_ALIGNMENT;
-		case 1:
-			pf.wAlignment = PFA_LEFT;
-			break;
-		case 2:
-			pf.wAlignment = PFA_RIGHT;
-			break;
-		case 3:
-			pf.wAlignment = PFA_CENTER;
-			break;
-	}
-	*/
 	// загружаем имя последнего редактируемого текстового файла
 
 	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, FileName, MAX_PATH, lpFileName);
