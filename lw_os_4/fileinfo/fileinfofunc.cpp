@@ -3,7 +3,8 @@
 #include <tchar.h>
 #include <CommCtrl.h>
 #include <strsafe.h>
-
+#include <time.h>//для ctime
+#include <fileapi.h>
 #include "resource.h"
 
 #define IDC_EDIT_TEXT        2001
@@ -19,6 +20,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
+
+/*Перевод времени*/
+BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime);
 
 TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
@@ -182,27 +186,158 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
 			openfile.lpstrDefExt = TEXT("txt");
 
+			if (GetOpenFileName(&openfile) != FALSE)
+			{
+			HANDLE  hFile;
+			BY_HANDLE_FILE_INFORMATION  bhfi;  // информация о файле
+
+			TCHAR TimeBuffer[100], Buffer[100];
+			//ULARGE_INTEGER size = { bhfi.nFileSizeHigh,bhfi.nFileSizeLow };
+			//CalculateSize(FileName, bhfi, &size);//вычисление размера каталога
+			
+			DWORD dwSizeLow;
+			DWORD dwSizeHigh;
+
+			if (bhfi.nFileSizeHigh != NULL)
+			{
+				dwSizeLow = GetFileSize(hFile, &dwSizeHigh);
+			}
+			else
+			{
+				dwSizeLow = GetFileSize(hFile, NULL);
+			}
+
+
+			// открываем файл для чтения
+			hFile = CreateFile(
+				FileName,   // имя файла
+				0,                     // получение информации о файле
+				0,                     // монопольный доступ к файлу
+				NULL,                  // защиты нет 
+				OPEN_EXISTING,         // открываем существующий файл
+				FILE_ATTRIBUTE_NORMAL, // обычный файл
+				NULL                   // шаблона нет
+			);
+			// проверяем на успешное открытие
+			if (hFile == INVALID_HANDLE_VALUE)
+			{
+				GetLastError();
+				break;
+			}
+			// получаем информацию о файле
+			if (!GetFileInformationByHandle(hFile, &bhfi))
+			{
+				GetLastError();
+				break;
+			}
+		
+			
+			
+			
+			StringCchPrintFileSize(Buffer, _countof(Buffer), dwSizeLow);
+
+			HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
+			// добавляем новый элемент в список просмотра
+			ListView_DeleteAllItems(hwndLV);
+			LVITEM lvItem = {LVIF_TEXT | LVIF_PARAM};
+			lvItem.iItem = ListView_GetItemCount(hwndLV);
+
+			//третий параметр
+			lvItem.iItem = ListView_GetItemCount(hwndLV);
+			lvItem.pszText = (LPWSTR)(L"Время изменения:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				GetFileTimeFormat(&bhfi.ftCreationTime, TimeBuffer, _countof(TimeBuffer));//время создания
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
+			}
+
+			//второй параметр
+			lvItem.iItem = ListView_GetItemCount(hwndLV);
+			lvItem.pszText = (LPWSTR)(L"Время последнего обращения:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				GetFileTimeFormat(&bhfi.ftLastAccessTime, TimeBuffer, _countof(TimeBuffer));//время последнего обращения
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
+			}
+
+			//первый параметр
+			
+			lvItem.pszText = (LPWSTR)(L"Время создания:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				GetFileTimeFormat(&bhfi.ftLastWriteTime, TimeBuffer, _countof(TimeBuffer));//время изменения
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
+			}
+
+			//Размер
+			lvItem.pszText = (LPWSTR)(L"Размер:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, bhfi.nFileSizeHigh);
+			}
+
+			//Расположение
+
+
+
+			}
+			
+
+
+
+			/*
+
+
+			// распечатываем информацию о файле
+			cout << "File attributes: " << bhfi.dwFileAttributes << endl
+				<< "Creation time: high date: "
+				<< bhfi.ftCreationTime.dwHighDateTime << endl
+				<< "Creation time: low date: "
+				<< bhfi.ftCreationTime.dwLowDateTime << endl
+				<< "Last access time: high date: "
+				<< bhfi.ftLastAccessTime.dwHighDateTime << endl
+				<< "Last access time: low date: "
+				<< bhfi.ftLastAccessTime.dwLowDateTime << endl
+				<< "Last write time: high date: "
+				<< bhfi.ftLastWriteTime.dwHighDateTime << endl
+				<< "Last write time: low date: "
+				<< bhfi.ftLastWriteTime.dwLowDateTime << endl
+				<< "Volume serial number: " << bhfi.dwVolumeSerialNumber << endl
+				<< "File size high: " << bhfi.nFileSizeHigh << endl
+				<< "File size low: " << bhfi.nFileSizeLow << endl
+				<< "Number of links: " << bhfi.nNumberOfLinks << endl
+				<< "File index high: " << bhfi.nFileIndexHigh << endl
+				<< "File index low: " << bhfi.nFileIndexLow << endl;
+
+			// закрываем дескриптор файла */
+			CloseHandle(hFile);
 
 
 
 
 
 
+/*
 
 
-
-
-			/*Работает, не трогать*/
+			/*Работает, не трогать
 			if (GetOpenFileName(&openfile) != FALSE)
 				{						
 					HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
 					// добавляем новый элемент в список просмотра
-					ListView_DeleteAllItems(hwndLV);						
+					ListView_DeleteAllItems(hwndLV);	
+					
+					//
 					LVITEM lvItem = { LVIF_TEXT | LVIF_PARAM };
 					lvItem.iItem = ListView_GetItemCount(hwndLV);
 					lvItem.pszText = (LPTSTR)"Атрибут 1";
 					// добавляем новый элемент в список просмотра
 					lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+						
 					if ((lvItem.iItem != -1))
 					{
 						ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
@@ -213,7 +348,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 					MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
 					FileName[0] = _T('\0');
 				}
-			}
+*/			
+}
 	break;
 
 	case ID_EXIT:
@@ -222,3 +358,57 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	}
 } 
+BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime)
+{
+	SYSTEMTIME st;
+
+	// преобразуем дату и время из FILETIME в SYSTEMTIME
+	BOOL bRet = FileTimeToSystemTime(lpFileTime, &st);
+
+	// приведем дату и время к текущему часовому поясу
+	if (FALSE != bRet)
+		bRet = SystemTimeToTzSpecificLocalTime(NULL, &st, &st);
+
+	if (FALSE != bRet)
+	{
+		// скопируем дату в результирующую строку
+		GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, lpszFileTime, cchFileTime);
+
+		// добавим время в результирующую строку
+
+		StringCchCat(lpszFileTime, cchFileTime, TEXT(", "));
+		DWORD len = _tcslen(lpszFileTime);
+
+		if (len < cchFileTime)
+			GetTimeFormat(LOCALE_USER_DEFAULT, TIME_FORCE24HOURFORMAT, &st, NULL, lpszFileTime + len, cchFileTime - len);
+	} // if
+
+	return bRet;
+} // GetFileTimeFormat
+
+void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
+{
+	if (size.QuadPart >= 0x40000000ULL)
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f ГБ"), (size.QuadPart / (float)0x40000000ULL));
+	} // if
+	else if (size.QuadPart >= 0x100000ULL)
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f МБ"), (size.QuadPart / (float)0x100000ULL));
+	} // if
+	else if (size.QuadPart >= 0x0400ULL)
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f КБ"), (size.QuadPart / (float)0x0400ULL));
+	} // if
+	else
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%u байт"), size.LowPart);
+	} // else
+
+	size_t len = _tcslen(lpszBuffer);
+
+	if (len < cch)
+	{
+		StringCchPrintf((lpszBuffer + len), (cch - len), TEXT(" (%llu байт)"), size.QuadPart);
+	} // if
+} // StringCchPrintFileSize
