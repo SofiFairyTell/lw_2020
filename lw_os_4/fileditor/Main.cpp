@@ -461,30 +461,25 @@ void LoadProfile(LPCTSTR lpFileName)
 	WindowSize.cx = GetPrivateProfileInt(TEXT("Window"), TEXT("Width"), CW_USEDEFAULT, lpFileName);
 	WindowSize.cy = GetPrivateProfileInt(TEXT("Window"), TEXT("Height"), 600, lpFileName);
 	
+	/*Dont init without this items*/
+	pf.cbSize = sizeof(pf);
+	pf.dwMask = PFM_ALIGNMENT;
+
 	//загрузка типа выравнивания
 	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName)==3)
 	{
-		pf.cbSize = sizeof(pf);
-		pf.dwMask = PFM_ALIGNMENT;
 		pf.wAlignment = PFA_CENTER;
 	}
 	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName) == 2)
 	{
-			pf.cbSize = sizeof(pf);
-			pf.dwMask = PFM_ALIGNMENT;
 			pf.wAlignment = PFA_RIGHT;
 	}
 	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName) == 1)
 	{
-		pf.cbSize = sizeof(pf);
-		pf.dwMask = PFM_ALIGNMENT;
 		pf.wAlignment = PFA_LEFT;
 	}
 	// загружаем имя последнего редактируемого текстового файла
-
 	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, FileName, MAX_PATH, lpFileName);
-
-
 } 
 
 void SaveProfile(LPCTSTR lpFileName)
@@ -505,12 +500,16 @@ void SaveProfile(LPCTSTR lpFileName)
 	StringCchPrintf(szString, 10, TEXT("%d"), WindowSize.cy);
 	WritePrivateProfileString(TEXT("Window"), TEXT("Height"), szString, lpFileName);
 	
+	//сохраняем параметры выравнивания текста
+	/*	warning! now this line describe all text in program. 
+		so, if you have first string with PFA_LEFT and second string with PFA_CENTER 
+		saveprofile write wAlignment = 3 (it is PFA_CENTER) in .ini file 
+	*/
 	StringCchPrintf(szString, 10, TEXT("%d"), pf.dwMask);
 	WritePrivateProfileString(TEXT("Paraformat"), TEXT("dwMask"), szString, lpFileName);
 	
 	StringCchPrintf(szString, 10, TEXT("%d"), pf.wAlignment);
 	WritePrivateProfileString(TEXT("Paraformat"), TEXT("wAlignment"), szString, lpFileName);
-
 
 	// сохраняем имя последнего редактируемого текстового файла
 
@@ -528,42 +527,35 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	if (INVALID_HANDLE_VALUE == hExistingFile) // не удалось открыть файл
 	{
 		return FALSE;
-	} // if
+	} 
 
-	// удаляем текст из поля ввода
-	Edit_SetText(hwndCtl, NULL);
+	Edit_SetText(hwndCtl, NULL);// удаляем текст из поля ввода
 
 	if (INVALID_HANDLE_VALUE != hFile)
 	{
-		// ожидаем завершения операции ввода/вывода
-		FinishIo(&_oWrite);
-		// закрываем дескриптор файла
+		FinishIo(&_oWrite);	// ожидаем завершения операции ввода/вывода
 		CloseHandle(hFile);
-	} // if
+	} 
 
 	hFile = hExistingFile;
-
-	// определяем размер файла 
-	LARGE_INTEGER size;
+	
+	LARGE_INTEGER size;// определяем размер файла 
 	BOOL bRet = GetFileSizeEx(hFile, &size);
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 		// выделяем память для буфера, в который будет считываться данные из файла
 		lpszBufferText = new CHAR[size.LowPart + 2];
-
-		// начинаем асинхронное чтение данных из файла
-		bRet = ReadAsync(hFile, lpszBufferText, 0, size.LowPart, &_oRead);
+		
+		bRet = ReadAsync(hFile, lpszBufferText, 0, size.LowPart, &_oRead);// асинхронное чтение данных из файла
 
 		if (FALSE == bRet) // возникла ошибка
-		{
-			// освобождаем выделенную память
-			delete[] lpszBufferText, lpszBufferText = NULL;
-		} // if
-	} // if
-
+		{		
+			delete[] lpszBufferText, lpszBufferText = NULL;// освобождаем выделенную память
+		} 
+	} 
 	return bRet;
-} // OpenFileAsync
+} 
 
 BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 {
@@ -575,23 +567,20 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 		if (INVALID_HANDLE_VALUE == hNewFile) // не удалось открыть файл
 		{
 			return FALSE;
-		} // if
+		} 
 
 		if (INVALID_HANDLE_VALUE != hFile)
-		{
-			// ожидаем завершения операции ввода/вывода
-			FinishIo(&_oWrite);
-			// закрываем дескриптор файла
+		{		
+			FinishIo(&_oWrite);// ожидаем завершения операции ввода/вывода
 			CloseHandle(hFile);
-		} // if
+		} 
 
 		hFile = hNewFile;
-	} // if
+	} 
 	else if (INVALID_HANDLE_VALUE != hFile)
-	{
-		// ожидаем завершения операции ввода/вывода
-		FinishIo(&_oWrite);
-	} // if
+	{	
+		FinishIo(&_oWrite);// ожидаем завершения операции ввода/вывода
+	}
 	else
 	{
 		// создаём и открываем файл для чтения и записи
@@ -600,38 +589,34 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 		if (INVALID_HANDLE_VALUE == hFile) // не удалось открыть файл
 		{
 			return FALSE;
-		} // if
-	} // else
-
-	// определяем размер текста
-	LARGE_INTEGER size;
+		} 
+	} 
+	
+	LARGE_INTEGER size;// определяем размер текста
 	size.QuadPart = GetWindowTextLengthA(hwndCtl);
 
-	// изменяем положение указателя файла
-	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);
-	// устанавливаем конец файла
+	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
+	
 	if (FALSE != bRet)
-		bRet = SetEndOfFile(hFile);
+		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
-		// выделяем память для буфера, из которого будут записываться данные в файл
-		lpszBufferText = new CHAR[size.LowPart + 1];
-		// копируем ANSI-строку из поля ввода в буффер
-		GetWindowTextA(hwndCtl, lpszBufferText, size.LowPart + 1);
 
-		// начинаем асинхронную запись данных в файл
-		bRet = WriteAsync(hFile, lpszBufferText, 0, size.LowPart, &_oWrite);
+		lpszBufferText = new CHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
 
-		if (FALSE == bRet) // возникла ошибка
+		GetWindowTextA(hwndCtl, lpszBufferText, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
+		
+		bRet = WriteAsync(hFile, lpszBufferText, 0, size.LowPart, &_oWrite);// асинхронная запись данных в файл
+
+		if (FALSE == bRet) 
 		{
-			// освобождаем выделенную память
-			delete[] lpszBufferText, lpszBufferText = NULL;
-		} // if
-	} // if
+			delete[] lpszBufferText, lpszBufferText = NULL;// освобождаем выделенную память
+		} 
+	} 
 
 	return bRet;
-} // SaveFileAsync
+} 
 
 /*Asynch work*/
 // ----------------------------------------------------------------------------------------------
@@ -651,10 +636,10 @@ BOOL ReadAsync(HANDLE hFile, LPVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOV
 	{
 		CloseHandle(lpOverlapped->hEvent), lpOverlapped->hEvent = NULL;
 		return FALSE;
-	} // if
+	} 
 
 	return TRUE;
-} // ReadAsync
+} 
 
 // ----------------------------------------------------------------------------------------------
 BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOVERLAPPED lpOverlapped)
@@ -676,7 +661,7 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	} // if
 
 	return TRUE;
-} // WriteAsync
+} 
 
 // ----------------------------------------------------------------------------------------------
 BOOL FinishIo(LPOVERLAPPED lpOverlapped)
@@ -690,27 +675,27 @@ BOOL FinishIo(LPOVERLAPPED lpOverlapped)
 		{
 			CloseHandle(lpOverlapped->hEvent), lpOverlapped->hEvent = NULL;
 			return TRUE;
-		} // if
-	} // if
+		} 
+	} 
 
 	return FALSE;
-} // FinishIo
+} 
 
 // ----------------------------------------------------------------------------------------------
 BOOL TryFinishIo(LPOVERLAPPED lpOverlapped)
 {
 	if (NULL != lpOverlapped->hEvent)
 	{
-		// определяем состояние операции ввода/вывода
-		DWORD dwResult = WaitForSingleObject(lpOverlapped->hEvent, 0);
+		
+		DWORD dwResult = WaitForSingleObject(lpOverlapped->hEvent, 0);// определяем состояние операции ввода/вывода
 
 		if (WAIT_OBJECT_0 == dwResult) // операция завершена
 		{
 			CloseHandle(lpOverlapped->hEvent), lpOverlapped->hEvent = NULL;
 			return TRUE;
-		} // if
-	} // if
+		} 
+	}
 
 	return FALSE;
-} // TryFinishIo
+} 
 
