@@ -47,7 +47,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	{
 		return -1; // завершаем работу приложения
 	}
-	RECT wr = { 0, 0, 500, 400 };    // set the size, but not the position
+	RECT wr = { 0, 0, 500, 500 };    // set the size, but not the position
 
 	// создаем главное окно на основе нового оконного класса
 	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW^WS_THICKFRAME^WS_MINIMIZEBOX^WS_MAXIMIZEBOX, 300,300,
@@ -121,7 +121,8 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 	type = CreateWindowEx(0, WC_STATIC,	TEXT("Тип файла"),	WS_CHILD | WS_VISIBLE | WS_BORDER,	10, 10, 100, 10, hwnd, (HMENU)IDC_STATIC_TYPE, lpCRStr->hInstance, NULL);*/
 	
 	//CreateWindowEx(0, TEXT("ListBox"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_WANTKEYBOARDINPUT | LBS_NOTIFY, 10, 10, 200, 410, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
-	
+
+	/*
 	HWND hlistview = CreateWindow(WC_LISTVIEW, L"",	WS_VISIBLE | WS_BORDER | WS_CHILD | LVS_REPORT | LVS_SINGLESEL,	10, 10, 100, 100,hwnd, (HMENU)IDC_LIST1, NULL, 0);
 	ListView_SetExtendedListViewStyle(hlistview, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP | LVS_EX_DOUBLEBUFFER | LVS_EX_FLATSB | LVS_EX_INFOTIP);
 
@@ -139,7 +140,25 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 	lvc.pszText = (LPWSTR)(" ");
 	lvc.cx = 75;
 	ListView_InsertColumn(hlistview, 1, &lvc);
+	*/
+	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,
+		WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SORTASCENDING, 10, 10, 400, 250, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 
+	// задаёс расширенный 
+	ListView_SetExtendedListViewStyle(hwndLV, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+	// вставляем три столбца в список просмотра
+
+	LVCOLUMN lvColumns[] = {
+		{ LVCF_WIDTH | LVCF_TEXT, 0, 200, (LPTSTR)TEXT("Свойство") },
+		{ LVCF_WIDTH | LVCF_TEXT, 0, 200, (LPTSTR)TEXT("Значение") },
+	};
+
+	for (int i = 0; i < _countof(lvColumns); ++i)
+	{
+		// вставляем столбец
+		ListView_InsertColumn(hwndLV, i, &lvColumns[i]);
+	} // for
 	
 
 	return TRUE;
@@ -162,13 +181,33 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			openfile.lpstrTitle = TEXT("Открыть");
 			openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
 			openfile.lpstrDefExt = TEXT("txt");
+
+
+
+
+
+
+
+
+
+
+
+			/*Работает, не трогать*/
 			if (GetOpenFileName(&openfile) != FALSE)
 				{						
-					HWND hWNDctrl = GetDlgItem(hwnd, IDC_LIST1);
-					ListView_SetItemText(hWNDctrl, 1, 0, (LPWSTR)"FileName");
-					ListView_SetItemText(hWNDctrl, 1, 1, FileName);
-					//int iItem = ListBox_AddString(hWNDctrl, FileName);
-				}
+					HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
+					// добавляем новый элемент в список просмотра
+					ListView_DeleteAllItems(hwndLV);						
+					LVITEM lvItem = { LVIF_TEXT | LVIF_PARAM };
+					lvItem.iItem = ListView_GetItemCount(hwndLV);
+					lvItem.pszText = (LPTSTR)"Атрибут 1";
+					// добавляем новый элемент в список просмотра
+					lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+					if ((lvItem.iItem != -1))
+					{
+						ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
+					} 
+			}
 			else
 				{
 					MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
