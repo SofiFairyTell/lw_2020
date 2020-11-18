@@ -1,11 +1,14 @@
 #include <Windows.h>
 #include <WindowsX.h>
 #include <tchar.h>
+#include <CommCtrl.h>
 #include <strsafe.h>
 
 #include "resource.h"
 
 #define IDC_EDIT_TEXT        2001
+
+#pragma warning(disable : 4996) //отключает Ошибку deprecate. Возникает, когда используется устаревшая функци
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -17,10 +20,13 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
+TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
+HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
+
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования								
+					
 	HACCEL hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
@@ -35,14 +41,17 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования				
+	
 	if (0 == RegisterClassEx(&wcex)) // регистрируем класс
 	{
 		return -1; // завершаем работу приложения
 	}
+	RECT wr = { 0, 0, 500, 400 };    // set the size, but not the position
 
 	// создаем главное окно на основе нового оконного класса
-	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW^WS_THICKFRAME^WS_MINIMIZEBOX^WS_MAXIMIZEBOX, 300,300,
+		wr.right - wr.left,   wr.bottom - wr.top, NULL, NULL, hInstance, NULL);
 
 	if (NULL == hWnd)
 	{
@@ -51,19 +60,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 
-	TCHAR InitFN[MAX_PATH];//имя файла инициализации
 
-	{
-		GetModuleFileName(NULL, InitFN, MAX_PATH);
 
-		LPTSTR str = _tcsrchr(InitFN, TEXT('.'));
-		if (NULL != str) str[0] = TEXT('\0');
-
-		StringCchCat(InitFN, MAX_PATH, TEXT(".ini"));
-	}
-
-	// загружаем параметры приложения из файла инициализации
-	LoadProfile(InitFN);
 
 	MSG  msg;
 	BOOL Ret;
@@ -87,3 +85,101 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	return (int)msg.wParam;
 }
+
+LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+		HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
+		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
+	case WM_SIZE:
+	{
+		HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
+		MoveWindow(hwndCtl, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE); // изменяем размеры поля ввода
+	}
+
+	break;
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0); // отправляем сообщение WM_QUIT
+	}break;
+	case WM_CLOSE:
+
+		DestroyWindow(hwnd); // уничтожаем окно
+		break;
+	}
+	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+
+
+BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
+{
+	/*static HWND name, type,address, size,timecreate,timechange,timeopen;
+	static const int width = 30, length = 120, shift = 70;
+	name = CreateWindowEx(0, WC_EDIT,TEXT(""), WS_CHILD | WS_VISIBLE | WS_BORDER,	110, shift, length, width - 1, hwnd, (HMENU)IDC_EDIT, lpCRStr->hInstance, NULL);
+	type = CreateWindowEx(0, WC_STATIC,	TEXT("Тип файла"),	WS_CHILD | WS_VISIBLE | WS_BORDER,	10, 10, 100, 10, hwnd, (HMENU)IDC_STATIC_TYPE, lpCRStr->hInstance, NULL);*/
+	
+	//CreateWindowEx(0, TEXT("ListBox"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_WANTKEYBOARDINPUT | LBS_NOTIFY, 10, 10, 200, 410, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
+	
+	HWND hlistview = CreateWindow(WC_LISTVIEW, L"",	WS_VISIBLE | WS_BORDER | WS_CHILD | LVS_REPORT | LVS_SINGLESEL,	10, 10, 100, 100,hwnd, (HMENU)IDC_LIST1, NULL, 0);
+	ListView_SetExtendedListViewStyle(hlistview, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP | LVS_EX_DOUBLEBUFFER | LVS_EX_FLATSB | LVS_EX_INFOTIP);
+
+	LVCOLUMN lvc;
+
+	lvc.mask = LVCF_TEXT | LVCF_SUBITEM | LVCF_WIDTH | LVCF_FMT;    //Стиль таблицы
+	lvc.fmt = LVCFMT_LEFT;                                          //выравнивание по левому краю
+
+	lvc.iSubItem = 0;                                               //Индекс столбца
+	lvc.pszText = (LPWSTR)(" ");                                   //Название столбца
+	lvc.cx = 30;                                                    //Длина столбца относительно левого края
+	ListView_InsertColumn(hlistview, 0, &lvc);                      //Функция вставки столбцов
+
+	lvc.iSubItem = 1;
+	lvc.pszText = (LPWSTR)(" ");
+	lvc.cx = 75;
+	ListView_InsertColumn(hlistview, 1, &lvc);
+
+	
+
+	return TRUE;
+}
+
+void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
+{
+	static HWND hEdit = GetDlgItem(hwnd, IDC_EDIT_TEXT);
+
+	switch (id)
+	{
+	case ID_OPEN_FILE: // Открыть
+		{
+			OPENFILENAME openfile = { sizeof(OPENFILENAME) };
+
+			openfile.hInstance = GetWindowInstance(hwnd);
+			openfile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
+			openfile.lpstrFile = FileName;
+			openfile.nMaxFile = _countof(FileName);
+			openfile.lpstrTitle = TEXT("Открыть");
+			openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
+			openfile.lpstrDefExt = TEXT("txt");
+			if (GetOpenFileName(&openfile) != FALSE)
+				{						
+					HWND hWNDctrl = GetDlgItem(hwnd, IDC_LIST1);
+					ListView_SetItemText(hWNDctrl, 1, 0, (LPWSTR)"FileName");
+					ListView_SetItemText(hWNDctrl, 1, 1, FileName);
+					//int iItem = ListBox_AddString(hWNDctrl, FileName);
+				}
+			else
+				{
+					MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
+					FileName[0] = _T('\0');
+				}
+			}
+	break;
+
+	case ID_EXIT:
+		SendMessage(hwnd, WM_CLOSE, 0, 0);
+		break;
+
+	}
+} 
