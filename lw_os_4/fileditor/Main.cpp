@@ -1,8 +1,13 @@
+
+
+
+
+
 #include <Windows.h>
 #include <WindowsX.h>
 #include <tchar.h>
 #include <strsafe.h>
-#include <richedit.h>
+#include <richedit.h> //why ?
 #include "resource.h"
 
 
@@ -53,11 +58,11 @@ LOGFONT logFont; // параметры шрифта
 HFONT hFont = NULL; // дескриптор шрифта
 
 LPSTR lpszBufferText = NULL; // указатель на буфер для чтения/записи текстового файла
-OVERLAPPED _oRead = { 0 }, _oWrite = { 0 };
+OVERLAPPED _oRead = { 0 }, _oWrite = { 0 };//why?
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования	
+	
 	HINSTANCE relib = LoadLibrary(TEXT("riched32.dll"));    //load the dll don't forget this   
 											//and don't forget to free it (see wm_destroy) 
 	if (relib == NULL)
@@ -80,19 +85,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	{
 		return -1; // завершаем работу приложения
 	}
-
-	// создаем главное окно на основе нового оконного класса
-	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
-
-	if (NULL == hWnd)
-	{
-		return -1; // завершаем работу приложения
-	}
-
-	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 	
-	TCHAR InitFN[MAX_PATH];//имя файла инициализации
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования
+	// создаем главное окно на основе нового оконного класса
+		TCHAR InitFN[MAX_PATH];//имя файла инициализации
 
 	{
 		GetModuleFileName(NULL, InitFN, MAX_PATH);
@@ -105,6 +101,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	// загружаем параметры приложения из файла инициализации
 	LoadProfile(InitFN);
+	
+	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
+		WindowPosition.x, WindowPosition.y, WindowSize.cx, WindowSize.cy, NULL, NULL, hInstance, NULL);
+
+	if (NULL == hWnd)
+	{
+		return -1; // завершаем работу приложения
+	}
+
+	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
+	
+
 	   	  
 	MSG  msg;
 	BOOL Ret;
@@ -141,9 +149,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
 		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
 	
-	case WM_KEYDOWN:
-
-			break;
+	
 	case WM_SIZE:
 	{
 			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
@@ -260,10 +266,10 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	logFont.lfWidth = 10; //ширина
 	logFont.lfWeight = 40; //толщина
 	logFont.lfEscapement = 0; //шрифт без поворота
-
+	
 	// создаём шрифт
 	hFont = CreateFontIndirect(&logFont);
-
+	static HWND hEdit = GetDlgItem(hwnd, IDC_EDIT_TEXT);
 	if (NULL != hFont)
 	{
 		// устанавливаем шрифт для поля ввода
@@ -275,6 +281,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	{
 		// задаём заголовок главного окна
 		SetWindowText(hwnd, FileName);
+		SendMessage(hEdit, EM_SETPARAFORMAT, 0, (LPARAM)&pf);//выравнивание текста
 	} 
 	else
 	{
@@ -580,8 +587,51 @@ void LoadProfile(LPCTSTR lpFileName)
 	WindowSize.cy = GetPrivateProfileInt(TEXT("Window"), TEXT("Height"), 600, lpFileName);
 	
 	//загрузка типа выравнивания
-	pf.wAlignment = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName);
+	/*Работает*/
 
+	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName)==3)
+	{
+		pf.cbSize = sizeof(pf);
+		pf.dwMask = PFM_ALIGNMENT;
+		pf.wAlignment = PFA_CENTER;
+	}
+	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName) == 2)
+	{
+			pf.cbSize = sizeof(pf);
+			pf.dwMask = PFM_ALIGNMENT;
+			pf.wAlignment = PFA_RIGHT;
+	}
+	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName) == 1)
+	{
+		pf.cbSize = sizeof(pf);
+		pf.dwMask = PFM_ALIGNMENT;
+		pf.wAlignment = PFA_LEFT;
+	}
+		
+
+	/*HOW DO THIS in another way????*/
+	
+	/*
+	pf.dwMask = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("dwMask"), 0, lpFileName);
+	pf.wAlignment = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName);
+	*/
+
+	/*
+	switch ((GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName)))
+	{
+		pf.cbSize = sizeof(pf);
+		pf.dwMask = PFM_ALIGNMENT;
+		case 1:
+			pf.wAlignment = PFA_LEFT;
+			break;
+		case 2:
+			pf.wAlignment = PFA_RIGHT;
+			break;
+		case 3:
+			pf.wAlignment = PFA_CENTER;
+			break;
+	}
+	*/
 	// загружаем имя последнего редактируемого текстового файла
 
 	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, FileName, MAX_PATH, lpFileName);
@@ -607,8 +657,12 @@ void SaveProfile(LPCTSTR lpFileName)
 	StringCchPrintf(szString, 10, TEXT("%d"), WindowSize.cy);
 	WritePrivateProfileString(TEXT("Window"), TEXT("Height"), szString, lpFileName);
 	
+	StringCchPrintf(szString, 10, TEXT("%d"), pf.dwMask);
+	WritePrivateProfileString(TEXT("Paraformat"), TEXT("dwMask"), szString, lpFileName);
+	
 	StringCchPrintf(szString, 10, TEXT("%d"), pf.wAlignment);
 	WritePrivateProfileString(TEXT("Paraformat"), TEXT("wAlignment"), szString, lpFileName);
+
 
 	// сохраняем имя последнего редактируемого текстового файла
 
