@@ -27,9 +27,10 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 /*Перевод чисел*/
 void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
 
-
+RECT rect = { 0 }; // размер и положение окна
 TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
+LPCTSTR lpszFileName = NULL; // указатель на имя файла/каталога
 
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
@@ -123,8 +124,17 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
-	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,
-		WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS , 30, 40, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
+	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS , 30, 40, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
+	
+	
+	//значения атрибутов
+	CreateWindowEx(0, TEXT("button"), TEXT("Только для чтения"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 200, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_READONLY, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("button"), TEXT("Скрытый"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 230, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_HIDDEN, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("button"), TEXT("Файл готов для архивирирования"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 260, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_ARCHIVE, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("button"), TEXT("Системный"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 290, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_SYSTEM, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("button"), TEXT("Временный"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 320, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_TEMPORARY, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("button"), TEXT("Сжимать для экономии места"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 350, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_COMPRESSED, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0,TEXT("button"), TEXT("Шифровать содержимое для защиты"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,30, 380, 400, 30, hwnd,(HMENU)IDC_ATTRIBUTE_ENCRYPTED,lpCRStr->hInstance, NULL);
 
 	// задем расширенный 
 	ListView_SetExtendedListViewStyle(hwndLV, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
@@ -159,6 +169,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			openfile.hInstance = GetWindowInstance(hwnd);
 			openfile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
 			openfile.lpstrFile = FileName;
+			
 			openfile.nMaxFile = _countof(FileName);
 			openfile.lpstrTitle = TEXT("Открыть");
 			openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
@@ -166,167 +177,180 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			if (GetOpenFileName(&openfile) != FALSE)
 			{
-			HANDLE  hFile;
-			BY_HANDLE_FILE_INFORMATION  bhfi;  // информация о файле
+				BY_HANDLE_FILE_INFORMATION  bhfi;  // информация о файле
+				TCHAR TimeBuffer[100], Buffer[100];
+				// открываем файл для чтения
+				hFile = CreateFile(
+					FileName,   // имя файла
+					0,                     // получение информации о файле
+					0,                     // монопольный доступ к файлу
+					NULL,                  // защиты нет 
+					OPEN_EXISTING,         // открываем существующий файл
+					FILE_ATTRIBUTE_NORMAL, // обычный файл
+					NULL                   // шаблона нет
+				);
+				// проверяем на успешное открытие
+				if (hFile == INVALID_HANDLE_VALUE)
+				{
+					GetLastError();
+					break;
+				}
+				// получаем информацию о файле
+				//get info about file
+				if (!GetFileInformationByHandle(hFile, &bhfi))
+				{
+					GetLastError();
+					break;
+				}
+			
+				//получение информации о размере файла
+				//get info about size of file
+				LARGE_INTEGER LI_Size;
+				if (!GetFileSizeEx(hFile, &LI_Size))
+				{
+					//обработка ошибки
+				}
 
-			TCHAR TimeBuffer[100], Buffer[100];
+				StringCchPrintFileSize(Buffer, _countof(Buffer), LI_Size);
 
+				/*Работает, не трогать*/
 
-			// открываем файл для чтения
-			hFile = CreateFile(
-				FileName,   // имя файла
-				0,                     // получение информации о файле
-				0,                     // монопольный доступ к файлу
-				NULL,                  // защиты нет 
-				OPEN_EXISTING,         // открываем существующий файл
-				FILE_ATTRIBUTE_NORMAL, // обычный файл
-				NULL                   // шаблона нет
-			);
-			// проверяем на успешное открытие
-			if (hFile == INVALID_HANDLE_VALUE)
-			{
-				GetLastError();
-				break;
-			}
-			// получаем информацию о файле
-			//get info about file
-			if (!GetFileInformationByHandle(hFile, &bhfi))
-			{
-				GetLastError();
-				break;
-			}
-			//получение информации о размере файла
-			//get info about size of file
-			LARGE_INTEGER LI_Size;
-			if (!GetFileSizeEx(hFile, &LI_Size))
-			{
-				//обработка ошибки
-			}
-
-			StringCchPrintFileSize(Buffer, _countof(Buffer), LI_Size);
-					   		
-
-			if (bhfi.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
-			{
-				
-			}
-
-
-
-
-
-
-
-			/*Работает, не трогать*/
-
-			//Добавление найденных атрибутов в список просмотра
-
-			HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
-			// добавляем новый элемент в список просмотра
-			ListView_DeleteAllItems(hwndLV);
-			LVITEM lvItem = {LVIF_TEXT | LVIF_PARAM};
-			lvItem.iItem = ListView_GetItemCount(hwndLV);
-
-			//Размер
-
-			lvItem.pszText = (LPWSTR)(L"Размер:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, Buffer);
-			}
-
-
-			//третий параметр
-
-
-			lvItem.pszText = (LPWSTR)(L"Время изменения:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				GetFileTimeFormat(&bhfi.ftCreationTime, TimeBuffer, _countof(TimeBuffer));//время создания
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
-			}
-
-			//второй параметр
-
-			lvItem.pszText = (LPWSTR)(L"Время последнего обращения:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				GetFileTimeFormat(&bhfi.ftLastAccessTime, TimeBuffer, _countof(TimeBuffer));//время последнего обращения
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
-			}
-
-			//первый параметр
-
-			lvItem.pszText = (LPWSTR)(L"Время создания:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				GetFileTimeFormat(&bhfi.ftLastWriteTime, TimeBuffer, _countof(TimeBuffer));//время изменения
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
-			}
-
-
-			//Расположение
-
-			lvItem.pszText = (LPWSTR)(L"Расположение:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
-			}
-
-			//Тип
-
-			lvItem.pszText = (LPWSTR)(L"Тип:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
-			}
-
-			}
-
-
-			// закрываем дескриптор файла */
-			CloseHandle(hFile);
-
-
-
-
-
-
-/*
-
-
-			/*Работает, не трогать
-			if (GetOpenFileName(&openfile) != FALSE)
-				{						
-					HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
-					// добавляем новый элемент в список просмотра
-					ListView_DeleteAllItems(hwndLV);	
-					
-					//
-					LVITEM lvItem = { LVIF_TEXT | LVIF_PARAM };
-					lvItem.iItem = ListView_GetItemCount(hwndLV);
-					lvItem.pszText = (LPTSTR)"Атрибут 1";
-					// добавляем новый элемент в список просмотра
-					lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-						
-					if ((lvItem.iItem != -1))
+				//Добавление найденных атрибутов в список просмотра
+				HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
+				// добавляем новый элемент в список просмотра
+				ListView_DeleteAllItems(hwndLV);
+				LVITEM lvItem = { LVIF_TEXT | LVIF_PARAM };
+				lvItem.iItem = ListView_GetItemCount(hwndLV);
+				//Размер
+				lvItem.pszText = (LPWSTR)(L"Размер:");
+				lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+				if ((lvItem.iItem != -1))
+				{
+					ListView_SetItemText(hwndLV, lvItem.iItem, 1, Buffer);
+				}
+				//третий параметр
+				lvItem.pszText = (LPWSTR)(L"Время изменения:");
+				lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+				if ((lvItem.iItem != -1))
+				{
+					GetFileTimeFormat(&bhfi.ftCreationTime, TimeBuffer, _countof(TimeBuffer));//время создания
+					ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
+				}
+				//второй параметр
+				lvItem.pszText = (LPWSTR)(L"Время последнего обращения:");
+				lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+				if ((lvItem.iItem != -1))
+				{
+					GetFileTimeFormat(&bhfi.ftLastAccessTime, TimeBuffer, _countof(TimeBuffer));//время последнего обращения
+					ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
+				}
+				//первый параметр
+				lvItem.pszText = (LPWSTR)(L"Время создания:");
+				lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+				if ((lvItem.iItem != -1))
+				{
+					GetFileTimeFormat(&bhfi.ftLastWriteTime, TimeBuffer, _countof(TimeBuffer));//время изменения
+					ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
+				}
+				//Расположение
+				lvItem.pszText = (LPWSTR)(L"Расположение:");
+				lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+				if ((lvItem.iItem != -1))
+				{
+					ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
+				}
+				//Тип
+				lvItem.pszText = (LPWSTR)(L"Тип:");
+				lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+				if ((lvItem.iItem != -1))
+				{
+					if (bhfi.dwFileAttributes != FILE_ATTRIBUTE_DIRECTORY)
 					{
-						ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
-					} 
+						ListView_SetItemText(hwndLV, lvItem.iItem, 1, (LPWSTR)(L"Файл"));
+					}
+					else
+						ListView_SetItemText(hwndLV, lvItem.iItem, 1, (LPWSTR)(L"Папка с файлами"));
+				}
+			
+				// массив атрибутов
+				constexpr DWORD attr[] = {
+					FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_ARCHIVE,
+					FILE_ATTRIBUTE_SYSTEM, FILE_ATTRIBUTE_TEMPORARY, FILE_ATTRIBUTE_COMPRESSED, FILE_ATTRIBUTE_ENCRYPTED
+				};
+				// массив идентификаторов флажков для атрибутов
+				constexpr DWORD ids[] = {
+					IDC_ATTRIBUTE_READONLY, IDC_ATTRIBUTE_HIDDEN, IDC_ATTRIBUTE_ARCHIVE,
+					IDC_ATTRIBUTE_SYSTEM, IDC_ATTRIBUTE_TEMPORARY, IDC_ATTRIBUTE_COMPRESSED, IDC_ATTRIBUTE_ENCRYPTED
+				};
+
+				// раставим флажки соответственно с установленными атрибутами файла/каталога
+
+				for (int i = 0; i < _countof(attr); ++i)
+				{
+					UINT uCheck = (bhfi.dwFileAttributes & attr[i]) ? BST_CHECKED : BST_UNCHECKED;
+					CheckDlgButton(hwnd, ids[i], uCheck);
+				} // for
+				
+				// закрываем дескриптор файла */
+				CloseHandle(hFile);
+
 			}
 			else
-				{
+			{
 					MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
 					FileName[0] = _T('\0');
-				}
-*/			
-}
+			}
+			
+		}
+	break;
+
+	case ID_CHANGE_ATR://Изменение атрибутов
+	{
+		BY_HANDLE_FILE_INFORMATION  bhfi;  // информация о файле
+		TCHAR TimeBuffer[100], Buffer[100];
+		// открываем файл для чтения
+		hFile = CreateFile(
+			FileName,   // имя файла
+			0,                     // получение информации о файле
+			0,                     // монопольный доступ к файлу
+			NULL,                  // защиты нет 
+			OPEN_EXISTING,         // открываем существующий файл
+			FILE_ATTRIBUTE_NORMAL, // обычный файл
+			NULL                   // шаблона нет
+		);
+		// массив атрибутов
+		constexpr DWORD attr[] = {
+			FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_ARCHIVE,
+			FILE_ATTRIBUTE_SYSTEM, FILE_ATTRIBUTE_TEMPORARY, FILE_ATTRIBUTE_COMPRESSED, FILE_ATTRIBUTE_ENCRYPTED
+		};
+
+		// массив идентификаторов флажков для атрибутов
+		constexpr DWORD ids[] = {
+			IDC_ATTRIBUTE_READONLY, IDC_ATTRIBUTE_HIDDEN, IDC_ATTRIBUTE_ARCHIVE,
+			IDC_ATTRIBUTE_SYSTEM, IDC_ATTRIBUTE_TEMPORARY, IDC_ATTRIBUTE_COMPRESSED, IDC_ATTRIBUTE_ENCRYPTED
+		};
+
+		DWORD dwFileAttributes = 0; // атрибуты файла/каталога
+
+		// определяем, какие атрибуты выбраны
+
+		for (int i = 0; i < _countof(attr); ++i)
+		{
+			if (IsDlgButtonChecked(hwnd, ids[i]) == BST_CHECKED) // флажок установлен
+			{
+				dwFileAttributes |= attr[i]; // добавим соответствующий атрибут
+			} // if
+		} // for
+
+		// зададим атрибуты
+		SetFileAttributes(FileName, dwFileAttributes);
+
+		// запомним размер и положение окна
+		GetWindowRect(hwnd, &rect);
+		// завершаем работу диалогового окна
+		EndDialog(hwnd, IDOK);
+	}
+	
 	break;
 
 	case ID_EXIT:

@@ -21,6 +21,14 @@
 #define ID_CHANGE_ATR                   40006
 #define ID_SAVE_PARAM                   40007
 #define ID_EXIT                         40010
+//атрибуты файла
+#define IDC_ATTRIBUTE_READONLY			40011
+#define IDC_ATTRIBUTE_HIDDEN			40012
+#define IDC_ATTRIBUTE_ARCHIVE			40013
+#define IDC_ATTRIBUTE_SYSTEM			40014
+#define IDC_ATTRIBUTE_TEMPORARY			40015
+#define IDC_ATTRIBUTE_COMPRESSED		40016
+#define IDC_ATTRIBUTE_ENCRYPTED			40017
 
 // Next default values for new objects
 // 
