@@ -124,7 +124,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
 	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,
-		WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SORTASCENDING, 10, 10, 400, 250, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS , 30, 40, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 
 	// задем расширенный 
 	ListView_SetExtendedListViewStyle(hwndLV, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
@@ -171,6 +171,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			TCHAR TimeBuffer[100], Buffer[100];
 
+
 			// открываем файл для чтения
 			hFile = CreateFile(
 				FileName,   // имя файла
@@ -203,16 +204,42 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			}
 
 			StringCchPrintFileSize(Buffer, _countof(Buffer), LI_Size);
-					   			 		  		  		 	   		
+					   		
+
+			if (bhfi.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
+			{
+				
+			}
+
+
+
+
+
+
+
 			/*Работает, не трогать*/
+
+			//Добавление найденных атрибутов в список просмотра
+
 			HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
 			// добавляем новый элемент в список просмотра
 			ListView_DeleteAllItems(hwndLV);
 			LVITEM lvItem = {LVIF_TEXT | LVIF_PARAM};
 			lvItem.iItem = ListView_GetItemCount(hwndLV);
 
+			//Размер
+
+			lvItem.pszText = (LPWSTR)(L"Размер:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, Buffer);
+			}
+
+
 			//третий параметр
-			lvItem.iItem = ListView_GetItemCount(hwndLV);
+
+
 			lvItem.pszText = (LPWSTR)(L"Время изменения:");
 			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
 			if ((lvItem.iItem != -1))
@@ -222,7 +249,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			}
 
 			//второй параметр
-			lvItem.iItem = ListView_GetItemCount(hwndLV);
+
 			lvItem.pszText = (LPWSTR)(L"Время последнего обращения:");
 			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
 			if ((lvItem.iItem != -1))
@@ -232,7 +259,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			}
 
 			//первый параметр
-			
+
 			lvItem.pszText = (LPWSTR)(L"Время создания:");
 			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
 			if ((lvItem.iItem != -1))
@@ -241,17 +268,24 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
 			}
 
-			//Размер
-			lvItem.pszText = (LPWSTR)(L"Размер:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
-			{
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, Buffer);
-			}
 
 			//Расположение
 
+			lvItem.pszText = (LPWSTR)(L"Расположение:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
+			}
 
+			//Тип
+
+			lvItem.pszText = (LPWSTR)(L"Тип:");
+			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
+			if ((lvItem.iItem != -1))
+			{
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
+			}
 
 			}
 
