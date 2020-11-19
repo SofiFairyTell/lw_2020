@@ -24,6 +24,10 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 /*Перевод времени*/
 BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime);
 
+/*Перевод чисел*/
+void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
+
+
 TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 
@@ -119,36 +123,10 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
-	/*static HWND name, type,address, size,timecreate,timechange,timeopen;
-	static const int width = 30, length = 120, shift = 70;
-	name = CreateWindowEx(0, WC_EDIT,TEXT(""), WS_CHILD | WS_VISIBLE | WS_BORDER,	110, shift, length, width - 1, hwnd, (HMENU)IDC_EDIT, lpCRStr->hInstance, NULL);
-	type = CreateWindowEx(0, WC_STATIC,	TEXT("Тип файла"),	WS_CHILD | WS_VISIBLE | WS_BORDER,	10, 10, 100, 10, hwnd, (HMENU)IDC_STATIC_TYPE, lpCRStr->hInstance, NULL);*/
-	
-	//CreateWindowEx(0, TEXT("ListBox"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_WANTKEYBOARDINPUT | LBS_NOTIFY, 10, 10, 200, 410, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
-
-	/*
-	HWND hlistview = CreateWindow(WC_LISTVIEW, L"",	WS_VISIBLE | WS_BORDER | WS_CHILD | LVS_REPORT | LVS_SINGLESEL,	10, 10, 100, 100,hwnd, (HMENU)IDC_LIST1, NULL, 0);
-	ListView_SetExtendedListViewStyle(hlistview, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP | LVS_EX_DOUBLEBUFFER | LVS_EX_FLATSB | LVS_EX_INFOTIP);
-
-	LVCOLUMN lvc;
-
-	lvc.mask = LVCF_TEXT | LVCF_SUBITEM | LVCF_WIDTH | LVCF_FMT;    //Стиль таблицы
-	lvc.fmt = LVCFMT_LEFT;                                          //выравнивание по левому краю
-
-	lvc.iSubItem = 0;                                               //Индекс столбца
-	lvc.pszText = (LPWSTR)(" ");                                   //Название столбца
-	lvc.cx = 30;                                                    //Длина столбца относительно левого края
-	ListView_InsertColumn(hlistview, 0, &lvc);                      //Функция вставки столбцов
-
-	lvc.iSubItem = 1;
-	lvc.pszText = (LPWSTR)(" ");
-	lvc.cx = 75;
-	ListView_InsertColumn(hlistview, 1, &lvc);
-	*/
 	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,
 		WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SORTASCENDING, 10, 10, 400, 250, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 
-	// задаёс расширенный 
+	// задем расширенный 
 	ListView_SetExtendedListViewStyle(hwndLV, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	// вставляем три столбца в список просмотра
@@ -162,7 +140,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 	{
 		// вставляем столбец
 		ListView_InsertColumn(hwndLV, i, &lvColumns[i]);
-	} // for
+	} 
 	
 
 	return TRUE;
@@ -192,21 +170,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			BY_HANDLE_FILE_INFORMATION  bhfi;  // информация о файле
 
 			TCHAR TimeBuffer[100], Buffer[100];
-			//ULARGE_INTEGER size = { bhfi.nFileSizeHigh,bhfi.nFileSizeLow };
-			//CalculateSize(FileName, bhfi, &size);//вычисление размера каталога
-			
-			DWORD dwSizeLow;
-			DWORD dwSizeHigh;
-
-			if (bhfi.nFileSizeHigh != NULL)
-			{
-				dwSizeLow = GetFileSize(hFile, &dwSizeHigh);
-			}
-			else
-			{
-				dwSizeLow = GetFileSize(hFile, NULL);
-			}
-
 
 			// открываем файл для чтения
 			hFile = CreateFile(
@@ -225,17 +188,23 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				break;
 			}
 			// получаем информацию о файле
+			//get info about file
 			if (!GetFileInformationByHandle(hFile, &bhfi))
 			{
 				GetLastError();
 				break;
 			}
-		
-			
-			
-			
-			StringCchPrintFileSize(Buffer, _countof(Buffer), dwSizeLow);
+			//получение информации о размере файла
+			//get info about size of file
+			LARGE_INTEGER LI_Size;
+			if (!GetFileSizeEx(hFile, &LI_Size))
+			{
+				//обработка ошибки
+			}
 
+			StringCchPrintFileSize(Buffer, _countof(Buffer), LI_Size);
+					   			 		  		  		 	   		
+			/*Работает, не трогать*/
 			HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
 			// добавляем новый элемент в список просмотра
 			ListView_DeleteAllItems(hwndLV);
@@ -277,7 +246,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
 			if ((lvItem.iItem != -1))
 			{
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, bhfi.nFileSizeHigh);
+				ListView_SetItemText(hwndLV, lvItem.iItem, 1, Buffer);
 			}
 
 			//Расположение
@@ -285,33 +254,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 
 			}
-			
 
-
-
-			/*
-
-
-			// распечатываем информацию о файле
-			cout << "File attributes: " << bhfi.dwFileAttributes << endl
-				<< "Creation time: high date: "
-				<< bhfi.ftCreationTime.dwHighDateTime << endl
-				<< "Creation time: low date: "
-				<< bhfi.ftCreationTime.dwLowDateTime << endl
-				<< "Last access time: high date: "
-				<< bhfi.ftLastAccessTime.dwHighDateTime << endl
-				<< "Last access time: low date: "
-				<< bhfi.ftLastAccessTime.dwLowDateTime << endl
-				<< "Last write time: high date: "
-				<< bhfi.ftLastWriteTime.dwHighDateTime << endl
-				<< "Last write time: low date: "
-				<< bhfi.ftLastWriteTime.dwLowDateTime << endl
-				<< "Volume serial number: " << bhfi.dwVolumeSerialNumber << endl
-				<< "File size high: " << bhfi.nFileSizeHigh << endl
-				<< "File size low: " << bhfi.nFileSizeLow << endl
-				<< "Number of links: " << bhfi.nNumberOfLinks << endl
-				<< "File index high: " << bhfi.nFileIndexHigh << endl
-				<< "File index low: " << bhfi.nFileIndexLow << endl;
 
 			// закрываем дескриптор файла */
 			CloseHandle(hFile);
@@ -386,7 +329,7 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 	return bRet;
 } // GetFileTimeFormat
 
-void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
+void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
 {
 	if (size.QuadPart >= 0x40000000ULL)
 	{
