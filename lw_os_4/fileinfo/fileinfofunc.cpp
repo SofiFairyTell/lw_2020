@@ -7,6 +7,7 @@
 #include <shlobj.h>
 #include <shobjidl.h>//for browserinfo
 #include <fileapi.h>
+#include <string>
 #include "resource.h"
 
 #define IDC_EDIT_TEXT        2001
@@ -27,7 +28,13 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime);
 
 /*Перевод чисел*/
-void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
+void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
+void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size);
+
+/*Считать размер папки*/
+BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
+typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
+BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
 
 /*Перевод в ListView*/
 BOOL ListViewInit(LPTSTR path , HWND hwnd);
@@ -36,6 +43,7 @@ RECT rect = { 0 }; // размер и положение окна
 TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 LPCTSTR lpszFileName = NULL; // указатель на имя файла/каталога
+
 
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
@@ -182,9 +190,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			if (GetOpenFileName(&openfile) != FALSE)
 			{
-				WIN32_FILE_ATTRIBUTE_DATA  bhfi;  // информация о файле
-				TCHAR TimeBuffer[100], Buffer[100];
-
 				// получаем информацию о файле
 				//get info about file
 				if (!(ListViewInit(FileName, hwnd)))
@@ -196,21 +201,17 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				{
 					break;
 				}
-
-
 			}
 			else
 			{
 					MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
 					FileName[0] = _T('\0');
 			}
-			
+		
 		}
 	break;
 	case ID_OPEN_DIR://Открыть папку
 	{
-		WIN32_FILE_ATTRIBUTE_DATA fa;
-		
 		BROWSEINFO bi;//structure for open special box with folder in treview
 		TCHAR                   szDisplayName[MAX_PATH];//for name of path
 		LPITEMIDLIST            pidl;
@@ -227,38 +228,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		{
 			SHGetPathFromIDList(pidl, szDisplayName);//get path
 
-			BOOL bRet = GetFileAttributesEx(szDisplayName, GetFileExInfoStandard, &fa);	
-			
-			 //Добавление найденных атрибутов в список просмотра
-			HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
-			// добавляем новый элемент в список просмотра
-			ListView_DeleteAllItems(hwndLV);
-			LVITEM lvItem = { LVIF_TEXT | LVIF_PARAM };
-			lvItem.iItem = ListView_GetItemCount(hwndLV);
-			//Размер
-			lvItem.pszText = (LPWSTR)(L"Path:");
-			lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if ((lvItem.iItem != -1))
+			if (!(ListViewInit(szDisplayName, hwnd)))
 			{
-				ListView_SetItemText(hwndLV, lvItem.iItem, 1, szDisplayName);
+				GetLastError();
+				break;
 			}
 		}
 	}
 		break;
 	case ID_CHANGE_ATR://Изменение атрибутов
 	{
-		BY_HANDLE_FILE_INFORMATION  bhfi;  // информация о файле
-		TCHAR TimeBuffer[100], Buffer[100];
-		// открываем файл для чтения
-		hFile = CreateFile(
-			FileName,   // имя файла
-			0,                     // получение информации о файле
-			0,                     // монопольный доступ к файлу
-			NULL,                  // защиты нет 
-			OPEN_EXISTING,         // открываем существующий файл
-			FILE_ATTRIBUTE_NORMAL, // обычный файл
-			NULL                   // шаблона нет
-		);
 		// массив атрибутов
 		constexpr DWORD attr[] = {
 			FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_ARCHIVE,
@@ -305,7 +284,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 {
 	WIN32_FILE_ATTRIBUTE_DATA bhfi;
 	TCHAR TimeBuffer[100], Buffer[100];
-	if (!GetFileAttributesEx(FileName, GetFileExInfoStandard, &bhfi))
+	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &bhfi))
 	{
 		GetLastError();
 	}
@@ -313,12 +292,21 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	//получение информации о размере файла
 	//get info about size of file
 	LARGE_INTEGER LI_Size;
+	ULARGE_INTEGER size = { 0 };
 	if (!GetFileSizeEx(hFile, &LI_Size))
 	{
 		//обработка ошибки
 	}
-
-	StringCchPrintFileSize(Buffer, _countof(Buffer), LI_Size);
+	if (bhfi.dwFileAttributes != FILE_ATTRIBUTE_DIRECTORY)
+	{
+		PrintFileSize(Buffer, _countof(Buffer), LI_Size);
+	}
+	else
+	{
+		CalculateSize(path, &bhfi, &size);
+		PrintDirectSize(Buffer, _countof(Buffer), size);
+		//расчет для папки 
+	}
 
 	/*Работает, не трогать*/
 
@@ -364,7 +352,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
 	if ((lvItem.iItem != -1))
 	{
-		ListView_SetItemText(hwndLV, lvItem.iItem, 1, FileName);
+		ListView_SetItemText(hwndLV, lvItem.iItem, 1, path);
 	}
 	//Тип
 	lvItem.pszText = (LPWSTR)(L"Тип:");
@@ -402,6 +390,69 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	return TRUE;
 }
 
+BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
+{
+	if (lpFileAttributeData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		// продолжим поиск внутри каталога
+		return FileSearch(TEXT("*"), lpszFileName, CalculateSize, lpvParam);
+	} // if
+
+	// прибавим к результату размер найденного файла
+
+	ULARGE_INTEGER size = { lpFileAttributeData->nFileSizeLow, lpFileAttributeData->nFileSizeHigh };
+	((ULARGE_INTEGER *)lpvParam)->QuadPart += size.QuadPart;
+
+	return TRUE; // возвращаем TRUE, чтобы продолжить поиск
+}
+
+
+
+BOOL FileSearch(LPCTSTR lpszFileName,LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
+{
+	WIN32_FIND_DATA fd;
+	TCHAR szFileName[MAX_PATH];
+	// формируем шаблон поиска
+	StringCchPrintf(szFileName, MAX_PATH, TEXT("%s\\%s"), path, lpszFileName);
+
+	// начинаем поиск
+	int dir = 0, file = 0;
+	BOOL bRet = TRUE;
+	HANDLE hf = FindFirstFile(lpszFileName, &fd);
+
+	if (hf == INVALID_HANDLE_VALUE) return FALSE;
+	for (BOOL bFindNext = TRUE; FALSE != bFindNext; bFindNext = FindNextFile(hf, &fd))
+		{ 
+			if (_tcscmp(fd.cFileName, TEXT(".")) == 0 || _tcscmp(fd.cFileName, TEXT("..")) == 0)
+			{
+				continue;
+			}
+			// формируем полный путь к файлу/каталогу
+			StringCchPrintf(szFileName, MAX_PATH, TEXT("%s\\%s"), path, fd.cFileName);
+			bRet = lpSearchFunc(szFileName, (LPWIN32_FILE_ATTRIBUTE_DATA)&fd, lpvParam);
+			if (FALSE == bRet) break; // прерываем поиск
+		} while (FindNextFile(hf, &fd) != 0);
+		FindClose(hf);
+	return bRet;
+} // FileSearch
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime)
 {
 	SYSTEMTIME st;
@@ -430,7 +481,34 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 	return bRet;
 } // GetFileTimeFormat
 
-void StringCchPrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
+void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
+{
+	if (size.QuadPart >= 0x40000000ULL)
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f ГБ"), (size.QuadPart / (float)0x40000000ULL));
+	} // if
+	else if (size.QuadPart >= 0x100000ULL)
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f МБ"), (size.QuadPart / (float)0x100000ULL));
+	} // if
+	else if (size.QuadPart >= 0x0400ULL)
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f КБ"), (size.QuadPart / (float)0x0400ULL));
+	} // if
+	else
+	{
+		StringCchPrintf(lpszBuffer, cch, TEXT("%u байт"), size.LowPart);
+	} // else
+
+	size_t len = _tcslen(lpszBuffer);
+
+	if (len < cch)
+	{
+		StringCchPrintf((lpszBuffer + len), (cch - len), TEXT(" (%llu байт)"), size.QuadPart);
+	} // if
+} // StringCchPrintFileSize
+
+void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
 {
 	if (size.QuadPart >= 0x40000000ULL)
 	{
