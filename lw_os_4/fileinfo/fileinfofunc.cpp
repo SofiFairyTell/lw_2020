@@ -384,7 +384,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	{
 		UINT uCheck = (bhfi.dwFileAttributes & attr[i]) ? BST_CHECKED : BST_UNCHECKED;
 		CheckDlgButton(hwnd, ids[i], uCheck);
-	} // for
+	} 
 
 	// закрываем дескриптор файла */
 	return TRUE;
@@ -397,12 +397,6 @@ BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_
 		// продолжим поиск внутри каталога
 		return FileSearch(TEXT("*"), lpszFileName, CalculateSize, lpvParam);
 	} // if
-
-	// прибавим к результату размер найденного файла
-
-	ULARGE_INTEGER size = { lpFileAttributeData->nFileSizeLow, lpFileAttributeData->nFileSizeHigh };
-	((ULARGE_INTEGER *)lpvParam)->QuadPart += size.QuadPart;
-
 	return TRUE; // возвращаем TRUE, чтобы продолжить поиск
 }
 
@@ -410,31 +404,33 @@ BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_
 
 BOOL FileSearch(LPCTSTR lpszFileName,LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
 {
-	WIN32_FIND_DATA fd;
-	TCHAR szFileName[MAX_PATH];
-	// формируем шаблон поиска
-	StringCchPrintf(szFileName, MAX_PATH, TEXT("%s\\%s"), path, lpszFileName);
+	WIN32_FIND_DATA ffd;
+	LARGE_INTEGER filesize;
+	LARGE_INTEGER size;
+	TCHAR szDir[MAX_PATH];
+	size_t length_of_arg;
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	StringCchCopy(szDir, MAX_PATH, path);
+	StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
+	hFind = FindFirstFile(szDir, &ffd);
 
-	// начинаем поиск
-	int dir = 0, file = 0;
-	BOOL bRet = TRUE;
-	HANDLE hf = FindFirstFile(lpszFileName, &fd);
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+			//error
+	}
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			filesize.LowPart = ffd.nFileSizeLow;
+			filesize.HighPart = ffd.nFileSizeHigh;
+			((ULARGE_INTEGER *)lpvParam)->QuadPart += filesize.QuadPart;
+		}
+	} while (FindNextFile(hFind, &ffd) != 0);
 
-	if (hf == INVALID_HANDLE_VALUE) return FALSE;
-	for (BOOL bFindNext = TRUE; FALSE != bFindNext; bFindNext = FindNextFile(hf, &fd))
-		{ 
-			if (_tcscmp(fd.cFileName, TEXT(".")) == 0 || _tcscmp(fd.cFileName, TEXT("..")) == 0)
-			{
-				continue;
-			}
-			// формируем полный путь к файлу/каталогу
-			StringCchPrintf(szFileName, MAX_PATH, TEXT("%s\\%s"), path, fd.cFileName);
-			bRet = lpSearchFunc(szFileName, (LPWIN32_FILE_ATTRIBUTE_DATA)&fd, lpvParam);
-			if (FALSE == bRet) break; // прерываем поиск
-		} while (FindNextFile(hf, &fd) != 0);
-		FindClose(hf);
-	return bRet;
-} // FileSearch
+	FindClose(hFind);
+	return TRUE;
+} 
 
 
 
@@ -480,6 +476,9 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 
 	return bRet;
 } // GetFileTimeFormat
+
+
+
 
 void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
 {
