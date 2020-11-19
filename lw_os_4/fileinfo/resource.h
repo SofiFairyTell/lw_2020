@@ -15,7 +15,7 @@
 #define IDC_EDIT						1006
 #define ID_                             40001
 #define ID_OPEN_FILE                    40002
-#define ID_40003                        40003
+#define ID_OPEN_DIR                     40003
 #define ID_RENAME                       40004
 #define ID_40005                        40005
 #define ID_CHANGE_ATR                   40006
