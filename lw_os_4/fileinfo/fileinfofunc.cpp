@@ -222,16 +222,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		ZeroMemory(&bi, sizeof(bi));
 		bi.hwndOwner = NULL;
-		bi.pszDisplayName = szDisplayName;
+		bi.pszDisplayName = FileName;
 		bi.lpszTitle = TEXT("Select folder");
 		bi.ulFlags = BIF_RETURNONLYFSDIRS;
 		
 		pidl = SHBrowseForFolder(&bi);//open window for select
 		if (pidl)
 		{
-			SHGetPathFromIDList(pidl, szDisplayName);//get path
+			SHGetPathFromIDList(pidl, FileName);//get path
 
-			if (!(ListViewInit(szDisplayName, hwnd)))
+			if (!(ListViewInit(FileName, hwnd)))
 			{
 				GetLastError();
 				break;
@@ -297,7 +297,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		// запомним размер и положение окна
 		GetWindowRect(hwnd, &rect);
-		ListViewInit(NewFileName, hwnd);
+
+		ListViewInit(FileName, hwnd);
 	}
 	
 	break;
