@@ -33,7 +33,7 @@ void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
 void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size);
 
 /*—читать размер папки*/
-BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
+BOOL __stdcall CountDirSize(LPCTSTR lpFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
 typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
 BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
 
@@ -50,7 +50,7 @@ RECT rect = { 0 }; // размер и положение окна
 TCHAR FileName[MAX_PATH] = TEXT(""); // путь до редактируемого файла/папки
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 LPCTSTR lpszFileName = NULL; // указатель на им€ файла/каталога
-DWORD cchPath = 0; // длина пути к файлу/каталогу
+DWORD CountPathLenght = 0; // длина пути к файлу/каталогу
 HKEY hKey = NULL; // дескриптор ключа рееста
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
@@ -241,7 +241,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	case ID_OPEN_DIR://ќткрыть папку
 	{
 		BROWSEINFO bi;//structure for open special box with folder in treview
-		TCHAR                   szDisplayName[MAX_PATH];//for name of path
 		LPITEMIDLIST            pidl;
 		LPMALLOC  pMalloc = NULL;
 
@@ -273,9 +272,9 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		lpszFileName = PathFindFileName(FileName);
 
 		// вычисл€ем длину пути к файлу/каталогу
-		cchPath = (DWORD)(lpszFileName - FileName) - 1;
+		CountPathLenght = (DWORD)(lpszFileName - FileName) - 1;
 		// раздел€ем нуль-символом путь и им€ файла/каталога
-		FileName[cchPath] = _T('\0');
+		FileName[CountPathLenght] = _T('\0');
 
 		if (CompareString(LOCALE_USER_DEFAULT, 0, lpszFileName, -1, NewFileName, -1) != CSTR_EQUAL) // (!) изменилось им€ файла/каталога
 		{
@@ -290,7 +289,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		else
 		{
 			// заменим нуль-символ, раздел€ющий путь и им€ файла/каталога
-			FileName[cchPath] = _T('\\');
+			FileName[CountPathLenght] = _T('\\');
 		} // else
 
 		// массив атрибутов
@@ -332,15 +331,14 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		lpszFileName = PathFindFileName(FileName);
 
 		// вычисл€ем длину пути к файлу/каталогу
-		cchPath = (DWORD)(lpszFileName - FileName) - 1;
+		CountPathLenght = (DWORD)(lpszFileName - FileName) - 1;
 		// раздел€ем нуль-символом путь и им€ файла/каталога
-		FileName[cchPath] = _T('\0');
+		FileName[CountPathLenght] = _T('\0');
 
 		if (CompareString(LOCALE_USER_DEFAULT, 0, lpszFileName, -1, NewFileName, -1) != CSTR_EQUAL) // (!) изменилось им€ файла/каталога
 		{
 			TCHAR ExistingFileName[MAX_PATH]; // старое им€ файла/каталога
 			StringCchPrintf(ExistingFileName, _countof(ExistingFileName), TEXT("%s\\%s"), FileName, lpszFileName);
-
 			// формируем новый путь к файлу/каталогу
 			PathAppend(FileName, NewFileName);
 			// переименовываем файл/каталог
@@ -349,7 +347,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		else
 		{
 			// заменим нуль-символ, раздел€ющий путь и им€ файла/каталога
-			FileName[cchPath] = _T('\\');
+			FileName[CountPathLenght] = _T('\\');
 		} // else
 		// запомним размер и положение окна
 		GetWindowRect(hwnd, &rect);
@@ -405,14 +403,12 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 	{
 		//расчет дл€ папки 
-		CalculateSize(path, &bhfi, &sizeDir);
+		CountDirSize(path, &bhfi, &sizeDir);
 		PrintDirectSize(Buffer, _countof(Buffer), sizeDir);
 	}
 	else
 	{
-
-		PrintFileSize(Buffer, _countof(Buffer), LI_Size);
-		
+		PrintFileSize(Buffer, _countof(Buffer), LI_Size);	
 	}
 
 	LPTSTR lpFN = PathFindFileNameW(path);
@@ -500,12 +496,12 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	return TRUE;
 }
 
-BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
+BOOL __stdcall CountDirSize(LPCTSTR lpFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
 {
 	if (lpFileAttributeData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 	{
 		// продолжим поиск внутри каталога
-		return FileSearch(TEXT("*"), lpszFileName, CalculateSize, lpvParam);
+		return FileSearch(TEXT("*"), lpszFileName, CountDirSize, lpvParam);
 	} // if
 	return TRUE; // возвращаем TRUE, чтобы продолжить поиск
 }
@@ -514,9 +510,9 @@ BOOL FileSearch(LPCTSTR lpszFileName,LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LP
 {
 	WIN32_FIND_DATA ffd;
 	LARGE_INTEGER filesize;
-	LARGE_INTEGER size;
+
 	TCHAR szDir[MAX_PATH];
-	size_t length_of_arg;
+
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	StringCchCopy(szDir, MAX_PATH, path);
 	StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
@@ -544,12 +540,9 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 {
 	SYSTEMTIME st;
 
-	// преобразуем дату и врем€ из FILETIME в SYSTEMTIME
-	BOOL bRet = FileTimeToSystemTime(lpFileTime, &st);
-
-	// приведем дату и врем€ к текущему часовому по€су
+	BOOL bRet = FileTimeToSystemTime(lpFileTime, &st);//из FILETIME в SYSTEMTIME
 	if (FALSE != bRet)
-		bRet = SystemTimeToTzSpecificLocalTime(NULL, &st, &st);
+		bRet = SystemTimeToTzSpecificLocalTime(NULL, &st, &st);	// приведем дату и врем€ к текущему часовому по€су
 
 	if (FALSE != bRet)
 	{
@@ -563,10 +556,9 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 
 		if (len < cchFileTime)
 			GetTimeFormat(LOCALE_USER_DEFAULT, TIME_FORCE24HOURFORMAT, &st, NULL, lpszFileTime + len, cchFileTime - len);
-	} // if
-
+	} 
 	return bRet;
-} // GetFileTimeFormat
+} 
 
 void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
 {
