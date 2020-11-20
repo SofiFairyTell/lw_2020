@@ -79,7 +79,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 		0, NULL, REG_OPTION_NON_VOLATILE, KEY_QUERY_VALUE | KEY_SET_VALUE, NULL, &hKey, &dwDisposition);
 	
 	// копируем имя файла/каталога из системного реестра
-	RegGetValueSZ(hKey, TEXT("FileName"), FileName, _countof(FileName), NULL);
+	RegGetValueSZ(hKey, TEXT("Path"), FileName, _countof(FileName), NULL);
 	// копируем положение окна из системного реестра
 	RegGetValueBinary(hKey, TEXT("rect"), (LPBYTE)&rect, sizeof(rect), NULL);
 
@@ -96,12 +96,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	// создаем главное окно на основе нового оконного класса
 	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW^WS_THICKFRAME^WS_MINIMIZEBOX^WS_MAXIMIZEBOX, 300,300,
 		wr.right - wr.left,   wr.bottom - wr.top, NULL, NULL, hInstance, NULL);
-	
 	if (IsRectEmpty(&rect) == FALSE)
 		{
 			// изменяем положение окна
-			SetWindowPos(hWnd, NULL, rect.left, rect.top, 0, 0, SWP_NOSIZE);
-		} // if
+			SetWindowPos(hWnd, NULL, rect.left, rect.top, 0, 0, SWP_NOSIZE| SWP_SHOWWINDOW);
+	} // if
+	
 	
 	if (NULL == hWnd)
 	{
@@ -320,9 +320,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		// зададим атрибуты
 		SetFileAttributes(FileName, dwFileAttributes);
 
-		// запомним размер и положение окна
-		GetWindowRect(hwnd, &rect);
-
 		ListViewInit(FileName, hwnd);
 	}
 	
@@ -362,6 +359,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	break;
 	case ID_SAVE_PARAM://сохранение параметров файла в реестре
 	{
+		// запомним размер и положение окна
+		GetWindowRect(hwnd, &rect);
 		// сохраняем имя файла/каталога в системный реестр
 		RegSetValueSZ(hKey, TEXT("Path"), FileName);
 		// сохраняем положение окна в системный реестр
