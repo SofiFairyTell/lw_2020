@@ -5,6 +5,7 @@
 #include <strsafe.h>
 #include <time.h>//для ctime
 #include <shlobj.h>
+#include <shlwapi.h>
 #include <shobjidl.h>//for browserinfo
 #include <fileapi.h>
 #include <string>
@@ -16,7 +17,7 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-
+#pragma comment(lib, "shlwapi.lib")
 // оконная процедура главного окна
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 /*Обработчики сообщений WM_CREATE WM_DESTROY WM_SIZE WM_COMMAND */
@@ -63,7 +64,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования				
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования		
+
 	
 	if (0 == RegisterClassEx(&wcex)) // регистрируем класс
 	{
@@ -137,6 +139,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
+	CreateWindowEx(0, TEXT("Edit"),NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 30, 10, 400, 30, hwnd, (HMENU)IDC_EDIT_FILENAME, lpCRStr->hInstance, NULL);
 	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS , 30, 40, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 	
 	
@@ -292,22 +295,35 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	//получение информации о размере файла
 	//get info about size of file
 	LARGE_INTEGER LI_Size;
-	ULARGE_INTEGER size = { 0 };
+	ULARGE_INTEGER sizeDir = { 0 };
+	hFile = CreateFile(
+		FileName,   // имя файла
+		GENERIC_READ,          // чтение из файла
+		FILE_SHARE_READ,       // совместный доступ к файлу
+		NULL,                  // защиты нет
+		OPEN_EXISTING,         // открываем существующий файл
+		FILE_ATTRIBUTE_NORMAL,  // асинхронный ввод
+		NULL                   // шаблона нет
+	);
 	if (!GetFileSizeEx(hFile, &LI_Size))
 	{
 		//обработка ошибки
 	}
-	if (bhfi.dwFileAttributes != FILE_ATTRIBUTE_DIRECTORY)
+	if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 	{
-		PrintFileSize(Buffer, _countof(Buffer), LI_Size);
+		//расчет для папки 
+		CalculateSize(path, &bhfi, &sizeDir);
+		PrintDirectSize(Buffer, _countof(Buffer), sizeDir);
 	}
 	else
 	{
-		CalculateSize(path, &bhfi, &size);
-		PrintDirectSize(Buffer, _countof(Buffer), size);
-		//расчет для папки 
+
+		PrintFileSize(Buffer, _countof(Buffer), LI_Size);
+		
 	}
 
+	LPTSTR lpFN = PathFindFileNameW(path);
+	SetDlgItemText(hwnd, IDC_EDIT_FILENAME, lpFN);
 	/*Работает, не трогать*/
 
 	//Добавление найденных атрибутов в список просмотра
@@ -387,6 +403,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	} 
 
 	// закрываем дескриптор файла */
+	CloseHandle(hFile);
 	return TRUE;
 }
 
@@ -432,23 +449,6 @@ BOOL FileSearch(LPCTSTR lpszFileName,LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LP
 	return TRUE;
 } 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime)
 {
 	SYSTEMTIME st;
@@ -476,9 +476,6 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 
 	return bRet;
 } // GetFileTimeFormat
-
-
-
 
 void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
 {

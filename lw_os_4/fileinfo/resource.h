@@ -7,13 +7,13 @@
 #define IDC_LIST1                       103
 #define IDR_ACCELERATOR1                104
 #define IDC_STATIC_TYPE                 1001
-#define IDC_STATIC_FILE_PATH            1002
+#define IDC_STATIC_FILE_PATH			1002
 
 #define IDC_STATIC_SIZE                 1003
 #define IDC_STATIC_CREATE               1004
 #define IDC_SLIDER1                     1005
 #define IDC_EDIT						1006
-#define ID_                             40001
+#define IDC_EDIT_FILENAME               40001
 #define ID_OPEN_FILE                    40002
 #define ID_OPEN_DIR                     40003
 #define ID_RENAME                       40004
