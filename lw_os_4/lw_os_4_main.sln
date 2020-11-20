@@ -14,8 +14,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3_filecopy", "filecopy\file
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample2", "..\..\OS_samples\Sample (OS-Lab4)\Sample2\Sample2.vcxproj", "{518C6BA6-ADAD-4230-9F34-414ADEB6617B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3_infoconsole", "3_infoconsole\3_infoconsole.vcxproj", "{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2_fileproperties", "2_fileproperties\2_fileproperties.vcxproj", "{D5B016C3-47EB-45CF-81B4-526604B03D8E}"
 EndProject
 Global
@@ -48,14 +46,6 @@ Global
 		{518C6BA6-ADAD-4230-9F34-414ADEB6617B}.Release|x64.ActiveCfg = Release|Win32
 		{518C6BA6-ADAD-4230-9F34-414ADEB6617B}.Release|x86.ActiveCfg = Release|Win32
 		{518C6BA6-ADAD-4230-9F34-414ADEB6617B}.Release|x86.Build.0 = Release|Win32
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Debug|x64.ActiveCfg = Debug|x64
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Debug|x64.Build.0 = Debug|x64
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Debug|x86.ActiveCfg = Debug|Win32
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Debug|x86.Build.0 = Debug|Win32
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Release|x64.ActiveCfg = Release|x64
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Release|x64.Build.0 = Release|x64
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Release|x86.ActiveCfg = Release|Win32
-		{F24B08FE-2F0B-43A9-B8BF-7446A50E47F8}.Release|x86.Build.0 = Release|Win32
 		{D5B016C3-47EB-45CF-81B4-526604B03D8E}.Debug|x64.ActiveCfg = Debug|x64
 		{D5B016C3-47EB-45CF-81B4-526604B03D8E}.Debug|x64.Build.0 = Debug|x64
 		{D5B016C3-47EB-45CF-81B4-526604B03D8E}.Debug|x86.ActiveCfg = Debug|Win32

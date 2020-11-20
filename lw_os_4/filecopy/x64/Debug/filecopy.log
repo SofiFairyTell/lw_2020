@@ -1,3 +1,4 @@
-﻿  filecopy.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\filecopy\filecopy.cpp(39): warning C4129: : неизвестная escape-последовательность
-  filecopy.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\filecopy.exe
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (x64\Debug\) содержит файлы, которые используются совместно с другим проектом (filecopy.vcxproj).  Это может привести к ошибкам очистки и перестроения.
+  filecopy.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\filecopy\filecopy.cpp(62): warning C4101: filesize: неиспользованная локальная переменная
+  filecopy.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\3_filecopy.exe

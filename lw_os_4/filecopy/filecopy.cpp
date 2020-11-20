@@ -1,49 +1,92 @@
-#include <Windows.h>
-#include <tchar.h>
-#include <stdio.h>
-#include <locale.h>
-#include <strsafe.h>
+#include <windows.h>
 #include <iostream>
-#include <io.h>
-#include <time.h>
+#include <stdio.h>
+#include <conio.h>
+
+#include <WindowsX.h>
+#include <tchar.h>
+#include <CommCtrl.h>
+#include <strsafe.h>
+#include <time.h>//для ctime
+#include <shlobj.h>
 #include <shlwapi.h>
+#include <shobjidl.h>//for browserinfo
+#include <fileapi.h>
+#include <string>
+#include <wchar.h>
+
+using namespace std;
+#pragma warning(disable : 4996) //отключает Ошибку deprecate. Возникает, когда используется устаревшая функци
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #pragma comment(lib, "shlwapi.lib")
 
+
 typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-
-// функция, используемая для копирования файлов и каталогов
-BOOL __stdcall FileCopy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-
-// функция, выполняющая операцию с файлом или каталогом
+BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
+BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
 BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC lpFunc);
 
-// функция, которая выполняет поиск внутри каталога
-BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR lpszDirName, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
+//indir - откуда копировать
+//outdir - куда копировать
 
-int _tmain(int argc, LPTSTR argv[])
+BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
 {
-	setlocale(LC_ALL, "");
-	std::cout << ">Начало программы\n" << std::endl;
-	do 
-	{
-	if ((4 == argc) && (_tcscmp(argv[1], TEXT("/copy")) == 0)) // копирование файлов и каталогов
-	{
-		std::cout << "> Копирование" << argv[2] << " в " << argv[3] << "\n";
-		/*передача аргументов командной строки для копирования*/
-		BOOL bRet = FileOperation(argv[2], argv[3], FileCopy);
+	LPCTSTR lpTargetDirectory = (LPCTSTR)lpvParam; // каталог, в который нужно скопировать файл/каталог
 
-		if (FALSE != bRet)
-			std::cout << "> Успешно" << "\n";
-		else
-			std::cout << "> Код ошибки"<< GetLastError()<<"\n";
-	} 
-	else
+	TCHAR szNewFileName[MAX_PATH]; // новое имя файла/каталога
+	StringCchPrintf(szNewFileName, _countof(szNewFileName), TEXT("%s\\%s"), (LPCTSTR)lpTargetDirectory, PathFindFileName(lpszFileName));
+
+	if (lpFileAttributeData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) // нужно скопировать каталог
 	{
-		std::cout<<"Формат ввода: /copy <имя файла> <каталог>\n\n\ \t<имя файла> - имя копируемого файла или каталога\n\n\t<каталог> - каталог, в который нужно скопировать файл или каталог\n\n";
-	} 
-	} while (argv[1] != TEXT("выход"));
-	
-} 
+		// создаём новый каталог (атрибуты копируются)
+		BOOL bRet = CreateDirectoryEx(lpszFileName, szNewFileName, NULL);
+
+		if ((FALSE != bRet) || (GetLastError() == ERROR_ALREADY_EXISTS)) // (!) ошибка: Невозможно создать каталог, так как он уже существует. 
+		{
+			// продолжим поиск внутри каталога
+			bRet = FileSearch(TEXT("*"), lpszFileName, Copy, szNewFileName);
+		} // if
+
+		return bRet;
+	} // if
+
+	// копируем файл
+	return CopyFile(lpszFileName, szNewFileName, FALSE);
+}
+
+BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
+{
+	WIN32_FIND_DATA ffd;
+	LARGE_INTEGER filesize;
+
+	TCHAR szDir[MAX_PATH];
+
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	StringCchCopy(szDir, MAX_PATH, path);
+	StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
+	hFind = FindFirstFile(szDir, &ffd);
+
+	BOOL bRet = TRUE;
+
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		//error
+	}
+	do
+	{
+		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			bRet = lpSearchFunc(szDir, (LPWIN32_FILE_ATTRIBUTE_DATA)&ffd, lpvParam);
+			if (FALSE == bRet) break; // прерываем поиск
+		}
+	} while (FindNextFile(hFind, &ffd) != 0);
+
+	FindClose(hFind);
+	return TRUE;
+}
+
 BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC lpFunc)
 {
 	if (NULL != lpTargetDirectory)
@@ -53,13 +96,13 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 		if (INVALID_FILE_ATTRIBUTES == dwFileAttributes) // (!) ошибка
 		{
 			return FALSE;
-		} 
+		} // if
 		else if ((dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) // (!) не является каталогом
 		{
 			SetLastError(ERROR_PATH_NOT_FOUND);
 			return FALSE;
-		} 
-	} 
+		} // if
+	} // if
 
 	WIN32_FILE_ATTRIBUTE_DATA fad;
 
@@ -70,69 +113,27 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 	{
 		// выполняем операцию с файлом/каталогом
 		bRet = lpFunc(lpszFileName, &fad, (LPVOID)lpTargetDirectory);
-	} 
+	} // if
 
 	return bRet;
-} 
+} // FileOperation
 
-BOOL __stdcall FileCopy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
+
+int _tmain(int argc, LPTSTR argv[])
 {
-	LPCTSTR lpTargetDirectory = (LPCTSTR)lpvParam; // каталог, в который нужно скопировать файл/каталог
+	_tsetlocale(LC_ALL, TEXT(""));
 
-	TCHAR NewFileName[MAX_PATH]; // новое имя файла/каталога
-	StringCchPrintf(NewFileName, _countof(NewFileName), TEXT("%s\\%s"), (LPCTSTR)lpTargetDirectory, PathFindFileName(lpszFileName));
+	// if ((4 == argc) && (_tcscmp(argv[1], TEXT("/copy")) == 0)) // копирование файлов и каталогов
+	//{
+	//	_tprintf(TEXT("> Копирование \"%s\" в каталог \"%s\\\"\n"), argv[2], argv[3]);
+	//	// копируем файл/каталог
+		BOOL bRet = FileOperation(L"C:\\test\\tests.txt", L"C:\\test\\libr", Copy);
 
-	if (lpFileAttributeData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) 
-	{
-		// создаём новый каталог 
-		BOOL Ret = CreateDirectoryEx(lpszFileName, NewFileName, NULL);
+		if (FALSE != bRet) _tprintf(TEXT("> Успешно!\n"));
+		else _tprintf(TEXT("> Ошибка: %d\n"), GetLastError());
+	//} // if
 
-		if ((Ret != FALSE) || (GetLastError() == ERROR_ALREADY_EXISTS)) // (!) ошибка: Невозможно создать каталог, так как он уже существует. 
-		{
-			// продолжим поиск внутри каталога
-			Ret = FileSearch(TEXT("*"), lpszFileName, FileCopy, NewFileName);
-		}
-
-		return Ret;
-	} 
-	return CopyFile(lpszFileName, NewFileName, FALSE);
-} 
+} // _tmain
 
 
 
-
-// ----------------------------------------------------------------------------------------------
-BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR lpszDirName, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
-{
-	
-	WIN32_FIND_DATA  fd;
-	TCHAR FileName[MAX_PATH];
-
-	//path for search
-	//путь по которому ищем
-	StringCchPrintf(FileName, MAX_PATH, TEXT("%s\\%s"), lpszDirName, lpszFileName);
-
-	// находим первый файл
-	HANDLE hFindFile = FindFirstFile(FileName, &fd);
-	if (hFindFile == INVALID_HANDLE_VALUE) return FALSE; //file not found
-
-	BOOL bRet = TRUE;
-
-	for (BOOL bFindNext = TRUE; FALSE != bFindNext; bFindNext = FindNextFile(hFindFile, &fd))
-	{
-		//игнорируем текущий и родительский каталог
-		//ignore parent and current directory
-		if (_tcscmp(fd.cFileName, TEXT(".")) == 0 || _tcscmp(fd.cFileName, TEXT("..")) == 0)
-		{
-			continue;
-		} 
-		// формируем полный путь к файлу
-		StringCchPrintf(FileName, MAX_PATH, TEXT("%s\\%s"), lpszDirName, fd.cFileName);
-
-		bRet = lpSearchFunc(FileName, (LPWIN32_FILE_ATTRIBUTE_DATA)&fd, lpvParam);
-		if (bRet == FALSE) break; // прерываем поиск
-	} 
-		
-	FindClose(hFindFile); //close handle of search //закрытие дескриптора поиска
-	return bRet;
-}
