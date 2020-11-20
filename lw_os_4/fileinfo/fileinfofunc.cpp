@@ -37,15 +37,21 @@ BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_
 typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
 BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
 
+/*Работа с реестром*/
+LSTATUS RegSetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPCBYTE lpData, DWORD cb);
+LSTATUS RegSetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPCTSTR lpszData);
+LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD cb, LPDWORD lpcbNeeded);
+LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded);
+
 /*Перевод в ListView*/
 BOOL ListViewInit(LPTSTR path , HWND hwnd);
 /*Var*/
 RECT rect = { 0 }; // размер и положение окна
-TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
+TCHAR FileName[MAX_PATH] = TEXT(""); // путь до редактируемого файла/папки
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 LPCTSTR lpszFileName = NULL; // указатель на имя файла/каталога
 DWORD cchPath = 0; // длина пути к файлу/каталогу
-
+HKEY hKey = NULL; // дескриптор ключа рееста
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
@@ -64,8 +70,22 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования		
+	
 
+	DWORD dwDisposition;
+
+	// создаём и открываем ключ реестра для сохранения параметров приложения
+	RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\IT-311"),
+		0, NULL, REG_OPTION_NON_VOLATILE, KEY_QUERY_VALUE | KEY_SET_VALUE, NULL, &hKey, &dwDisposition);
+	
+	// копируем имя файла/каталога из системного реестра
+	RegGetValueSZ(hKey, TEXT("FileName"), FileName, _countof(FileName), NULL);
+	// копируем положение окна из системного реестра
+	RegGetValueBinary(hKey, TEXT("rect"), (LPBYTE)&rect, sizeof(rect), NULL);
+
+
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования		
+	
 	
 	if (0 == RegisterClassEx(&wcex)) // регистрируем класс
 	{
@@ -76,16 +96,19 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	// создаем главное окно на основе нового оконного класса
 	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW^WS_THICKFRAME^WS_MINIMIZEBOX^WS_MAXIMIZEBOX, 300,300,
 		wr.right - wr.left,   wr.bottom - wr.top, NULL, NULL, hInstance, NULL);
-
+	
+	if (IsRectEmpty(&rect) == FALSE)
+		{
+			// изменяем положение окна
+			SetWindowPos(hWnd, NULL, rect.left, rect.top, 0, 0, SWP_NOSIZE);
+		} // if
+	
 	if (NULL == hWnd)
 	{
 		return -1; // завершаем работу приложения
 	}
 
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
-
-
-
 
 	MSG  msg;
 	BOOL Ret;
@@ -142,7 +165,6 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 	CreateWindowEx(0, TEXT("Edit"),NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 30, 10, 400, 30, hwnd, (HMENU)IDC_EDIT_FILENAME, lpCRStr->hInstance, NULL);
 	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL,WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS , 30, 40, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 	
-	
 	//значения атрибутов
 	CreateWindowEx(0, TEXT("button"), TEXT("Только для чтения"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 200, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_READONLY, lpCRStr->hInstance, NULL);
 	CreateWindowEx(0, TEXT("button"), TEXT("Скрытый"), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 30, 230, 400, 30, hwnd, (HMENU)IDC_ATTRIBUTE_HIDDEN, lpCRStr->hInstance, NULL);
@@ -167,7 +189,10 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 		// вставляем столбец
 		ListView_InsertColumn(hwndLV, i, &lvColumns[i]);
 	} 
-	
+	if (FileName != NULL) //если путь не пустой, то заполнить список
+	{
+		ListViewInit(FileName, hwnd);
+	}
 
 	return TRUE;
 }
@@ -301,10 +326,52 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		ListViewInit(FileName, hwnd);
 	}
 	
-	break;
+	case ID_RENAME://переименование без сохранения атрибутов
+	{
+		TCHAR NewFileName[MAX_PATH]; // новое имя файла/каталога
+		GetDlgItemText(hwnd, IDC_EDIT_FILENAME, NewFileName, _countof(NewFileName));//это имя и его к указателю lpszFileName
 
+			// найдём имя в пути к файлу/каталогу
+		lpszFileName = PathFindFileName(FileName);
+
+		// вычисляем длину пути к файлу/каталогу
+		cchPath = (DWORD)(lpszFileName - FileName) - 1;
+		// разделяем нуль-символом путь и имя файла/каталога
+		FileName[cchPath] = _T('\0');
+
+		if (CompareString(LOCALE_USER_DEFAULT, 0, lpszFileName, -1, NewFileName, -1) != CSTR_EQUAL) // (!) изменилось имя файла/каталога
+		{
+			TCHAR ExistingFileName[MAX_PATH]; // старое имя файла/каталога
+			StringCchPrintf(ExistingFileName, _countof(ExistingFileName), TEXT("%s\\%s"), FileName, lpszFileName);
+
+			// формируем новый путь к файлу/каталогу
+			PathAppend(FileName, NewFileName);
+			// переименовываем файл/каталог
+			MoveFile(ExistingFileName, FileName);
+		} // if
+		else
+		{
+			// заменим нуль-символ, разделяющий путь и имя файла/каталога
+			FileName[cchPath] = _T('\\');
+		} // else
+		// запомним размер и положение окна
+		GetWindowRect(hwnd, &rect);
+
+		ListViewInit(FileName, hwnd);
+	}
+	break;
+	case ID_SAVE_PARAM://сохранение параметров файла в реестре
+	{
+		// сохраняем имя файла/каталога в системный реестр
+		RegSetValueSZ(hKey, TEXT("Path"), FileName);
+		// сохраняем положение окна в системный реестр
+		RegSetValueBinary(hKey, TEXT("rect"), (LPCBYTE)&rect, sizeof(rect));
+
+	}
+	break;
 	case ID_EXIT:
 		SendMessage(hwnd, WM_CLOSE, 0, 0);
+		RegCloseKey(hKey);
 		break;
 
 	}
@@ -444,8 +511,6 @@ BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_
 	return TRUE; // возвращаем TRUE, чтобы продолжить поиск
 }
 
-
-
 BOOL FileSearch(LPCTSTR lpszFileName,LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
 {
 	WIN32_FIND_DATA ffd;
@@ -557,3 +622,64 @@ void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
 		StringCchPrintf((lpszBuffer + len), (cch - len), TEXT(" (%llu байт)"), size.QuadPart);
 	} // if
 } // StringCchPrintFileSize
+
+
+//work wit regist
+LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded)
+{
+	DWORD dwType;
+	// определяем тип получаемого значения параметра
+	LSTATUS lStatus = RegQueryValueEx(hKey, lpValueName, NULL, &dwType, NULL, NULL);
+
+	if (ERROR_SUCCESS == lStatus && REG_SZ == dwType)
+	{
+		// вычисляем размер буфера (в байтах)
+		DWORD cb = cch * sizeof(TCHAR);
+		// получаем значение параметра
+		lStatus = RegQueryValueEx(hKey, lpValueName, NULL, NULL, (LPBYTE)lpszData, &cb);
+
+		if (NULL != lpcchNeeded)
+			*lpcchNeeded = cb / sizeof(TCHAR);
+	} // if
+	else if (ERROR_SUCCESS == lStatus)
+	{
+		lStatus = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
+	} // if
+
+	return lStatus;
+} // RegGetValueSZ
+
+LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD cb, LPDWORD lpcbNeeded)
+{
+	DWORD dwType;
+	// определяем тип получаемого значения параметра
+	LSTATUS lStatus = RegQueryValueEx(hKey, lpValueName, NULL, &dwType, NULL, NULL);
+
+	if (ERROR_SUCCESS == lStatus && REG_BINARY == dwType)
+	{
+		// получаем значение параметра
+		lStatus = RegQueryValueEx(hKey, lpValueName, NULL, NULL, lpData, &cb);
+
+		if (NULL != lpcbNeeded) *lpcbNeeded = cb;
+	} // if
+	else if (ERROR_SUCCESS == lStatus)
+	{
+		lStatus = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
+	} // if
+
+	return lStatus;
+} // RegGetValueBinary
+
+LSTATUS RegSetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPCTSTR lpszData)
+{
+	// вычисляем размер строкового значения (в байтах)
+	DWORD cb = (_tcslen(lpszData) + 1) * sizeof(TCHAR);
+	// изменяем значение параметра
+	return RegSetValueEx(hKey, lpValueName, 0, REG_SZ, (LPCBYTE)lpszData, cb);
+} // RegSetValueSZ
+
+LSTATUS RegSetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPCBYTE lpData, DWORD cb)
+{
+	// изменяем значение параметра
+	return RegSetValueEx(hKey, lpValueName, 0, REG_BINARY, (LPCBYTE)lpData, cb);
+} // RegSetValueBinary
