@@ -7,7 +7,7 @@
 #include <tchar.h>
 #include <CommCtrl.h>
 #include <strsafe.h>
-#include <time.h>//для ctime
+
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <shobjidl.h>//for browserinfo
@@ -20,7 +20,7 @@ using namespace std;
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#pragma comment(lib, "shlwapi.lib")
+#pragma comment (lib, "shlwapi.lib")
 
 
 typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
@@ -28,8 +28,6 @@ BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttribut
 BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
 BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC lpFunc);
 
-//indir - откуда копировать
-//outdir - куда копировать
 
 BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
 {
@@ -37,7 +35,7 @@ BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttribut
 
 	TCHAR szNewFileName[MAX_PATH]; // новое имя файла/каталога
 	StringCchPrintf(szNewFileName, _countof(szNewFileName), TEXT("%s\\%s"), (LPCTSTR)lpTargetDirectory, PathFindFileName(lpszFileName));
-
+	
 	if (lpFileAttributeData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) // нужно скопировать каталог
 	{
 		// создаём новый каталог (атрибуты копируются)
@@ -56,16 +54,18 @@ BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttribut
 	return CopyFile(lpszFileName, szNewFileName, FALSE);
 }
 
+
 BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
 {
 	WIN32_FIND_DATA ffd;
 	LARGE_INTEGER filesize;
 
 	TCHAR szDir[MAX_PATH];
+	//TCHAR Path[MAX_PATH];
 
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	StringCchCopy(szDir, MAX_PATH, path);
-	StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
+	StringCchCat(szDir, MAX_PATH, TEXT("\\*.*"));
 	hFind = FindFirstFile(szDir, &ffd);
 
 	BOOL bRet = TRUE;
@@ -76,6 +76,14 @@ BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, L
 	}
 	do
 	{
+		if ((0 == lstrcmp(ffd.cFileName, L".")) ||
+			(0 == lstrcmp(ffd.cFileName, L"..")))
+		{
+			continue;
+		}
+		// формируем полный путь к файлу
+		StringCchPrintf(szDir, MAX_PATH, TEXT("%s\\%s"), path, ffd.cFileName);
+
 		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		{
 			bRet = lpSearchFunc(szDir, (LPWIN32_FILE_ATTRIBUTE_DATA)&ffd, lpvParam);
@@ -122,14 +130,8 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 int _tmain(int argc, LPTSTR argv[])
 {
 	_tsetlocale(LC_ALL, TEXT(""));
-
-	// if ((4 == argc) && (_tcscmp(argv[1], TEXT("/copy")) == 0)) // копирование файлов и каталогов
-	//{
-	//	_tprintf(TEXT("> Копирование \"%s\" в каталог \"%s\\\"\n"), argv[2], argv[3]);
-	//	// копируем файл/каталог
-		BOOL bRet = FileOperation(L"C:\\test\\tests.txt", L"C:\\test\\libr", Copy);
-
-		if (FALSE != bRet) _tprintf(TEXT("> Успешно!\n"));
+	BOOL bRet = FileOperation(L"C:\\test\\libr1", L"C:\\test\\libr", Copy);
+	if (FALSE != bRet) _tprintf(TEXT("> Успешно!\n"));
 		else _tprintf(TEXT("> Ошибка: %d\n"), GetLastError());
 	//} // if
 
@@ -137,3 +139,59 @@ int _tmain(int argc, LPTSTR argv[])
 
 
 
+
+//
+//#include <windows.h>
+//
+//void Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName, bool flag = false)
+//{
+//	WIN32_FIND_DATA ffd;
+//	HANDLE hFind;
+//
+//	TCHAR szFind[MAX_PATH + 1];
+//	TCHAR szInFileName[MAX_PATH + 1];
+//	TCHAR szOutFileName[MAX_PATH + 1];
+//
+//	lstrcpy(szFind, szInDirName);
+//	lstrcat(szFind, L"\\*.*"); //ищем файлы с любым именем и рысширением
+//
+//	hFind = FindFirstFile(szFind, &ffd);
+//
+//	do
+//	{
+//		//Формируем полный путь (источник)
+//		lstrcpy(szInFileName, szInDirName);
+//		lstrcat(szInFileName, L"\\");
+//		lstrcat(szInFileName, ffd.cFileName);
+//
+//		//Формируем полный путь (результат)
+//		lstrcpy(szOutFileName, szOutDirName);
+//		lstrcat(szOutFileName, L"\\");
+//		lstrcat(szOutFileName, ffd.cFileName);
+//
+//		if (flag) //если flag == true, то копируем и папки
+//		{
+//			if (ffd.dwFileAttributes & 0x00000010)
+//			{
+//				if (lstrcmp(ffd.cFileName, L".") == 0 ||
+//					lstrcmp(ffd.cFileName, L"..") == 0) continue;
+//
+//				CreateDirectory(szOutFileName, NULL);
+//				Copy(szInFileName, szOutFileName);
+//			}
+//		} //иначе пропускаем папки
+//		else
+//			if (ffd.dwFileAttributes & 0x00000010) continue;
+//
+//		CopyFile(szInFileName, szOutFileName, TRUE);
+//	} while (FindNextFile(hFind, &ffd));
+//
+//	FindClose(hFind);
+//}
+//
+//int main()
+//{
+//	//В конце пути к папкам не нужно добавлять "\"
+//	Copy(L"C:\\test\\libr1", L"C:\\test\\libr", true); //если нужно скопировать и поддиректории
+//	//Copy(L"C:\\test\\libr1", L"C:\\test\\libr"); //если нужно скопировать только файлы
+//}
