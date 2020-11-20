@@ -44,7 +44,7 @@ RECT rect = { 0 }; // размер и положение окна
 TCHAR FileName[MAX_PATH] = TEXT(""); // им€ редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 LPCTSTR lpszFileName = NULL; // указатель на им€ файла/каталога
-
+DWORD cchPath = 0; // длина пути к файлу/каталогу
 
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
@@ -241,6 +241,33 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 	case ID_CHANGE_ATR://»зменение атрибутов
 	{
+		TCHAR NewFileName[MAX_PATH]; // новое им€ файла/каталога
+		GetDlgItemText(hwnd, IDC_EDIT_FILENAME, NewFileName, _countof(NewFileName));//это им€ и его к указателю lpszFileName
+
+			// найдЄм им€ в пути к файлу/каталогу
+		lpszFileName = PathFindFileName(FileName);
+
+		// вычисл€ем длину пути к файлу/каталогу
+		cchPath = (DWORD)(lpszFileName - FileName) - 1;
+		// раздел€ем нуль-символом путь и им€ файла/каталога
+		FileName[cchPath] = _T('\0');
+
+		if (CompareString(LOCALE_USER_DEFAULT, 0, lpszFileName, -1, NewFileName, -1) != CSTR_EQUAL) // (!) изменилось им€ файла/каталога
+		{
+			TCHAR ExistingFileName[MAX_PATH]; // старое им€ файла/каталога
+			StringCchPrintf(ExistingFileName, _countof(ExistingFileName), TEXT("%s\\%s"), FileName, lpszFileName);
+
+			// формируем новый путь к файлу/каталогу
+			PathAppend(FileName, NewFileName);
+			// переименовываем файл/каталог
+			MoveFile(ExistingFileName, FileName);
+		} // if
+		else
+		{
+			// заменим нуль-символ, раздел€ющий путь и им€ файла/каталога
+			FileName[cchPath] = _T('\\');
+		} // else
+
 		// массив атрибутов
 		constexpr DWORD attr[] = {
 			FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_ARCHIVE,
@@ -264,14 +291,13 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				dwFileAttributes |= attr[i]; // добавим соответствующий атрибут
 			} // if
 		} // for
-
+		
 		// зададим атрибуты
 		SetFileAttributes(FileName, dwFileAttributes);
 
 		// запомним размер и положение окна
 		GetWindowRect(hwnd, &rect);
-		// завершаем работу диалогового окна
-		EndDialog(hwnd, IDOK);
+		ListViewInit(NewFileName, hwnd);
 	}
 	
 	break;
