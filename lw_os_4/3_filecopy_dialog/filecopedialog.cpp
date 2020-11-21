@@ -240,14 +240,12 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		// Сохраняем координаты курсора мыши
 		xPos = LOWORD(lParam);
 		yPos = HIWORD(lParam);
-
-		hdc = GetDC(hwndDlg);
-		nSize = wsprintf(szBuf, TEXT("(%d, %d)"), xPos, yPos);
-
+	
 		/*Отследим точки над первым и вторым editbox 
 		Если да, то откроем для соответствующего editbox окна для их заполнения*/
 		if ((xPos > 312 & xPos < 544)&(yPos>39&yPos<81))
 		{
+			//В какую директорию скопировать
 				//TextOut(hdc, xPos, yPos, szBuf, nSize);
 				ZeroMemory(&bi, sizeof(bi));
 				bi.hwndOwner = NULL;
@@ -265,49 +263,18 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		else 
 			if ((xPos > 36 & xPos < 250)&(yPos > 39 & yPos < 81))
 			{
-				if (IsDlgButtonChecked(hwndDlg, IDC_CHECK1) == BST_CHECKED) // флажок установлен
-				{
-					OPENFILENAME openfile = { sizeof(OPENFILENAME) };
-					openfile.hInstance = GetWindowInstance(hwnd);
-					openfile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
-					openfile.lpstrFile = FileName;
-
-					openfile.nMaxFile = _countof(FileName);
-					openfile.lpstrTitle = TEXT("Открыть");
-					openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
-					openfile.lpstrDefExt = TEXT("txt");
-
-					if (GetOpenFileName(&openfile) != FALSE)
+					ZeroMemory(&bi, sizeof(bi));
+					bi.hwndOwner = NULL;
+					bi.pszDisplayName = FileName;
+					bi.lpszTitle = TEXT("Select folder");
+					bi.ulFlags = BIF_BROWSEINCLUDEFILES;
+					pidl = SHBrowseForFolder(&bi);//open window for select
+					if (pidl)
 					{
-						SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
+						SHGetPathFromIDList(pidl, FileName);//get path
 					}
-
-				} // if
-				else if (IsDlgButtonChecked(hwndDlg, IDC_CHECK2) == BST_CHECKED)
-				{
-					//копируем каталог
-				//TextOut(hdc, xPos, yPos, szBuf, nSize);//было надо для отслеживания нажатия курсора 
-				ZeroMemory(&bi, sizeof(bi));
-				bi.hwndOwner = NULL;
-				bi.pszDisplayName = FileName;
-				bi.lpszTitle = TEXT("Select folder");
-				bi.ulFlags = BIF_RETURNONLYFSDIRS;
-
-				pidl = SHBrowseForFolder(&bi);//open window for select
-				if (pidl)
-				{
-					SHGetPathFromIDList(pidl, FileName);//get path
+					SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
 				}
-				SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
-				}
-				/*else
-				{
-					MessageBox(hwnd, L"Нельзя установить 2 активных чекбокса", L" Стоп!", MB_YESNO);
-				}*/
-
-			}
-	
-		ReleaseDC(hwndDlg, hdc);
 	}break;
 	case WM_INITDIALOG:
 	{
@@ -356,13 +323,13 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		if (!(bRet == FALSE))
 		{
 
-			MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_YESNO);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"");
+			MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_OK);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"...");
 		}
 		else
 		{
 			MessageBox(hwnd, L"Файлы не скопированы.", L"Ошибка", MB_YESNO);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"");
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"...");
 		}
 	}
 	break;
