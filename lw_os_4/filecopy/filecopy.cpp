@@ -33,7 +33,7 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 
 // процедура диалогового окна 
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
+LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // обработчик сообщения WM_INITDIALOG
 BOOL Dialog_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);
 // обработчик сообщения WM_CLOSE
@@ -41,6 +41,8 @@ void Dialog_OnClose(HWND hwnd);
 // обработчик сообщения WM_COMMAND
 void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
+HWND hDlg = NULL;
+HWND hwnd = NULL;
 
 
 BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
@@ -138,58 +140,33 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 } 
 
 
-int WINAPI _wWinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
+int WINAPI _wWinMain(HINSTANCE hInstance, HINSTANCE , LPSTR lpszCmdLine, int nCmdShow)
 {
-	//WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
-
-	//wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	//wcex.lpfnWndProc = MainWindowProc; // оконная процедура
-	//wcex.hInstance = hInstance;
-	//wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
-	//wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
-	//if (0 == RegisterClassEx(&wcex)) // регистрируем класс
-	//{
-	//	return -1; // завершаем работу приложения
-	//}
-
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования
-
-	HWND hwnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
-		0, 0,100, 100, NULL, NULL, hInstance, NULL);
-	HWND hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, DialogProc);
-
-	MSG  msg;
-	BOOL Ret;
-
-	for (;;)
-	{
-
-		// извлекаем сообщение из очереди
-		Ret = GetMessage(&msg, NULL, 0, 0);
-		if (Ret == FALSE)
-		{
-			break; // получено WM_QUIT, выход из цикла
-		}
-		else if (!IsDialogMessage(hDlg, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-	return (int)msg.wParam;
-
-
-	//DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, (DLGPROC)DialogProc, 0);
-
-	/*
 	_tsetlocale(LC_ALL, TEXT(""));
 	BOOL bRet = FileOperation(L"C:\\test\\libr1", L"C:\\test\\libr", Copy);
 	if (FALSE != bRet) _tprintf(TEXT("> Успешно!\n"));
 		else _tprintf(TEXT("> Ошибка: %d\n"), GetLastError());
-	*/
+	
 	return 0;
 } 
+
+
+LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_CREATE:
+	{
+			HINSTANCE hInstance = GetWindowInstance(hwnd);
+			HWND hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, DialogProc);
+			ShowWindow(hDlg, SW_SHOW);
+	}
+	break;
+
+	}
+	
+	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
 
 
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
