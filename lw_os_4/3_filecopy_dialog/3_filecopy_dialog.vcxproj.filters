@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\filecopy\3_filecopy.rc">
-      <Filter>Файлы ресурсов</Filter>
-    </ResourceCompile>
+    <ClCompile Include="filecopedialog.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\filecopy\resource.h">
+    <ClInclude Include="resource.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="filecopedialog.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
+    <ResourceCompile Include="3_filecopy.rc">
+      <Filter>Файлы ресурсов</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

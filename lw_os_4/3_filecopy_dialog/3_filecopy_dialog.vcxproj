@@ -143,13 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\filecopy\3_filecopy.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\filecopy\resource.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="filecopedialog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="3_filecopy.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -73,7 +73,6 @@ BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttribut
 BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
 {
 	WIN32_FIND_DATA ffd;
-	LARGE_INTEGER filesize;
 
 	TCHAR szDir[MAX_PATH];
 	//TCHAR Path[MAX_PATH];
@@ -140,12 +139,24 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 }
 
 
-int  _wWinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
+
+	HINSTANCE relib = LoadLibrary(TEXT("riched32.dll"));    //load the dll don't forget this   
+											//and don't forget to free it (see wm_destroy) 
+	if (relib == NULL)
+		MessageBox(NULL, TEXT("Failed to load riched32.dll!"), TEXT("Error"), MB_ICONEXCLAMATION);
+	HACCEL hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
+
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
+
 	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 	wcex.lpfnWndProc = MainWindowProc; // оконная процедура
 	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 2);
+	
 	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
@@ -155,9 +166,19 @@ int  _wWinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
 	}
 
 	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования
+	// создаем главное окно на основе нового оконного класса
+	
 
-	hwnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
-		0, 0,100, 100, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
+		100, 100, 10, 10, NULL, NULL, hInstance, NULL);
+
+	if (NULL == hWnd)
+	{
+		return -1; // завершаем работу приложения
+	}
+
+	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
+
 
 
 	MSG  msg;
@@ -166,18 +187,20 @@ int  _wWinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
 	for (;;)
 	{
 
+
 		// извлекаем сообщение из очереди
 		Ret = GetMessage(&msg, NULL, 0, 0);
 		if (Ret == FALSE)
 		{
 			break; // получено WM_QUIT, выход из цикла
 		}
-		else if (!IsDialogMessage(hDlg, &msg))
+		else if (!TranslateAccelerator(hWnd, hAccel, &msg))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 	}
+	
 	return (int)msg.wParam;
 }
 
@@ -193,7 +216,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		ShowWindow(hDlg, SW_SHOW);
 	}
 	break;
-
+	
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -202,8 +225,90 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	TCHAR FileName[260];
+	BROWSEINFO bi;//structure for open special box with folder in treview
+	HDC hdc;
+	LPITEMIDLIST pidl;
+	LPMALLOC  pMalloc = NULL;
 	switch (uMsg)
 	{
+	case WM_LBUTTONDOWN:
+	{
+		DWORD xPos, yPos, nSize;
+		TCHAR szBuf[80];
+
+		// Сохраняем координаты курсора мыши
+		xPos = LOWORD(lParam);
+		yPos = HIWORD(lParam);
+
+		hdc = GetDC(hwndDlg);
+		nSize = wsprintf(szBuf, TEXT("(%d, %d)"), xPos, yPos);
+
+		/*Отследим точки над первым и вторым editbox 
+		Если да, то откроем для соответствующего editbox окна для их заполнения*/
+		if ((xPos > 312 & xPos < 544)&(yPos>39&yPos<81))
+		{
+				//TextOut(hdc, xPos, yPos, szBuf, nSize);
+				ZeroMemory(&bi, sizeof(bi));
+				bi.hwndOwner = NULL;
+				bi.pszDisplayName = FileName;
+				bi.lpszTitle = TEXT("Select folder");
+				bi.ulFlags = BIF_RETURNONLYFSDIRS;
+
+				pidl = SHBrowseForFolder(&bi);//open window for select
+				if (pidl)
+				{
+					SHGetPathFromIDList(pidl, FileName);//get path
+				}
+				SetDlgItemText(hwndDlg, IDC_EDIT_TO,FileName);
+		}
+		else 
+			if ((xPos > 36 & xPos < 250)&(yPos > 39 & yPos < 81))
+			{
+				if (IsDlgButtonChecked(hwndDlg, IDC_CHECK1) == BST_CHECKED) // флажок установлен
+				{
+					OPENFILENAME openfile = { sizeof(OPENFILENAME) };
+					openfile.hInstance = GetWindowInstance(hwnd);
+					openfile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
+					openfile.lpstrFile = FileName;
+
+					openfile.nMaxFile = _countof(FileName);
+					openfile.lpstrTitle = TEXT("Открыть");
+					openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
+					openfile.lpstrDefExt = TEXT("txt");
+
+					if (GetOpenFileName(&openfile) != FALSE)
+					{
+						SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
+					}
+
+				} // if
+				else if (IsDlgButtonChecked(hwndDlg, IDC_CHECK2) == BST_CHECKED)
+				{
+					//копируем каталог
+				//TextOut(hdc, xPos, yPos, szBuf, nSize);//было надо для отслеживания нажатия курсора 
+				ZeroMemory(&bi, sizeof(bi));
+				bi.hwndOwner = NULL;
+				bi.pszDisplayName = FileName;
+				bi.lpszTitle = TEXT("Select folder");
+				bi.ulFlags = BIF_RETURNONLYFSDIRS;
+
+				pidl = SHBrowseForFolder(&bi);//open window for select
+				if (pidl)
+				{
+					SHGetPathFromIDList(pidl, FileName);//get path
+				}
+				SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
+				}
+				/*else
+				{
+					MessageBox(hwnd, L"Нельзя установить 2 активных чекбокса", L" Стоп!", MB_YESNO);
+				}*/
+
+			}
+	
+		ReleaseDC(hwndDlg, hdc);
+	}break;
 	case WM_INITDIALOG:
 	{
 		BOOL bRet = HANDLE_WM_INITDIALOG(hwndDlg, wParam, lParam, Dialog_OnInitDialog);
@@ -212,6 +317,7 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 	case WM_CLOSE:
 		HANDLE_WM_CLOSE(hwndDlg, wParam, lParam, Dialog_OnClose);
+
 		return TRUE;
 
 	case WM_COMMAND:
@@ -231,15 +337,33 @@ BOOL Dialog_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 void Dialog_OnClose(HWND hwnd)
 {
 	EndDialog(hwnd, IDCLOSE);
+	DestroyWindow(hwnd); // уничтожаем окно
+	PostQuitMessage(0); // отправляем сообщение WM_QUIT
 }
 
 void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	switch (id)
 	{
+	
 	case IDOK:
 	{
+		TCHAR FromName[260];
+		TCHAR ToName[260];
+		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
+		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));
+		BOOL bRet = FileOperation(FromName, ToName, Copy);
+		if (!(bRet == FALSE))
+		{
 
+			MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_YESNO);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"");
+		}
+		else
+		{
+			MessageBox(hwnd, L"Файлы не скопированы.", L"Ошибка", MB_YESNO);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"");
+		}
 	}
 	break;
 
@@ -247,6 +371,8 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 		// завершаем работу диалогового окна
 		EndDialog(hwnd, IDCANCEL);
+		DestroyWindow(hwnd); // уничтожаем окно
+		PostQuitMessage(0);
 	}
 	break;
 	}
