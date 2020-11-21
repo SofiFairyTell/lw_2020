@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "1_fileditor", "fileditor\fileditor.vcxproj", "{4D199110-51A4-4265-9B50-917D890ED828}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fileditor", "fileditor\fileditor.vcxproj", "{4D199110-51A4-4265-9B50-917D890ED828}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57EDF18C-C3EF-408A-A7FA-2504182D73D4}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2_fileproperties", "2_fileproperties\2_fileproperties.vcxproj", "{D5B016C3-47EB-45CF-81B4-526604B03D8E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3_filecopy_dialog", "3_filecopy_dialog\3_filecopy_dialog.vcxproj", "{617B05C1-AC28-41AB-B5D5-648FE3D106BE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "4_fileinstalinfo", "4_fileinstalinfo\4_fileinstalinfo.vcxproj", "{C48D3399-8B63-46B2-AD08-E8221781789C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,14 @@ Global
 		{617B05C1-AC28-41AB-B5D5-648FE3D106BE}.Release|x64.Build.0 = Release|x64
 		{617B05C1-AC28-41AB-B5D5-648FE3D106BE}.Release|x86.ActiveCfg = Release|Win32
 		{617B05C1-AC28-41AB-B5D5-648FE3D106BE}.Release|x86.Build.0 = Release|Win32
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Debug|x64.ActiveCfg = Debug|x64
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Debug|x64.Build.0 = Debug|x64
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Debug|x86.ActiveCfg = Debug|Win32
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Debug|x86.Build.0 = Debug|Win32
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Release|x64.ActiveCfg = Release|x64
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Release|x64.Build.0 = Release|x64
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Release|x86.ActiveCfg = Release|Win32
+		{C48D3399-8B63-46B2-AD08-E8221781789C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
