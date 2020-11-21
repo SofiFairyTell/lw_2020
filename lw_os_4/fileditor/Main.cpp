@@ -1,8 +1,13 @@
+
+
+
+
+
 #include <Windows.h>
 #include <WindowsX.h>
 #include <tchar.h>
 #include <strsafe.h>
-#include <richedit.h>
+#include <richedit.h> //why ?
 #include "resource.h"
 
 
@@ -53,11 +58,11 @@ LOGFONT logFont; // параметры шрифта
 HFONT hFont = NULL; // дескриптор шрифта
 
 LPSTR lpszBufferText = NULL; // указатель на буфер для чтения/записи текстового файла
-OVERLAPPED _oRead = { 0 }, _oWrite = { 0 };
+OVERLAPPED _oRead = { 0 }, _oWrite = { 0 };//why?
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
-	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования	
+	
 	HINSTANCE relib = LoadLibrary(TEXT("riched32.dll"));    //load the dll don't forget this   
 											//and don't forget to free it (see wm_destroy) 
 	if (relib == NULL)
@@ -80,19 +85,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	{
 		return -1; // завершаем работу приложения
 	}
-
-	// создаем главное окно на основе нового оконного класса
-	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
-
-	if (NULL == hWnd)
-	{
-		return -1; // завершаем работу приложения
-	}
-
-	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 	
-	TCHAR InitFN[MAX_PATH];//имя файла инициализации
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования
+	// создаем главное окно на основе нового оконного класса
+		TCHAR InitFN[MAX_PATH];//имя файла инициализации
 
 	{
 		GetModuleFileName(NULL, InitFN, MAX_PATH);
@@ -105,6 +101,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	// загружаем параметры приложения из файла инициализации
 	LoadProfile(InitFN);
+	
+	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
+		WindowPosition.x, WindowPosition.y, WindowSize.cx, WindowSize.cy, NULL, NULL, hInstance, NULL);
+
+	if (NULL == hWnd)
+	{
+		return -1; // завершаем работу приложения
+	}
+
+	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
+	
+
 	   	  
 	MSG  msg;
 	BOOL Ret;
@@ -141,9 +149,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		HANDLE_MSG(hwnd, WM_CREATE, OnCreate);
 		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
 	
-	case WM_KEYDOWN:
-
-			break;
+	
 	case WM_SIZE:
 	{
 			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
@@ -260,10 +266,10 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	logFont.lfWidth = 10; //ширина
 	logFont.lfWeight = 40; //толщина
 	logFont.lfEscapement = 0; //шрифт без поворота
-
+	
 	// создаём шрифт
 	hFont = CreateFontIndirect(&logFont);
-
+	static HWND hEdit = GetDlgItem(hwnd, IDC_EDIT_TEXT);
 	if (NULL != hFont)
 	{
 		// устанавливаем шрифт для поля ввода
@@ -275,6 +281,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	{
 		// задаём заголовок главного окна
 		SetWindowText(hwnd, FileName);
+		SendMessage(hEdit, EM_SETPARAFORMAT, 0, (LPARAM)&pf);//выравнивание текста
 	} 
 	else
 	{
@@ -391,133 +398,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		SetFocus(hEdit);// передаём фокус клавиатуы в поле ввода
 	}
 	break;
-#pragma region Font
 
-	case ID_BOLD_FONT:
-	{
-		cf.cbSize = sizeof(cf);
-
-		// Определяем формат символов
-		SendMessage(hEdit, EM_GETCHARFORMAT, TRUE, (LPARAM)&cf);
-
-		// Изменяем бит поля dwEffects, с помощью которого
-		// можно выделить символы как bold (жирное начертание)
-		cf.dwMask = CFM_BOLD;
-
-		// Инвертируем бит, определяющий жирное начертание
-		cf.dwEffects ^= CFE_BOLD;
-
-		// Изменяем формат символов
-		SendMessage(hEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
-		break;
-	}
-
-	// Устанавливаем или отменяем наклонное
-	// начертание символов
-	case ID_ITALIC_FONT:
-	{
-		cf.cbSize = sizeof(cf);
-		SendMessage(hEdit, EM_GETCHARFORMAT,
-			TRUE, (LPARAM)&cf);
-
-		cf.dwMask = CFM_ITALIC;
-		cf.dwEffects ^= CFE_ITALIC;
-		SendMessage(hEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
-		break;
-	}
-
-
-	case ID_FONT_EDIT: // Шрифт
-	{
-		// Определяем текущий формат символов
-		SendMessage(hEdit, EM_GETCHARFORMAT, TRUE, (LPARAM)&cf);
 	
-		memset(&choosef, 0, sizeof(choosef));
-		memset(&logFont, 0, sizeof(logFont));
-
-		choosef.hInstance = GetWindowInstance(hwnd); // указываем дескриптор экземпляра приложения
-		choosef.hwndOwner = hwnd; // указываем дескриптор окна владельца
-			   		 
-		// Если было задано выделение наклоном или жирным
-			// шрифтом,подбираем шрифт с соответствующими атрибутами
-		logFont.lfItalic = (BOOL)(cf.dwEffects & CFE_ITALIC);
-		logFont.lfUnderline = (BOOL)(cf.dwEffects & CFE_UNDERLINE);
-
-		// Преобразуем высоту из TWIPS-ов в пикселы.
-		// Устанавливаем отрицательный знак, чтобы 
-		// выполнялось преобразование и использовалось
-		// абсолютное значение высоты символов
-		logFont.lfHeight = -cf.yHeight / 20;
-
-		// Набор символов, принятый по умолчанию
-		logFont.lfCharSet = ANSI_CHARSET;
-
-		// Качество символов, принятое по умолчанию
-		logFont.lfQuality = DEFAULT_QUALITY;
-
-		// Выбираем семейство шрифтов
-		logFont.lfPitchAndFamily = cf.bPitchAndFamily;
-
-		// Название начертания шрифта
-		lstrcpy(logFont.lfFaceName, cf.szFaceName);
-
-		// Устанавливаем вес шрифта в зависимости от того,
-		// было использовано выделение жирным шрифтом 
-		// или нет
-		if (cf.dwEffects & CFE_BOLD)
-			logFont.lfWeight = FW_BOLD;
-		else
-			logFont.lfWeight = FW_NORMAL;
-		hDC = GetDC(hwnd);
-		// Заполняем структуру для функции выбора шрифта
-		choosef.lStructSize = sizeof(choosef);
-		choosef.Flags = CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT;
-		choosef.hDC = hDC;
-		choosef.hwndOwner = hwnd;
-		choosef.lpLogFont = &logFont;
-		choosef.rgbColors = RGB(0, 0, 0);
-		choosef.nFontType = SCREEN_FONTTYPE;
-
-		// Выводим на экран диалоговую панель для
-		// выбора шрифта
-		if (ChooseFont(&choosef))
-		{
-			// Можно использовать все биты поля dwEffects
-			cf.dwMask = CFM_BOLD | CFM_FACE | CFM_ITALIC |
-				CFM_UNDERLINE | CFM_SIZE | CFM_OFFSET;
-
-			// Преобразование в TWIPS-ы
-			cf.yHeight = -logFont.lfHeight * 20;
-
-			// Устанавливаем поле dwEffects 
-			cf.dwEffects = 0;
-			if (logFont.lfUnderline)
-				cf.dwEffects |= CFE_UNDERLINE;
-
-			if (logFont.lfWeight == FW_BOLD)
-				cf.dwEffects |= CFE_BOLD;
-
-			if (logFont.lfItalic)
-				cf.dwEffects |= CFE_ITALIC;
-
-			// Устанавливаем семейство шрифта
-			cf.bPitchAndFamily = logFont.lfPitchAndFamily;
-
-			// Устанавливаем название начертания шрифта
-			lstrcpy(cf.szFaceName, logFont.lfFaceName);
-
-			// Изменяем шрифтовое оформление символов
-			SendMessage(hEdit, EM_SETCHARFORMAT,
-				SCF_SELECTION, (LPARAM)&cf);
-		}
-
-		// Освобождаем контекст отображения
-		ReleaseDC(hwnd, hDC);
-
-	}
-	break;
-
-#pragma endregion	
 case IDM_EDCUT:
 		SendMessage(hEdit, WM_CUT, 0, 0);
 		break;
@@ -579,14 +461,25 @@ void LoadProfile(LPCTSTR lpFileName)
 	WindowSize.cx = GetPrivateProfileInt(TEXT("Window"), TEXT("Width"), CW_USEDEFAULT, lpFileName);
 	WindowSize.cy = GetPrivateProfileInt(TEXT("Window"), TEXT("Height"), 600, lpFileName);
 	
+	/*Dont init without this items*/
+	pf.cbSize = sizeof(pf);
+	pf.dwMask = PFM_ALIGNMENT;
+
 	//загрузка типа выравнивания
-	pf.wAlignment = GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName);
-
+	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName)==3)
+	{
+		pf.wAlignment = PFA_CENTER;
+	}
+	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName) == 2)
+	{
+			pf.wAlignment = PFA_RIGHT;
+	}
+	if (GetPrivateProfileInt(TEXT("Paraformat"), TEXT("wAlignment"), 0, lpFileName) == 1)
+	{
+		pf.wAlignment = PFA_LEFT;
+	}
 	// загружаем имя последнего редактируемого текстового файла
-
 	GetPrivateProfileString(TEXT("File"), TEXT("Filename"), NULL, FileName, MAX_PATH, lpFileName);
-
-
 } 
 
 void SaveProfile(LPCTSTR lpFileName)
@@ -607,6 +500,14 @@ void SaveProfile(LPCTSTR lpFileName)
 	StringCchPrintf(szString, 10, TEXT("%d"), WindowSize.cy);
 	WritePrivateProfileString(TEXT("Window"), TEXT("Height"), szString, lpFileName);
 	
+	//сохраняем параметры выравнивания текста
+	/*	warning! now this line describe all text in program. 
+		so, if you have first string with PFA_LEFT and second string with PFA_CENTER 
+		saveprofile write wAlignment = 3 (it is PFA_CENTER) in .ini file 
+	*/
+	StringCchPrintf(szString, 10, TEXT("%d"), pf.dwMask);
+	WritePrivateProfileString(TEXT("Paraformat"), TEXT("dwMask"), szString, lpFileName);
+	
 	StringCchPrintf(szString, 10, TEXT("%d"), pf.wAlignment);
 	WritePrivateProfileString(TEXT("Paraformat"), TEXT("wAlignment"), szString, lpFileName);
 
@@ -626,42 +527,35 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	if (INVALID_HANDLE_VALUE == hExistingFile) // не удалось открыть файл
 	{
 		return FALSE;
-	} // if
+	} 
 
-	// удаляем текст из поля ввода
-	Edit_SetText(hwndCtl, NULL);
+	Edit_SetText(hwndCtl, NULL);// удаляем текст из поля ввода
 
 	if (INVALID_HANDLE_VALUE != hFile)
 	{
-		// ожидаем завершения операции ввода/вывода
-		FinishIo(&_oWrite);
-		// закрываем дескриптор файла
+		FinishIo(&_oWrite);	// ожидаем завершения операции ввода/вывода
 		CloseHandle(hFile);
-	} // if
+	} 
 
 	hFile = hExistingFile;
-
-	// определяем размер файла 
-	LARGE_INTEGER size;
+	
+	LARGE_INTEGER size;// определяем размер файла 
 	BOOL bRet = GetFileSizeEx(hFile, &size);
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 		// выделяем память для буфера, в который будет считываться данные из файла
 		lpszBufferText = new CHAR[size.LowPart + 2];
-
-		// начинаем асинхронное чтение данных из файла
-		bRet = ReadAsync(hFile, lpszBufferText, 0, size.LowPart, &_oRead);
+		
+		bRet = ReadAsync(hFile, lpszBufferText, 0, size.LowPart, &_oRead);// асинхронное чтение данных из файла
 
 		if (FALSE == bRet) // возникла ошибка
-		{
-			// освобождаем выделенную память
-			delete[] lpszBufferText, lpszBufferText = NULL;
-		} // if
-	} // if
-
+		{		
+			delete[] lpszBufferText, lpszBufferText = NULL;// освобождаем выделенную память
+		} 
+	} 
 	return bRet;
-} // OpenFileAsync
+} 
 
 BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 {
@@ -673,23 +567,20 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 		if (INVALID_HANDLE_VALUE == hNewFile) // не удалось открыть файл
 		{
 			return FALSE;
-		} // if
+		} 
 
 		if (INVALID_HANDLE_VALUE != hFile)
-		{
-			// ожидаем завершения операции ввода/вывода
-			FinishIo(&_oWrite);
-			// закрываем дескриптор файла
+		{		
+			FinishIo(&_oWrite);// ожидаем завершения операции ввода/вывода
 			CloseHandle(hFile);
-		} // if
+		} 
 
 		hFile = hNewFile;
-	} // if
+	} 
 	else if (INVALID_HANDLE_VALUE != hFile)
-	{
-		// ожидаем завершения операции ввода/вывода
-		FinishIo(&_oWrite);
-	} // if
+	{	
+		FinishIo(&_oWrite);// ожидаем завершения операции ввода/вывода
+	}
 	else
 	{
 		// создаём и открываем файл для чтения и записи
@@ -698,38 +589,34 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 		if (INVALID_HANDLE_VALUE == hFile) // не удалось открыть файл
 		{
 			return FALSE;
-		} // if
-	} // else
-
-	// определяем размер текста
-	LARGE_INTEGER size;
+		} 
+	} 
+	
+	LARGE_INTEGER size;// определяем размер текста
 	size.QuadPart = GetWindowTextLengthA(hwndCtl);
 
-	// изменяем положение указателя файла
-	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);
-	// устанавливаем конец файла
+	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
+	
 	if (FALSE != bRet)
-		bRet = SetEndOfFile(hFile);
+		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
-		// выделяем память для буфера, из которого будут записываться данные в файл
-		lpszBufferText = new CHAR[size.LowPart + 1];
-		// копируем ANSI-строку из поля ввода в буффер
-		GetWindowTextA(hwndCtl, lpszBufferText, size.LowPart + 1);
 
-		// начинаем асинхронную запись данных в файл
-		bRet = WriteAsync(hFile, lpszBufferText, 0, size.LowPart, &_oWrite);
+		lpszBufferText = new CHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
 
-		if (FALSE == bRet) // возникла ошибка
+		GetWindowTextA(hwndCtl, lpszBufferText, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
+		
+		bRet = WriteAsync(hFile, lpszBufferText, 0, size.LowPart, &_oWrite);// асинхронная запись данных в файл
+
+		if (FALSE == bRet) 
 		{
-			// освобождаем выделенную память
-			delete[] lpszBufferText, lpszBufferText = NULL;
-		} // if
-	} // if
+			delete[] lpszBufferText, lpszBufferText = NULL;// освобождаем выделенную память
+		} 
+	} 
 
 	return bRet;
-} // SaveFileAsync
+} 
 
 /*Asynch work*/
 // ----------------------------------------------------------------------------------------------
@@ -749,10 +636,10 @@ BOOL ReadAsync(HANDLE hFile, LPVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOV
 	{
 		CloseHandle(lpOverlapped->hEvent), lpOverlapped->hEvent = NULL;
 		return FALSE;
-	} // if
+	} 
 
 	return TRUE;
-} // ReadAsync
+} 
 
 // ----------------------------------------------------------------------------------------------
 BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOVERLAPPED lpOverlapped)
@@ -774,7 +661,7 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	} // if
 
 	return TRUE;
-} // WriteAsync
+} 
 
 // ----------------------------------------------------------------------------------------------
 BOOL FinishIo(LPOVERLAPPED lpOverlapped)
@@ -788,27 +675,27 @@ BOOL FinishIo(LPOVERLAPPED lpOverlapped)
 		{
 			CloseHandle(lpOverlapped->hEvent), lpOverlapped->hEvent = NULL;
 			return TRUE;
-		} // if
-	} // if
+		} 
+	} 
 
 	return FALSE;
-} // FinishIo
+} 
 
 // ----------------------------------------------------------------------------------------------
 BOOL TryFinishIo(LPOVERLAPPED lpOverlapped)
 {
 	if (NULL != lpOverlapped->hEvent)
 	{
-		// определяем состояние операции ввода/вывода
-		DWORD dwResult = WaitForSingleObject(lpOverlapped->hEvent, 0);
+		
+		DWORD dwResult = WaitForSingleObject(lpOverlapped->hEvent, 0);// определяем состояние операции ввода/вывода
 
 		if (WAIT_OBJECT_0 == dwResult) // операция завершена
 		{
 			CloseHandle(lpOverlapped->hEvent), lpOverlapped->hEvent = NULL;
 			return TRUE;
-		} // if
-	} // if
+		} 
+	}
 
 	return FALSE;
-} // TryFinishIo
+} 
 

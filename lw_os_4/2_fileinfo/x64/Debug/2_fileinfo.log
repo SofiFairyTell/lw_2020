@@ -1,0 +1,4 @@
+﻿  fileinfomain.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\2_fileinfo\fileinfomain.cpp(555): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\2_fileinfo\fileinfomain.cpp(667): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
+  2_fileinfo.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\2_fileinfo.exe
