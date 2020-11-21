@@ -1,8 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (x64\Debug\) содержит файлы, которые используются совместно с другим проектом (2_fileinfo.vcxproj).  Это может привести к ошибкам очистки и перестроения.
-  fileinfofunc.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(244): warning C4101: szDisplayName: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(519): warning C4101: length_of_arg: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(517): warning C4101: size: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(562): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(675): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
-  2_fileproperties.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\2_fileproperties.exe
