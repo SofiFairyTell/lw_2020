@@ -29,8 +29,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime);
 
 /*Перевод чисел*/
-void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
-void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size);
+void ConvertFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
+void ConvertDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size);
 
 /*Считать размер папки*/
 BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
@@ -38,8 +38,7 @@ typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_A
 BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
 
 /*Работа с реестром*/
-LSTATUS RegSetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPCBYTE lpData, DWORD cb);
-LSTATUS RegSetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPCTSTR lpszData);
+
 LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD cb, LPDWORD lpcbNeeded);
 LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded);
 
@@ -358,13 +357,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	}
 	break;
 	case ID_SAVE_PARAM://сохранение параметров файла в реестре
-	{
+	{		
 		// запомним размер и положение окна
 		GetWindowRect(hwnd, &rect);
-		// сохраняем имя файла/каталога в системный реестр
-		RegSetValueSZ(hKey, TEXT("Path"), FileName);
+		// вычисляем размер строкового значения (в байтах)
+		DWORD cb = (_tcslen(FileName) + 1) * sizeof(TCHAR);
+		// изменяем значение параметра
+		RegSetValueEx(hKey, TEXT("Path"), 0, REG_SZ, (LPCBYTE)FileName, cb);
 		// сохраняем положение окна в системный реестр
-		RegSetValueBinary(hKey, TEXT("rect"), (LPCBYTE)&rect, sizeof(rect));
+		RegSetValueEx(hKey, TEXT("rect"), 0, REG_BINARY, (LPCBYTE)&rect, sizeof(rect));
+
 
 	}
 	break;
@@ -406,12 +408,12 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	{
 		//расчет для папки 
 		CalculateSize(path, &bhfi, &sizeDir);
-		PrintDirectSize(Buffer, _countof(Buffer), sizeDir);
+		ConvertDirectSize(Buffer, _countof(Buffer), sizeDir);
 	}
 	else
 	{
 
-		PrintFileSize(Buffer, _countof(Buffer), LI_Size);
+		ConvertFileSize(Buffer, _countof(Buffer), LI_Size);
 		
 	}
 
@@ -524,7 +526,7 @@ BOOL FileSearch(LPCTSTR lpszFileName,LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LP
 
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
-			//error
+			//error. terminator . later.
 	}
 	do
 	{
@@ -568,7 +570,7 @@ BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD c
 	return bRet;
 } // GetFileTimeFormat
 
-void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
+void ConvertFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
 {
 	if (size.QuadPart >= 0x40000000ULL)
 	{
@@ -595,7 +597,7 @@ void PrintFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
 	} // if
 } // StringCchPrintFileSize
 
-void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
+void ConvertDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
 {
 	if (size.QuadPart >= 0x40000000ULL)
 	{
@@ -668,17 +670,3 @@ LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD c
 
 	return lStatus;
 } // RegGetValueBinary
-
-LSTATUS RegSetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPCTSTR lpszData)
-{
-	// вычисляем размер строкового значения (в байтах)
-	DWORD cb = (_tcslen(lpszData) + 1) * sizeof(TCHAR);
-	// изменяем значение параметра
-	return RegSetValueEx(hKey, lpValueName, 0, REG_SZ, (LPCBYTE)lpszData, cb);
-} // RegSetValueSZ
-
-LSTATUS RegSetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPCBYTE lpData, DWORD cb)
-{
-	// изменяем значение параметра
-	return RegSetValueEx(hKey, lpValueName, 0, REG_BINARY, (LPCBYTE)lpData, cb);
-} // RegSetValueBinary
