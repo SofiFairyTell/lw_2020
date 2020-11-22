@@ -114,7 +114,7 @@ void SubFind(LSTATUS retCode, DWORD CMVlen, HKEY hSubKey)
 			if ((ERROR_SUCCESS == retCode) && (_T('\0') != lpData[0]))
 			{
 				_tprintf(TEXT("%s\n"), lpData);
-			} // if
+			} 
 		
 			std::cout <<  "\n";
 		} 

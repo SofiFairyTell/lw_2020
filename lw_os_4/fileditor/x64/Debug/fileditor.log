@@ -1,2 +1,6 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (x64\Debug\) содержит файлы, которые используются совместно с другим проектом (1_fileditor.vcxproj).  Это может привести к ошибкам очистки и перестроения.
+  Main.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(140): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(226): warning C4101: hDC: неиспользованная локальная переменная
+  LINK : не найден или не выполнена сборка C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\fileditor.exe при последней инкрементной компоновке; выполняется полная компоновка
   fileditor.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\fileditor.exe

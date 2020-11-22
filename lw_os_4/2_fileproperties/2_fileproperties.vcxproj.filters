@@ -28,5 +28,8 @@
     <ClInclude Include="..\fileinfo\resource.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="..\fileinfo\FileInfoFuncHeader.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

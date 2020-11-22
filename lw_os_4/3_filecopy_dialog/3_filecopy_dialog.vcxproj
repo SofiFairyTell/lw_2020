@@ -146,6 +146,7 @@
     <ClCompile Include="filecopedialog.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileCopeDialogHeader.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

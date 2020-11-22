@@ -150,6 +150,7 @@
     <ResourceCompile Include="..\fileinfo\2_fileinfo.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\fileinfo\FileInfoFuncHeader.h" />
     <ClInclude Include="..\fileinfo\resource.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
