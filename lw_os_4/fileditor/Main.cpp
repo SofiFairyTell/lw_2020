@@ -1,5 +1,5 @@
 #include "FileEditorHeader.h"
-
+#include <tchar.h>
 #define IDC_EDIT_TEXT        2001
 
 
@@ -487,7 +487,7 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	if (fSaveAs != FALSE)
 	{
 		// создаём и открываем файл для чтения и записи
-			HANDLE hNewFile = CreateFile(FileName,
+			HANDLE hNewFile = CreateFileW(FileName,
 			GENERIC_READ | GENERIC_WRITE,//запись и чтние
 			FILE_SHARE_READ, //для совместного чтения
 			NULL, //защиты нет
@@ -586,7 +586,10 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	ovl->Offset = dwOffset; // младшая часть смещения
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
 	// начинаем асинхронную операцию записи данных в файл
+	//TCHAR tcFF[] = TEXT("\xFF");
 	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
+	//BOOL bRet = WriteFile(hFile, &tcFF,1, dwSize, NULL, ovl);
+
 	DWORD  dwRet = GetLastError();
 	if (FALSE == bRet && ERROR_IO_PENDING != dwRet)
 	{
@@ -594,6 +597,9 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 		return FALSE;
 	} 
 	return TRUE;
+
+	
+
 } 
 
 BOOL FinishIo(LPOVERLAPPED ovl)

@@ -1,5 +1,8 @@
 #include "FileCopeDialogHeader.h"
+#include <string>
 
+#pragma region CopyBlock
+/*Хорошие функции с алгоритмами*/
 BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
 {
 	LPCTSTR lpTargetDirectory = (LPCTSTR)lpvParam; // каталог, в который нужно скопировать файл/каталог
@@ -93,6 +96,7 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 	return bRet;
 }
 
+#pragma endregion
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
@@ -132,8 +136,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 		return -1; // завершаем работу приложения
 	}
 
-	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
-
+	ShowWindow(hWnd, SW_HIDE); // отображаем главное окно
+	
 
 
 	MSG  msg;
@@ -212,8 +216,10 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				if (pidl)
 				{
 					SHGetPathFromIDList(pidl, FileName);//get path
+					SetDlgItemText(hwndDlg, IDC_EDIT_TO,FileName);
 				}
-				SetDlgItemText(hwndDlg, IDC_EDIT_TO,FileName);
+				
+				
 		}
 		else 
 			if ((xPos > 36 & xPos < 250)&(yPos > 39 & yPos < 81))
@@ -227,8 +233,9 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if (pidl)
 					{
 						SHGetPathFromIDList(pidl, FileName);//get path
+						SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
 					}
-					SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
+					
 				}
 	}break;
 	case WM_INITDIALOG:
@@ -267,31 +274,51 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	switch (id)
 	{
-	
+
 	case IDOK:
 	{
 		TCHAR FromName[260];
 		TCHAR ToName[260];
+
 		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
 		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));
-		BOOL bRet = FileOperation(FromName, ToName, Copy);
-		if (!(bRet == FALSE))
-		{
 
-			MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_OK);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"...");
+		//копирование файлов с помощью структуры SHFILEOPSTRUCT
+		TCHAR newFrom[MAX_PATH], newTo[MAX_PATH];
+		_tcscpy_s(newFrom, FromName);
+		newFrom[_tcsclen(FromName) + 1] = 0;
+
+		_tcscpy_s(newTo, ToName);
+		newTo[_tcsclen(ToName) + 1] = 0;
+
+		SHFILEOPSTRUCT fos;
+		memset(&fos, 0, sizeof(SHFILEOPSTRUCT));
+		fos.hwnd = hwnd;
+		fos.wFunc = FO_COPY;
+		fos.pFrom = newFrom;
+		fos.pTo = newTo;
+		fos.fFlags = FOF_SILENT;
+
+		int ResultError = SHFileOperation(&fos);
+
+		if (ResultError != 0)
+		{
+			MessageBox(hwnd, L"Файлы не скопированы.", L"Ошибка", MB_YESNO);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+			//ShowMessage(IntToStr(result));
 		}
 		else
 		{
-			MessageBox(hwnd, L"Файлы не скопированы.", L"Ошибка", MB_YESNO);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"...");
+			MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_OK);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
 		}
-	}
-	break;
+				
+	}	break;
 
 	case IDCANCEL:
 	{
-		// завершаем работу диалогового окна
 		EndDialog(hwnd, IDCANCEL);
 		DestroyWindow(hwnd); // уничтожаем окно
 		PostQuitMessage(0);
