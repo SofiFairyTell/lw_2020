@@ -1,0 +1,2082 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=Windows-1251">
+<title>NL: Файл util.h</title>
+<link href="nl.doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Создано системой Doxygen 1.4.7 -->
+<div class="tabs">
+  <ul>
+    <li><a href="index.html"><span>Титульная&nbsp;страница</span></a></li>
+    <li><a href="classes.html"><span>Классы</span></a></li>
+    <li id="current"><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="pages.html"><span>Описания</span></a></li>
+    <li><a href="examples.html"><span>Примеры</span></a></li>
+    <li>
+      <form action="search.php" method="get">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td><label>&nbsp;Поиск&nbsp;</label></td>
+            <td><input type="text" name="query" value="" size="20" accesskey="s"/></td>
+          </tr>
+        </table>
+      </form>
+    </li>
+  </ul></div>
+<div class="tabs">
+  <ul>
+    <li><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="globals.html"><span>Список&nbsp;членов&nbsp;всех&nbsp;файлов</span></a></li>
+  </ul></div>
+<h1>Файл util.h</h1>Вспомогательные процедуры. <a href="#_details">Подробнее...</a>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Обработка ошибок</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865">nl_err_enum</a> { <br>
+&nbsp;&nbsp;<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865d977d02f543ffb54bdd665b2fe5a2b1f">nl_err_OK</a> =  0, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865e0860522af1502c2e1d4a1f3a0c5136c">nl_err_out_of_memory</a> =  1, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865de14d6f5a34a7d71596ef10daa7c0c81">nl_err_inconsistent_size</a>, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865f72f712dadb18217b3e19c24a009cd7b">nl_err_incorrect_index</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865eccee13de27da16b9483f276901041ad">nl_err_matrix_must_be_square</a>, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c86512f1e2711c619440203ae746a1fc895b">nl_err_matrix_is_singular</a>, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c86512cc5433cb199b28b3e8a8d41d3f02fa">nl_err_matrix_is_not_positive_definite</a>, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865d90711e086d21f9b43e406161f71c36f">nl_err_IO</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c86545d052894e6c50ad085598cffabb861c">nl_err_diag_elem_must_be_non_zero</a>, 
+<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c8656a46a194271a01cac77ebc9724d7be58">nl_err_count</a>
+<br>
+ }</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Коды ошибок.  <a href="util_8h.html#51a9a5b60a381366ece56bb401c4c865">Подробнее...</a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void(*)&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#87c8e9ea30e23c54c9d9e91d1ec56679">nl_error</a> (<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865">nl_err_enum</a> error, int critical)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Указатель на функцию, которая вызывается в случае возникновения ошибки.  <a href="#87c8e9ea30e23c54c9d9e91d1ec56679"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#bb1729121f5a9055004a3bfa5b61c7ab">nl_exit_when_error</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Если значение этой переменной отлично от нуля, то в случае возникновения ошибки процедура <a class="el" href="util_8h.html#87c8e9ea30e23c54c9d9e91d1ec56679">nl_error</a> прерывает работу программы.  <a href="#bb1729121f5a9055004a3bfa5b61c7ab"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Создание, удаление и копирование векторов</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a> (size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Создать вектор длины <img class="formulaInl" alt="$n$" src="form_37.png">.  <a href="#395ea00a37f001729adc1ac0ce22f54a"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">size_t *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#9fcf91bd050dc13ac020af86cab5bfb7">nl_xvector_create</a> (size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Создать вектор длины <img class="formulaInl" alt="$n$" src="form_37.png">.  <a href="#9fcf91bd050dc13ac020af86cab5bfb7"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#a1eda085a9321ffc1504e2ce95f1a1dd">nl_dvector_create_copy</a> (const double *v, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Создать копию вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">.  <a href="#a1eda085a9321ffc1504e2ce95f1a1dd"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">size_t *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#234cbace132cd9eb967ea36217570d75">nl_xvector_create_copy</a> (size_t *v, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Создать копию вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">.  <a href="#234cbace132cd9eb967ea36217570d75"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#9271fc7be1e78b8df154552e449d249c">nl_dvector_copy</a> (double *a, const double *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Копирует вектор <img class="formulaInl" alt="$b$" src="form_41.png"> в вектор <img class="formulaInl" alt="$a$" src="form_123.png">.  <a href="#9271fc7be1e78b8df154552e449d249c"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#f4712d0a87932d58e35a3aed4c019bf5">nl_xvector_copy</a> (size_t *a, const size_t *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Копирует вектор <img class="formulaInl" alt="$b$" src="form_41.png"> в вектор <img class="formulaInl" alt="$a$" src="form_123.png">.  <a href="#f4712d0a87932d58e35a3aed4c019bf5"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a> (double *v)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Освободить память, занятую вектором <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">.  <a href="#1ec620dc1da7f4d6fdebccd70eea844a"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#6e9ebfb5c2ac99ce4756b95697e2562d">nl_xvector_free</a> (size_t *v)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Освободить память, занятую вектором <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">.  <a href="#6e9ebfb5c2ac99ce4756b95697e2562d"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Ввод и вывод векторов</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#fb0e62a1dcae57f968237392f74a15c6">nl_dvector_print</a> (double *v, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> на экран.  <a href="#fb0e62a1dcae57f968237392f74a15c6"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#b9d15dad25e09dd9dfa3175d29696de5">nl_xvector_print</a> (size_t *v, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> на экран.  <a href="#b9d15dad25e09dd9dfa3175d29696de5"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#a83d161b95e8b9e087d28f8b432b3691">nl_dvector_fprint</a> (FILE *file, const double *v, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл file.  <a href="#a83d161b95e8b9e087d28f8b432b3691"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#b9a32e7fa070eae321fa391714fe1eb8">nl_xvector_fprint</a> (FILE *file, const size_t *v, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл file.  <a href="#b9a32e7fa070eae321fa391714fe1eb8"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#488ed5600ab3a0a6fd7b822ad4e667dd">nl_dvector_fwrite</a> (const char *filename, double *v, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл с именем <img class="formulaInl" alt="$filename$" src="form_439.png">.  <a href="#488ed5600ab3a0a6fd7b822ad4e667dd"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#2dcb6c759c2e9e99f1c9a08c7b3b9fa5">nl_xvector_fwrite</a> (const char *filename, size_t *v, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл с именем <img class="formulaInl" alt="$filename$" src="form_439.png">.  <a href="#2dcb6c759c2e9e99f1c9a08c7b3b9fa5"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#53adbd7f80790abc80abb4de5275d326">nl_dvector_scan</a> (size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение вектора с клавиатуры.  <a href="#53adbd7f80790abc80abb4de5275d326"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">size_t *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#ab9523477b6b0d422bf00eeda347c768">nl_xvector_scan</a> (size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение вектора с клавиатуры.  <a href="#ab9523477b6b0d422bf00eeda347c768"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#9600881733af17da1566280d8a774d31">nl_dvector_fscan</a> (FILE *file, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение вектора из файла.  <a href="#9600881733af17da1566280d8a774d31"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">size_t *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#13861e3d864c77d18871e9b912869738">nl_xvector_fscan</a> (FILE *file, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение вектора из файла.  <a href="#13861e3d864c77d18871e9b912869738"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#b31d0e4dc10b43107ff203920f6bc47c">nl_dvector_fread</a> (const char *filename, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение вектора из файла.  <a href="#b31d0e4dc10b43107ff203920f6bc47c"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">size_t *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#3e3c0b791edb6d070e2b39a5dc0a63fe">nl_xvector_fread</a> (const char *filename, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение вектора из файла.  <a href="#3e3c0b791edb6d070e2b39a5dc0a63fe"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Операции с векторами</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#802330757eb2e7322a9a3a04f0cb9fab">nl_dvector_add</a> (double *a, const double *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Сложение векторов.  <a href="#802330757eb2e7322a9a3a04f0cb9fab"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#c9efc6dfada4f77f34c4a8cd9b4b28f8">nl_dvector_sub</a> (double *a, const double *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычитание из вектора <img class="formulaInl" alt="$a$" src="form_123.png"> вектора <img class="formulaInl" alt="$b$" src="form_41.png">.  <a href="#c9efc6dfada4f77f34c4a8cd9b4b28f8"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#deb0c3d296a6763c69f68c3e54d387f3">nl_dvector_diff_norm1</a> (const double *a, const double *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление 1-нормы (манхеттенской) разности двух векторов.  <a href="#deb0c3d296a6763c69f68c3e54d387f3"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#d12af5bd373cbc6fbb84dbfca8364fa2">nl_dvector_diff_norm2</a> (const double *a, const double *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление 2-нормы разности (евклидовой) двух векторов.  <a href="#d12af5bd373cbc6fbb84dbfca8364fa2"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#ceb1a6472fc1fc7e44767e24f83aa7e1">nl_dvector_norm1</a> (const double *a, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление 1-нормы (манхеттенской) вектора.  <a href="#ceb1a6472fc1fc7e44767e24f83aa7e1"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#2d80f54923f5c7d1db394f298550fca7">nl_dvector_norm2</a> (const double *a, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление 2-нормы (евклидовой) вектора.  <a href="#2d80f54923f5c7d1db394f298550fca7"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#2b0c21cd7df3cee977527771a3d18eec">nl_dvector_norm_inf</a> (const double *a, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление <img class="formulaInl" alt="$\infty$" src="form_419.png">-нормы (чебышевой) вектора.  <a href="#2b0c21cd7df3cee977527771a3d18eec"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#a258011aafe309afdc3b8e18a944947a">nl_dvector_dot</a> (const double *a, const double *b, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление скалярного произведения векторов.  <a href="#a258011aafe309afdc3b8e18a944947a"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#dfba6f3521dd2276b52d0cff65e320fc">nl_dvector_axpy</a> (double alpha, const double *x, const double *y, size_t n, double *z)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление вектора <img class="formulaInl" alt="$z = \alpha x + y$" src="form_23.png">.  <a href="#dfba6f3521dd2276b52d0cff65e320fc"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#7e591d0c9ad47f2a8704eeab1b948978">nl_dvector_permute</a> (const double *a, const size_t *P, size_t n, double *b)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Перестановка элементов вектора.  <a href="#7e591d0c9ad47f2a8704eeab1b948978"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Создание, удаление и копирование матриц</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double **&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#6edefe99eb1df48d1a5107cbd0fff870">nl_dmatrix_create</a> (size_t m, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Создать матрицу с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">.  <a href="#6edefe99eb1df48d1a5107cbd0fff870"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double **&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#d4c98309b258fbe96e04e3a25aa15fa7">nl_dmatrix_create_copy</a> (const double **A, size_t m, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Создать копию матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">.  <a href="#d4c98309b258fbe96e04e3a25aa15fa7"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#7a82892e410d8a8347cfd35432a9cbe3">nl_dmatrix_copy</a> (double **A, const double **B, size_t m, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Копирует <img class="formulaInl" alt="$m\times n$" src="form_10.png">-матрцу B матрицу <img class="formulaInl" alt="$A$" src="form_767.png">.  <a href="#7a82892e410d8a8347cfd35432a9cbe3"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#fb7d0819fe1e3929001fe8648afc1c7d">nl_dmatrix_free</a> (double **A, size_t m)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Освободить память, занятую матрицей <img class="formulaInl" alt="$A$" src="form_767.png"> с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">.  <a href="#fb7d0819fe1e3929001fe8648afc1c7d"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double **&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#4fe41524f1dbbe99ad5cf87db3b5aeed">nl_dmatrix_convert</a> (double *A, size_t m, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Конвертация представления матрицы.  <a href="#4fe41524f1dbbe99ad5cf87db3b5aeed"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Ввод и вывод матриц</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#5a45afb29eb489f6f1794c02ef2aa3fb">nl_dmatrix_print</a> (double **A, size_t m, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> на экран.  <a href="#5a45afb29eb489f6f1794c02ef2aa3fb"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#dcb17bae0689ba1ee2f4e937777e7723">nl_dmatrix_fprint</a> (FILE *file, double **A, size_t m, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> в файл <img class="formulaInl" alt="$file$" src="form_313.png">.  <a href="#dcb17bae0689ba1ee2f4e937777e7723"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#a14b327cb0e3b3d84c8e7204dce9a1f0">nl_dmatrix_fwrite</a> (const char *filename, double **A, size_t m, size_t n, const char *format)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Форматированный вывод <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> в файл с именем <img class="formulaInl" alt="$filename$" src="form_439.png">.  <a href="#a14b327cb0e3b3d84c8e7204dce9a1f0"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double **&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#cffa574f91a6ff3f1bb7c1678db2c8c2">nl_dmatrix_scan</a> (size_t *m, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение матрицы с клавиатуры.  <a href="#cffa574f91a6ff3f1bb7c1678db2c8c2"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double **&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#a412744d64fc6b3211006b78aae45f5b">nl_dmatrix_fscan</a> (FILE *file, size_t *m, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение матрицы из файла.  <a href="#a412744d64fc6b3211006b78aae45f5b"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double **&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#df23d80fb536c8277a5d0b7c37027c0a">nl_dmatrix_fread</a> (const char *filename, size_t *m, size_t *n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Чтение матрицы из файла.  <a href="#df23d80fb536c8277a5d0b7c37027c0a"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Операции с матрицами</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#6524f246cf0858b1d6816c4233515db6">nl_dmatrix_mult</a> (size_t m, size_t n, size_t k, double **A, double **B, double **Mul)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Умножает матрицу <img class="formulaInl" alt="$A$" src="form_767.png"> размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"> на матрицу B <img class="formulaInl" alt="$n \times k$" src="form_425.png"> Результат в <img class="formulaInl" alt="$Mul$" src="form_426.png"> размера <img class="formulaInl" alt="$m\times k$" src="form_427.png">.  <a href="#6524f246cf0858b1d6816c4233515db6"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#52e2009d6ae2c52e0676fc5fbfb2717a">nl_dmatrix_add</a> (size_t m, size_t n, double **A, double **B)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Сложение двух матриц.  <a href="#52e2009d6ae2c52e0676fc5fbfb2717a"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#e25798e01f24395fd1b5af58b3e23a70">nl_dmatrix_sub</a> (size_t m, size_t n, double **A, double **B)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычитает из матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицу B размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"> Результат в матрице <img class="formulaInl" alt="$А$" src="form_768.png">.  <a href="#e25798e01f24395fd1b5af58b3e23a70"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#d8a388b84cdb81757051f46bfc11e617">nl_dmatrix_diff_norm_inf</a> (double **A, double **B, size_t m, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Вычисление чебышевой нормы разности двух матриц.  <a href="#d8a388b84cdb81757051f46bfc11e617"></a><br></td></tr>
+<tr><td colspan="2"><br><h2>Операции с матрицами и векторами</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">double *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#abd8c36c2e037aa96e650b01811cc2c0">nl_dvector_mult_dmatrix</a> (double *b, double **A, size_t m, size_t n)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Умножение вектора-строки <img class="formulaInl" alt="$b$" src="form_41.png"> на матрицу <img class="formulaInl" alt="$A$" src="form_767.png">.  <a href="#abd8c36c2e037aa96e650b01811cc2c0"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8h.html#bbfc60cfc34f2916860f02332503b301">nl_dmatrix_mult_dvector</a> (double **A, size_t m, size_t n, const double *b, double *res)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Умножение матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> на вектор <img class="formulaInl" alt="$b$" src="form_41.png"> справа.  <a href="#bbfc60cfc34f2916860f02332503b301"></a><br></td></tr>
+</table>
+<hr><a name="_details"></a><h2>Подробное описание</h2>
+Вспомогательные процедуры. 
+<p>
+Файл содержит вспомогательные процедуры для библиотеки численных методов. <hr><h2>Перечисления</h2>
+<a class="anchor" name="51a9a5b60a381366ece56bb401c4c865"></a><!-- doxytag: member="util.h::nl_err_enum" ref="51a9a5b60a381366ece56bb401c4c865" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865">nl_err_enum</a>          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Коды ошибок. 
+<p>
+<dl compact><dt><b>Элементы перечислений: </b></dt><dd>
+<table border="0" cellspacing="2" cellpadding="0">
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c865d977d02f543ffb54bdd665b2fe5a2b1f"></a><!-- doxytag: member="nl_err_OK" ref="51a9a5b60a381366ece56bb401c4c865d977d02f543ffb54bdd665b2fe5a2b1f" args="" -->nl_err_OK</em>&nbsp;</td><td>
+Ошибок нет. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c865e0860522af1502c2e1d4a1f3a0c5136c"></a><!-- doxytag: member="nl_err_out_of_memory" ref="51a9a5b60a381366ece56bb401c4c865e0860522af1502c2e1d4a1f3a0c5136c" args="" -->nl_err_out_of_memory</em>&nbsp;</td><td>
+Недостаточно памяти. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c865de14d6f5a34a7d71596ef10daa7c0c81"></a><!-- doxytag: member="nl_err_inconsistent_size" ref="51a9a5b60a381366ece56bb401c4c865de14d6f5a34a7d71596ef10daa7c0c81" args="" -->nl_err_inconsistent_size</em>&nbsp;</td><td>
+Неверный размер. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c865f72f712dadb18217b3e19c24a009cd7b"></a><!-- doxytag: member="nl_err_incorrect_index" ref="51a9a5b60a381366ece56bb401c4c865f72f712dadb18217b3e19c24a009cd7b" args="" -->nl_err_incorrect_index</em>&nbsp;</td><td>
+Неверный индекс. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c865eccee13de27da16b9483f276901041ad"></a><!-- doxytag: member="nl_err_matrix_must_be_square" ref="51a9a5b60a381366ece56bb401c4c865eccee13de27da16b9483f276901041ad" args="" -->nl_err_matrix_must_be_square</em>&nbsp;</td><td>
+Матрица должна быть квадратной. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c86512f1e2711c619440203ae746a1fc895b"></a><!-- doxytag: member="nl_err_matrix_is_singular" ref="51a9a5b60a381366ece56bb401c4c86512f1e2711c619440203ae746a1fc895b" args="" -->nl_err_matrix_is_singular</em>&nbsp;</td><td>
+Матрица вырождена. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c86512cc5433cb199b28b3e8a8d41d3f02fa"></a><!-- doxytag: member="nl_err_matrix_is_not_positive_definite" ref="51a9a5b60a381366ece56bb401c4c86512cc5433cb199b28b3e8a8d41d3f02fa" args="" -->nl_err_matrix_is_not_positive_definite</em>&nbsp;</td><td>
+Матрица не положительно определенная. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c865d90711e086d21f9b43e406161f71c36f"></a><!-- doxytag: member="nl_err_IO" ref="51a9a5b60a381366ece56bb401c4c865d90711e086d21f9b43e406161f71c36f" args="" -->nl_err_IO</em>&nbsp;</td><td>
+Ошибка при вводе/выводе. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c86545d052894e6c50ad085598cffabb861c"></a><!-- doxytag: member="nl_err_diag_elem_must_be_non_zero" ref="51a9a5b60a381366ece56bb401c4c86545d052894e6c50ad085598cffabb861c" args="" -->nl_err_diag_elem_must_be_non_zero</em>&nbsp;</td><td>
+Диагональные элементы должны быть ненулевыми. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51a9a5b60a381366ece56bb401c4c8656a46a194271a01cac77ebc9724d7be58"></a><!-- doxytag: member="nl_err_count" ref="51a9a5b60a381366ece56bb401c4c8656a46a194271a01cac77ebc9724d7be58" args="" -->nl_err_count</em>&nbsp;</td><td>
+Количество типов зарегистрированных ошибок. </td></tr>
+</table>
+</dl>
+
+</div>
+</div><p>
+<hr><h2>Функции</h2>
+<a class="anchor" name="52e2009d6ae2c52e0676fc5fbfb2717a"></a><!-- doxytag: member="util.h::nl_dmatrix_add" ref="52e2009d6ae2c52e0676fc5fbfb2717a" args="(size_t m, size_t n, double **A, double **B)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_add           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>B</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Сложение двух матриц. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$m$" src="form_36.png"> - число строк матриц</li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - число столбцов матриц</li><li><img class="formulaInl" alt="$A$" src="form_767.png"> - матрица</li><li><img class="formulaInl" alt="$B$" src="form_227.png"> - матрица</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$A = A+B$" src="form_428.png"> </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="4fe41524f1dbbe99ad5cf87db3b5aeed"></a><!-- doxytag: member="util.h::nl_dmatrix_convert" ref="4fe41524f1dbbe99ad5cf87db3b5aeed" args="(double *A, size_t m, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double** nl_dmatrix_convert           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Конвертация представления матрицы. 
+<p>
+Матрица <img class="formulaInl" alt="$A$" src="form_767.png"> с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">, представленная в виде списка своих элементов (по строкам), конвертируется в представление, принятое в библиотеке. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="7a82892e410d8a8347cfd35432a9cbe3"></a><!-- doxytag: member="util.h::nl_dmatrix_copy" ref="7a82892e410d8a8347cfd35432a9cbe3" args="(double **A, const double **B, size_t m, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_copy           </td>
+          <td>(</td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double **&nbsp;</td>
+          <td class="paramname"> <em>B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Копирует <img class="formulaInl" alt="$m\times n$" src="form_10.png">-матрцу B матрицу <img class="formulaInl" alt="$A$" src="form_767.png">. 
+<p>
+Под элементы матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> должно быть выделено место. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="6edefe99eb1df48d1a5107cbd0fff870"></a><!-- doxytag: member="util.h::nl_dmatrix_create" ref="6edefe99eb1df48d1a5107cbd0fff870" args="(size_t m, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double** nl_dmatrix_create           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Создать матрицу с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">. 
+<p>
+Функция размещает память под матрицу и возвращает указатель на него. Тип элементов - double <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xband_8c-example.html#a6">xband.c</a>, <a class="el" href="xchol_8c-example.html#a26">xchol.c</a>, <a class="el" href="xeig_8c-example.html#a34">xeig.c</a>, <a class="el" href="xeigsym_8c-example.html#a49">xeigsym.c</a>, <a class="el" href="xjacobi_8c-example.html#a62">xjacobi.c</a>, <a class="el" href="xlaplace_8c-example.html#a73">xlaplace.c</a>, <a class="el" href="xlu_8c-example.html#a83">xlu.c</a>, <a class="el" href="xneldermead_8c-example.html#a115">xneldermead.c</a>, <a class="el" href="xqr_8c-example.html#a126">xqr.c</a>, <a class="el" href="xqrls_8c-example.html#a134">xqrls.c</a>, <a class="el" href="xsparse_8c-example.html#a147">xsparse.c</a> и <a class="el" href="xsvd_8c-example.html#a185">xsvd.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="d4c98309b258fbe96e04e3a25aa15fa7"></a><!-- doxytag: member="util.h::nl_dmatrix_create_copy" ref="d4c98309b258fbe96e04e3a25aa15fa7" args="(const double **A, size_t m, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double** nl_dmatrix_create_copy           </td>
+          <td>(</td>
+          <td class="paramtype">const double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Создать копию матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">. 
+<p>
+Функция размещает память под матрицу, копирует значения и возвращает указатель на него. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="d8a388b84cdb81757051f46bfc11e617"></a><!-- doxytag: member="util.h::nl_dmatrix_diff_norm_inf" ref="d8a388b84cdb81757051f46bfc11e617" args="(double **A, double **B, size_t m, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dmatrix_diff_norm_inf           </td>
+          <td>(</td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление чебышевой нормы разности двух матриц. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$A$" src="form_767.png"> - матрица размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"></li><li><img class="formulaInl" alt="$B$" src="form_227.png"> - матрица размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"></li><li><img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png"> - размеры матриц <img class="formulaInl" alt="$A$" src="form_767.png"> и <img class="formulaInl" alt="$B$" src="form_227.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$\|A-B\|_{\infty}$" src="form_433.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="dcb17bae0689ba1ee2f4e937777e7723"></a><!-- doxytag: member="util.h::nl_dmatrix_fprint" ref="dcb17bae0689ba1ee2f4e937777e7723" args="(FILE *file, double **A, size_t m, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_fprint           </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> в файл <img class="formulaInl" alt="$file$" src="form_313.png">. 
+<p>
+Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="df23d80fb536c8277a5d0b7c37027c0a"></a><!-- doxytag: member="util.h::nl_dmatrix_fread" ref="df23d80fb536c8277a5d0b7c37027c0a" args="(const char *filename, size_t *m, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double** nl_dmatrix_fread           </td>
+          <td>(</td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение матрицы из файла. 
+<p>
+Функция считывает из файла с именем <img class="formulaInl" alt="$filename$" src="form_439.png"> размеры матрицы <img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под матрицу, считывает значения и возвращает указатель на матрицу. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="fb7d0819fe1e3929001fe8648afc1c7d"></a><!-- doxytag: member="util.h::nl_dmatrix_free" ref="fb7d0819fe1e3929001fe8648afc1c7d" args="(double **A, size_t m)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_free           </td>
+          <td>(</td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Освободить память, занятую матрицей <img class="formulaInl" alt="$A$" src="form_767.png"> с размерами <img class="formulaInl" alt="$m\times n$" src="form_10.png">. 
+<p>
+Тип элементов - double <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xband_8c-example.html#a14">xband.c</a>, <a class="el" href="xchol_8c-example.html#a32">xchol.c</a>, <a class="el" href="xeig_8c-example.html#a46">xeig.c</a>, <a class="el" href="xeigsym_8c-example.html#a55">xeigsym.c</a>, <a class="el" href="xjacobi_8c-example.html#a67">xjacobi.c</a>, <a class="el" href="xlaplace_8c-example.html#a82">xlaplace.c</a>, <a class="el" href="xlu_8c-example.html#a91">xlu.c</a>, <a class="el" href="xneldermead_8c-example.html#a120">xneldermead.c</a>, <a class="el" href="xqr_8c-example.html#a132">xqr.c</a>, <a class="el" href="xqrls_8c-example.html#a140">xqrls.c</a>, <a class="el" href="xsparse_8c-example.html#a151">xsparse.c</a> и <a class="el" href="xsvd_8c-example.html#a192">xsvd.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="a412744d64fc6b3211006b78aae45f5b"></a><!-- doxytag: member="util.h::nl_dmatrix_fscan" ref="a412744d64fc6b3211006b78aae45f5b" args="(FILE *file, size_t *m, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double** nl_dmatrix_fscan           </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение матрицы из файла. 
+<p>
+Функция считывает из файла <img class="formulaInl" alt="$file$" src="form_313.png"> размеры матрицы <img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под матрицу, считывает значения и возвращает указатель на матрицу. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="a14b327cb0e3b3d84c8e7204dce9a1f0"></a><!-- doxytag: member="util.h::nl_dmatrix_fwrite" ref="a14b327cb0e3b3d84c8e7204dce9a1f0" args="(const char *filename, double **A, size_t m, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_fwrite           </td>
+          <td>(</td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> в файл с именем <img class="formulaInl" alt="$filename$" src="form_439.png">. 
+<p>
+Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="6524f246cf0858b1d6816c4233515db6"></a><!-- doxytag: member="util.h::nl_dmatrix_mult" ref="6524f246cf0858b1d6816c4233515db6" args="(size_t m, size_t n, size_t k, double **A, double **B, double **Mul)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_mult           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>k</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>Mul</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Умножает матрицу <img class="formulaInl" alt="$A$" src="form_767.png"> размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"> на матрицу B <img class="formulaInl" alt="$n \times k$" src="form_425.png"> Результат в <img class="formulaInl" alt="$Mul$" src="form_426.png"> размера <img class="formulaInl" alt="$m\times k$" src="form_427.png">. 
+<p>
+
+</div>
+</div><p>
+<a class="anchor" name="bbfc60cfc34f2916860f02332503b301"></a><!-- doxytag: member="util.h::nl_dmatrix_mult_dvector" ref="bbfc60cfc34f2916860f02332503b301" args="(double **A, size_t m, size_t n, const double *b, double *res)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_mult_dvector           </td>
+          <td>(</td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>res</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Умножение матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> на вектор <img class="formulaInl" alt="$b$" src="form_41.png"> справа. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$A$" src="form_767.png"> - исходная матрица</li><li><img class="formulaInl" alt="$m$" src="form_36.png"> - число строк матрицы <img class="formulaInl" alt="$A$" src="form_767.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - число столбцов матрицы <img class="formulaInl" alt="$A$" src="form_767.png"></li><li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор-столбец</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$res = A\cdot b$" src="form_431.png"> </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="5a45afb29eb489f6f1794c02ef2aa3fb"></a><!-- doxytag: member="util.h::nl_dmatrix_print" ref="5a45afb29eb489f6f1794c02ef2aa3fb" args="(double **A, size_t m, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_print           </td>
+          <td>(</td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> на экран. 
+<p>
+Тип элементов - double <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xband_8c-example.html#a9">xband.c</a>, <a class="el" href="xchol_8c-example.html#a28">xchol.c</a>, <a class="el" href="xeig_8c-example.html#a37">xeig.c</a>, <a class="el" href="xeigsym_8c-example.html#a51">xeigsym.c</a>, <a class="el" href="xjacobi_8c-example.html#a64">xjacobi.c</a>, <a class="el" href="xlaplace_8c-example.html#a75">xlaplace.c</a>, <a class="el" href="xlu_8c-example.html#a86">xlu.c</a>, <a class="el" href="xneldermead_8c-example.html#a118">xneldermead.c</a>, <a class="el" href="xqr_8c-example.html#a128">xqr.c</a>, <a class="el" href="xqrls_8c-example.html#a136">xqrls.c</a>, <a class="el" href="xsparse_8c-example.html#a149">xsparse.c</a> и <a class="el" href="xsvd_8c-example.html#a188">xsvd.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="cffa574f91a6ff3f1bb7c1678db2c8c2"></a><!-- doxytag: member="util.h::nl_dmatrix_scan" ref="cffa574f91a6ff3f1bb7c1678db2c8c2" args="(size_t *m, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double** nl_dmatrix_scan           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение матрицы с клавиатуры. 
+<p>
+Функция считывает с клавиатуры размеры матрицы <img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под матрицу, считывает значения и возвращает указатель на матрицу. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="e25798e01f24395fd1b5af58b3e23a70"></a><!-- doxytag: member="util.h::nl_dmatrix_sub" ref="e25798e01f24395fd1b5af58b3e23a70" args="(size_t m, size_t n, double **A, double **B)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dmatrix_sub           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>B</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычитает из матрицы <img class="formulaInl" alt="$A$" src="form_767.png"> размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"> матрицу B размера <img class="formulaInl" alt="$m\times n$" src="form_10.png"> Результат в матрице <img class="formulaInl" alt="$А$" src="form_768.png">. 
+<p>
+
+</div>
+</div><p>
+<a class="anchor" name="802330757eb2e7322a9a3a04f0cb9fab"></a><!-- doxytag: member="util.h::nl_dvector_add" ref="802330757eb2e7322a9a3a04f0cb9fab" args="(double *a, const double *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_add           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Сложение векторов. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор</li><li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор</li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер векторов</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$a = a+b$" src="form_413.png"> </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="dfba6f3521dd2276b52d0cff65e320fc"></a><!-- doxytag: member="util.h::nl_dvector_axpy" ref="dfba6f3521dd2276b52d0cff65e320fc" args="(double alpha, const double *x, const double *y, size_t n, double *z)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_axpy           </td>
+          <td>(</td>
+          <td class="paramtype">double&nbsp;</td>
+          <td class="paramname"> <em>alpha</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>z</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление вектора <img class="formulaInl" alt="$z = \alpha x + y$" src="form_23.png">. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$alpha$" src="form_422.png"> - коэффициент перед <img class="formulaInl" alt="$x$" src="form_40.png"></li><li><img class="formulaInl" alt="$x$" src="form_40.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$y$" src="form_423.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер вектора <img class="formulaInl" alt="$a$" src="form_123.png"></li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$z$" src="form_424.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"> </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="9271fc7be1e78b8df154552e449d249c"></a><!-- doxytag: member="util.h::nl_dvector_copy" ref="9271fc7be1e78b8df154552e449d249c" args="(double *a, const double *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_copy           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Копирует вектор <img class="formulaInl" alt="$b$" src="form_41.png"> в вектор <img class="formulaInl" alt="$a$" src="form_123.png">. 
+<p>
+Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="395ea00a37f001729adc1ac0ce22f54a"></a><!-- doxytag: member="util.h::nl_dvector_create" ref="395ea00a37f001729adc1ac0ce22f54a" args="(size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* nl_dvector_create           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Создать вектор длины <img class="formulaInl" alt="$n$" src="form_37.png">. 
+<p>
+Функция размещает память под вектор и возвращает указатель на него. Тип элементов - double <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xandrew_8c-example.html#a1">xandrew.c</a>, <a class="el" href="xband_8c-example.html#a7">xband.c</a>, <a class="el" href="xbicg_8c-example.html#a17">xbicg.c</a>, <a class="el" href="xchol_8c-example.html#a27">xchol.c</a>, <a class="el" href="xeig_8c-example.html#a35">xeig.c</a>, <a class="el" href="xeigsym_8c-example.html#a50">xeigsym.c</a>, <a class="el" href="xfft_8c-example.html#a57">xfft.c</a>, <a class="el" href="xjacobi_8c-example.html#a63">xjacobi.c</a>, <a class="el" href="xlu_8c-example.html#a84">xlu.c</a>, <a class="el" href="xmda_8c-example.html#a94">xmda.c</a>, <a class="el" href="xneldermead_8c-example.html#a114">xneldermead.c</a>, <a class="el" href="xqhull_8c-example.html#a121">xqhull.c</a>, <a class="el" href="xqr_8c-example.html#a127">xqr.c</a>, <a class="el" href="xqrls_8c-example.html#a135">xqrls.c</a>, <a class="el" href="xspbicnj_8c-example.html#a152">xspbicnj.c</a>, <a class="el" href="xspconjs_8c-example.html#a172">xspconjs.c</a>, <a class="el" href="xsvd_8c-example.html#a186">xsvd.c</a> и <a class="el" href="xtridiag_8c-example.html#a194">xtridiag.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="a1eda085a9321ffc1504e2ce95f1a1dd"></a><!-- doxytag: member="util.h::nl_dvector_create_copy" ref="a1eda085a9321ffc1504e2ce95f1a1dd" args="(const double *v, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* nl_dvector_create_copy           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Создать копию вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">. 
+<p>
+Функция размещает память под вектор, копирует значения и возвращает указатель на него. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="deb0c3d296a6763c69f68c3e54d387f3"></a><!-- doxytag: member="util.h::nl_dvector_diff_norm1" ref="deb0c3d296a6763c69f68c3e54d387f3" args="(const double *a, const double *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dvector_diff_norm1           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление 1-нормы (манхеттенской) разности двух векторов. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер векторов <img class="formulaInl" alt="$a$" src="form_123.png"> и <img class="formulaInl" alt="$b$" src="form_41.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$\|a-b\|_1$" src="form_415.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="d12af5bd373cbc6fbb84dbfca8364fa2"></a><!-- doxytag: member="util.h::nl_dvector_diff_norm2" ref="d12af5bd373cbc6fbb84dbfca8364fa2" args="(const double *a, const double *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dvector_diff_norm2           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление 2-нормы разности (евклидовой) двух векторов. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер векторов <img class="formulaInl" alt="$a$" src="form_123.png"> и <img class="formulaInl" alt="$b$" src="form_41.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$\|a-b\|_2$" src="form_416.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="a258011aafe309afdc3b8e18a944947a"></a><!-- doxytag: member="util.h::nl_dvector_dot" ref="a258011aafe309afdc3b8e18a944947a" args="(const double *a, const double *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dvector_dot           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление скалярного произведения векторов. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер вектора <img class="formulaInl" alt="$a$" src="form_123.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$(a,b)$" src="form_421.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="a83d161b95e8b9e087d28f8b432b3691"></a><!-- doxytag: member="util.h::nl_dvector_fprint" ref="a83d161b95e8b9e087d28f8b432b3691" args="(FILE *file, const double *v, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_fprint           </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл file. 
+<p>
+Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="b31d0e4dc10b43107ff203920f6bc47c"></a><!-- doxytag: member="util.h::nl_dvector_fread" ref="b31d0e4dc10b43107ff203920f6bc47c" args="(const char *filename, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* nl_dvector_fread           </td>
+          <td>(</td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение вектора из файла. 
+<p>
+Функция считывает из файла с именем <img class="formulaInl" alt="$filename$" src="form_439.png"> размер вектора <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под вектор, считывает значения и возвращает указатель на вектор. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="1ec620dc1da7f4d6fdebccd70eea844a"></a><!-- doxytag: member="util.h::nl_dvector_free" ref="1ec620dc1da7f4d6fdebccd70eea844a" args="(double *v)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_free           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>v</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Освободить память, занятую вектором <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">. 
+<p>
+Тип элементов - double <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xandrew_8c-example.html#a4">xandrew.c</a>, <a class="el" href="xband_8c-example.html#a15">xband.c</a>, <a class="el" href="xbicg_8c-example.html#a25">xbicg.c</a>, <a class="el" href="xchol_8c-example.html#a33">xchol.c</a>, <a class="el" href="xeig_8c-example.html#a47">xeig.c</a>, <a class="el" href="xeigsym_8c-example.html#a56">xeigsym.c</a>, <a class="el" href="xfft_8c-example.html#a61">xfft.c</a>, <a class="el" href="xjacobi_8c-example.html#a68">xjacobi.c</a>, <a class="el" href="xlu_8c-example.html#a92">xlu.c</a>, <a class="el" href="xmda_8c-example.html#a110">xmda.c</a>, <a class="el" href="xneldermead_8c-example.html#a119">xneldermead.c</a>, <a class="el" href="xqhull_8c-example.html#a124">xqhull.c</a>, <a class="el" href="xqr_8c-example.html#a133">xqr.c</a>, <a class="el" href="xqrls_8c-example.html#a141">xqrls.c</a>, <a class="el" href="xspbicnj_8c-example.html#a160">xspbicnj.c</a>, <a class="el" href="xspconjs_8c-example.html#a178">xspconjs.c</a>, <a class="el" href="xsvd_8c-example.html#a193">xsvd.c</a> и <a class="el" href="xtridiag_8c-example.html#a197">xtridiag.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="9600881733af17da1566280d8a774d31"></a><!-- doxytag: member="util.h::nl_dvector_fscan" ref="9600881733af17da1566280d8a774d31" args="(FILE *file, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* nl_dvector_fscan           </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение вектора из файла. 
+<p>
+Функция считывает из файла <img class="formulaInl" alt="$file$" src="form_313.png"> размер вектора <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под вектор, считывает значения и возвращает указатель на вектор. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="488ed5600ab3a0a6fd7b822ad4e667dd"></a><!-- doxytag: member="util.h::nl_dvector_fwrite" ref="488ed5600ab3a0a6fd7b822ad4e667dd" args="(const char *filename, double *v, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_fwrite           </td>
+          <td>(</td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл с именем <img class="formulaInl" alt="$filename$" src="form_439.png">. 
+<p>
+Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="abd8c36c2e037aa96e650b01811cc2c0"></a><!-- doxytag: member="util.h::nl_dvector_mult_dmatrix" ref="abd8c36c2e037aa96e650b01811cc2c0" args="(double *b, double **A, size_t m, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* nl_dvector_mult_dmatrix           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Умножение вектора-строки <img class="formulaInl" alt="$b$" src="form_41.png"> на матрицу <img class="formulaInl" alt="$A$" src="form_767.png">. 
+<p>
+Функция выделяет память под результирующий вектор и записывает в него результат умножения.<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор-строка</li><li><img class="formulaInl" alt="$A$" src="form_767.png"> - исходная матрица</li><li><img class="formulaInl" alt="$m$" src="form_36.png"> - число строк матрицы <img class="formulaInl" alt="$A$" src="form_767.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - число столбцов матрицы <img class="formulaInl" alt="$A$" src="form_767.png"></li></ul>
+</li><li>Результат:<ul>
+<li><img class="formulaInl" alt="$A\cdot b$" src="form_370.png"> </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="ceb1a6472fc1fc7e44767e24f83aa7e1"></a><!-- doxytag: member="util.h::nl_dvector_norm1" ref="ceb1a6472fc1fc7e44767e24f83aa7e1" args="(const double *a, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dvector_norm1           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление 1-нормы (манхеттенской) вектора. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер вектора <img class="formulaInl" alt="$a$" src="form_123.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$\|a\|_1$" src="form_417.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="2d80f54923f5c7d1db394f298550fca7"></a><!-- doxytag: member="util.h::nl_dvector_norm2" ref="2d80f54923f5c7d1db394f298550fca7" args="(const double *a, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dvector_norm2           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление 2-нормы (евклидовой) вектора. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер вектора <img class="formulaInl" alt="$a$" src="form_123.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$\|a\|_2$" src="form_418.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="2b0c21cd7df3cee977527771a3d18eec"></a><!-- doxytag: member="util.h::nl_dvector_norm_inf" ref="2b0c21cd7df3cee977527771a3d18eec" args="(const double *a, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nl_dvector_norm_inf           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычисление <img class="formulaInl" alt="$\infty$" src="form_419.png">-нормы (чебышевой) вектора. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор размера <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер вектора <img class="formulaInl" alt="$a$" src="form_123.png"></li></ul>
+</li><li>Выход:</li><li>Результат: <img class="formulaInl" alt="$\|a\|_{\infty}$" src="form_420.png"> </li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="7e591d0c9ad47f2a8704eeab1b948978"></a><!-- doxytag: member="util.h::nl_dvector_permute" ref="7e591d0c9ad47f2a8704eeab1b948978" args="(const double *a, const size_t *P, size_t n, double *b)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_permute           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const size_t *&nbsp;</td>
+          <td class="paramname"> <em>P</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>b</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Перестановка элементов вектора. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор длины <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$P$" src="form_139.png"> - перестановка чисел <img class="formulaInl" alt="$1,2,\dots,n$" src="form_592.png"></li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - длина векторов <img class="formulaInl" alt="$a$" src="form_123.png">, <img class="formulaInl" alt="$P$" src="form_139.png"></li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор, составленный из компонент вектора <img class="formulaInl" alt="$a$" src="form_123.png">, переставленных согласно <img class="formulaInl" alt="$P$" src="form_139.png"> </li></ul>
+</li></ul>
+<dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xmda_8c-example.html#a108">xmda.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="fb0e62a1dcae57f968237392f74a15c6"></a><!-- doxytag: member="util.h::nl_dvector_print" ref="fb0e62a1dcae57f968237392f74a15c6" args="(double *v, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_print           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> на экран. 
+<p>
+Тип элементов - double <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xband_8c-example.html#a11">xband.c</a>, <a class="el" href="xbicg_8c-example.html#a22">xbicg.c</a>, <a class="el" href="xchol_8c-example.html#a30">xchol.c</a>, <a class="el" href="xeig_8c-example.html#a39">xeig.c</a>, <a class="el" href="xeigsym_8c-example.html#a53">xeigsym.c</a>, <a class="el" href="xfft_8c-example.html#a58">xfft.c</a>, <a class="el" href="xjacobi_8c-example.html#a66">xjacobi.c</a>, <a class="el" href="xlaplace_8c-example.html#a80">xlaplace.c</a>, <a class="el" href="xlu_8c-example.html#a89">xlu.c</a>, <a class="el" href="xmda_8c-example.html#a99">xmda.c</a>, <a class="el" href="xneldermead_8c-example.html#a117">xneldermead.c</a>, <a class="el" href="xqr_8c-example.html#a130">xqr.c</a>, <a class="el" href="xqrls_8c-example.html#a138">xqrls.c</a>, <a class="el" href="xspbicnj_8c-example.html#a157">xspbicnj.c</a>, <a class="el" href="xspchol_8c-example.html#a167">xspchol.c</a>, <a class="el" href="xspconjs_8c-example.html#a175">xspconjs.c</a>, <a class="el" href="xspseid_8c-example.html#a182">xspseid.c</a>, <a class="el" href="xsvd_8c-example.html#a189">xsvd.c</a> и <a class="el" href="xtridiag_8c-example.html#a196">xtridiag.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="53adbd7f80790abc80abb4de5275d326"></a><!-- doxytag: member="util.h::nl_dvector_scan" ref="53adbd7f80790abc80abb4de5275d326" args="(size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* nl_dvector_scan           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение вектора с клавиатуры. 
+<p>
+Функция считывает с клавиатуры размер вектора <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под вектор, считывает значения и возвращает указатель на вектор. Тип элементов - double 
+</div>
+</div><p>
+<a class="anchor" name="c9efc6dfada4f77f34c4a8cd9b4b28f8"></a><!-- doxytag: member="util.h::nl_dvector_sub" ref="c9efc6dfada4f77f34c4a8cd9b4b28f8" args="(double *a, const double *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_dvector_sub           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Вычитание из вектора <img class="formulaInl" alt="$a$" src="form_123.png"> вектора <img class="formulaInl" alt="$b$" src="form_41.png">. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$a$" src="form_123.png"> - вектор</li><li><img class="formulaInl" alt="$b$" src="form_41.png"> - вектор</li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер векторов</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$a = a-b$" src="form_414.png"> </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<a class="anchor" name="f4712d0a87932d58e35a3aed4c019bf5"></a><!-- doxytag: member="util.h::nl_xvector_copy" ref="f4712d0a87932d58e35a3aed4c019bf5" args="(size_t *a, const size_t *b, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_xvector_copy           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const size_t *&nbsp;</td>
+          <td class="paramname"> <em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Копирует вектор <img class="formulaInl" alt="$b$" src="form_41.png"> в вектор <img class="formulaInl" alt="$a$" src="form_123.png">. 
+<p>
+Тип элементов - size_t 
+</div>
+</div><p>
+<a class="anchor" name="9fcf91bd050dc13ac020af86cab5bfb7"></a><!-- doxytag: member="util.h::nl_xvector_create" ref="9fcf91bd050dc13ac020af86cab5bfb7" args="(size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* nl_xvector_create           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Создать вектор длины <img class="formulaInl" alt="$n$" src="form_37.png">. 
+<p>
+Функция размещает память под вектор и возвращает указатель на него. Тип элементов - size_t <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xandrew_8c-example.html#a2">xandrew.c</a>, <a class="el" href="xband_8c-example.html#a8">xband.c</a>, <a class="el" href="xeig_8c-example.html#a36">xeig.c</a>, <a class="el" href="xlu_8c-example.html#a85">xlu.c</a>, <a class="el" href="xmda_8c-example.html#a95">xmda.c</a> и <a class="el" href="xqhull_8c-example.html#a122">xqhull.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="234cbace132cd9eb967ea36217570d75"></a><!-- doxytag: member="util.h::nl_xvector_create_copy" ref="234cbace132cd9eb967ea36217570d75" args="(size_t *v, size_t n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* nl_xvector_create_copy           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Создать копию вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">. 
+<p>
+Функция размещает память под вектор, копирует значения и возвращает указатель на него. Тип элементов - size_t 
+</div>
+</div><p>
+<a class="anchor" name="b9a32e7fa070eae321fa391714fe1eb8"></a><!-- doxytag: member="util.h::nl_xvector_fprint" ref="b9a32e7fa070eae321fa391714fe1eb8" args="(FILE *file, const size_t *v, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_xvector_fprint           </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const size_t *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл file. 
+<p>
+Тип элементов - size_t 
+</div>
+</div><p>
+<a class="anchor" name="3e3c0b791edb6d070e2b39a5dc0a63fe"></a><!-- doxytag: member="util.h::nl_xvector_fread" ref="3e3c0b791edb6d070e2b39a5dc0a63fe" args="(const char *filename, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* nl_xvector_fread           </td>
+          <td>(</td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение вектора из файла. 
+<p>
+Функция считывает из файла с именем <img class="formulaInl" alt="$filename$" src="form_439.png"> размер вектора <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под вектор, считывает значения и возвращает указатель на вектор. Тип элементов - size_t 
+</div>
+</div><p>
+<a class="anchor" name="6e9ebfb5c2ac99ce4756b95697e2562d"></a><!-- doxytag: member="util.h::nl_xvector_free" ref="6e9ebfb5c2ac99ce4756b95697e2562d" args="(size_t *v)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_xvector_free           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>v</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Освободить память, занятую вектором <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png">. 
+<p>
+Тип элементов - size_t <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xandrew_8c-example.html#a5">xandrew.c</a>, <a class="el" href="xband_8c-example.html#a16">xband.c</a>, <a class="el" href="xeig_8c-example.html#a48">xeig.c</a>, <a class="el" href="xlu_8c-example.html#a93">xlu.c</a>, <a class="el" href="xmda_8c-example.html#a111">xmda.c</a> и <a class="el" href="xqhull_8c-example.html#a125">xqhull.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="13861e3d864c77d18871e9b912869738"></a><!-- doxytag: member="util.h::nl_xvector_fscan" ref="13861e3d864c77d18871e9b912869738" args="(FILE *file, size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* nl_xvector_fscan           </td>
+          <td>(</td>
+          <td class="paramtype">FILE *&nbsp;</td>
+          <td class="paramname"> <em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение вектора из файла. 
+<p>
+Функция считывает из файла <img class="formulaInl" alt="$file$" src="form_313.png"> размер вектора <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под вектор, считывает значения и возвращает указатель на вектор. Тип элементов - size_t 
+</div>
+</div><p>
+<a class="anchor" name="2dcb6c759c2e9e99f1c9a08c7b3b9fa5"></a><!-- doxytag: member="util.h::nl_xvector_fwrite" ref="2dcb6c759c2e9e99f1c9a08c7b3b9fa5" args="(const char *filename, size_t *v, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_xvector_fwrite           </td>
+          <td>(</td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> в файл с именем <img class="formulaInl" alt="$filename$" src="form_439.png">. 
+<p>
+Тип элементов - size_t 
+</div>
+</div><p>
+<a class="anchor" name="b9d15dad25e09dd9dfa3175d29696de5"></a><!-- doxytag: member="util.h::nl_xvector_print" ref="b9d15dad25e09dd9dfa3175d29696de5" args="(size_t *v, size_t n, const char *format)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void nl_xvector_print           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&nbsp;</td>
+          <td class="paramname"> <em>format</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Форматированный вывод вектора <img class="formulaInl" alt="$v$" src="form_228.png"> длины <img class="formulaInl" alt="$n$" src="form_37.png"> на экран. 
+<p>
+Тип элементов - size_t <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xeig_8c-example.html#a41">xeig.c</a>, <a class="el" href="xlu_8c-example.html#a88">xlu.c</a> и <a class="el" href="xmda_8c-example.html#a103">xmda.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="ab9523477b6b0d422bf00eeda347c768"></a><!-- doxytag: member="util.h::nl_xvector_scan" ref="ab9523477b6b0d422bf00eeda347c768" args="(size_t *n)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t* nl_xvector_scan           </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>n</em>          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Чтение вектора с клавиатуры. 
+<p>
+Функция считывает с клавиатуры размер вектора <img class="formulaInl" alt="$n$" src="form_37.png">, размещает память под вектор, считывает значения и возвращает указатель на вектор. Тип элементов - size_t 
+</div>
+</div><p>
+<hr><h2>Переменные</h2>
+<a class="anchor" name="87c8e9ea30e23c54c9d9e91d1ec56679"></a><!-- doxytag: member="util.h::nl_error" ref="87c8e9ea30e23c54c9d9e91d1ec56679" args="(nl_err_enum error, int critical)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void(*) <a class="el" href="util_8h.html#87c8e9ea30e23c54c9d9e91d1ec56679">nl_error</a>(<a class="el" href="util_8h.html#51a9a5b60a381366ece56bb401c4c865">nl_err_enum</a> error, int critical)          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Указатель на функцию, которая вызывается в случае возникновения ошибки. 
+<p>
+По умолчанию печатает на консоли сообщение об ошибке и в случае, если critical отлично от нуля или переменная <a class="el" href="util_8h.html#bb1729121f5a9055004a3bfa5b61c7ab">nl_exit_when_error</a> отлична от нуля, аварийно завершает работу программы. В случае необходимости пользователь может написать свой обработчик ошибок. 
+</div>
+</div><p>
+<a class="anchor" name="bb1729121f5a9055004a3bfa5b61c7ab"></a><!-- doxytag: member="util.h::nl_exit_when_error" ref="bb1729121f5a9055004a3bfa5b61c7ab" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="util_8h.html#bb1729121f5a9055004a3bfa5b61c7ab">nl_exit_when_error</a>          </td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Если значение этой переменной отлично от нуля, то в случае возникновения ошибки процедура <a class="el" href="util_8h.html#87c8e9ea30e23c54c9d9e91d1ec56679">nl_error</a> прерывает работу программы. 
+<p>
+
+</div>
+</div><p>
+<hr size="1"><address style="align: right;"><small>Документация по NL. Последние изменения: Mon Oct 9 12:25:55 2006. Создано системой&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
+</body>
+</html>

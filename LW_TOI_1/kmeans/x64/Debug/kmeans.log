@@ -1,22 +1,27 @@
-﻿  Source.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(105): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(610): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(621): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(645): warning C4390: ";": обнаружен пустой контролируемый оператор; это правильно?
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(723): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(724): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(739): warning C4244: инициализация: преобразование "double" в "int", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(746): warning C4244: инициализация: преобразование "double" в "int", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(704): warning C4390: ";": обнаружен пустой контролируемый оператор; это правильно?
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(799): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(882): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(891): warning C4244: =: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(995): warning C4244: /=: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(1003): warning C4244: -=: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(1015): warning C4244: -=: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(1048): warning C4244: +=: преобразование "double" в "float", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(462): warning C4715: Step1: значение возвращается не при всех путях выполнения
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(526): warning C4715: FindR2: значение возвращается не при всех путях выполнения
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(559): warning C4715: Step3: значение возвращается не при всех путях выполнения
-c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\source.cpp(498): warning C4715: FindR1: значение возвращается не при всех путях выполнения
+﻿  example.cpp
+  Source.cpp
+  svd.cpp
+  util.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(187): warning C4477: "scanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(187): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(203): warning C4477: "scanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(203): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(208): warning C4477: "scanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(208): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(219): warning C4477: "fscanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(219): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(235): warning C4477: "fscanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(235): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(240): warning C4477: "fscanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(240): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(379): warning C4477: "scanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(379): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(379): warning C4477: "scanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "2" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(379): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(398): warning C4477: "fscanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "1" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(398): note: рекомендуется использовать "%zu" в строке форматирования
+c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(398): warning C4477: "fscanf": в строке форматирования "%u" требуется аргумент типа "unsigned int *", но вариативный аргумент "2" имеет тип "size_t *"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_toi_1\kmeans\util.cpp(398): note: рекомендуется использовать "%zu" в строке форматирования
+  Создание кода...
+  LINK : не найден или не выполнена сборка C:\Users\Kurbatova\source\LW2020\lw_2020\LW_TOI_1\x64\Debug\kmeans.exe при последней инкрементной компоновке; выполняется полная компоновка
   kmeans.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\LW_TOI_1\x64\Debug\kmeans.exe

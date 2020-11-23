@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=Windows-1251">
+<title>NL: xneldermead.c</title>
+<link href="nl.doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Создано системой Doxygen 1.4.7 -->
+<div class="tabs">
+  <ul>
+    <li><a href="index.html"><span>Титульная&nbsp;страница</span></a></li>
+    <li><a href="classes.html"><span>Классы</span></a></li>
+    <li><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="pages.html"><span>Описания</span></a></li>
+    <li><a href="examples.html"><span>Примеры</span></a></li>
+    <li>
+      <form action="search.php" method="get">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td><label>&nbsp;Поиск&nbsp;</label></td>
+            <td><input type="text" name="query" value="" size="20" accesskey="s"/></td>
+          </tr>
+        </table>
+      </form>
+    </li>
+  </ul></div>
+<h1>xneldermead.c</h1><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment">  Пример использования функций из модуля @optim.h@ </span>
+<a name="l00003"></a>00003 <span class="comment">  Минимизация &lt;&lt;банана&gt;&gt;-Розенброка:</span>
+<a name="l00004"></a>00004 <span class="comment">  $f(x_1, x_2) = (x_2 - x_1^2)^2 + (1 - x_1)^2$</span>
+<a name="l00005"></a>00005 <span class="comment">  симплекс-методом Нелдера-Мида   </span>
+<a name="l00006"></a>00006 <span class="comment">*/</span>
+<a name="l00007"></a>00007 
+<a name="l00008"></a>00008 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00009"></a>00009 <span class="preprocessor">#include &lt;math.h&gt;</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#include "<a class="code" href="nl_8h.html">nl.h</a>"</span>
+<a name="l00011"></a>00011 
+<a name="l00012"></a>00012 <span class="keywordtype">double</span> func(<span class="keywordtype">double</span> *x)
+<a name="l00013"></a>00013 {
+<a name="l00014"></a>00014 
+<a name="l00015"></a>00015   <span class="keywordtype">double</span> tmp1, tmp2;
+<a name="l00016"></a>00016 
+<a name="l00017"></a>00017   tmp1 = x[1] - x[0]*x[0];
+<a name="l00018"></a>00018   tmp2 = 1 - x[0];
+<a name="l00019"></a>00019 
+<a name="l00020"></a>00020   <span class="keywordflow">return</span> tmp1 * tmp1 + tmp2 * tmp2;
+<a name="l00021"></a>00021 }
+<a name="l00022"></a>00022 
+<a name="l00023"></a>00023 <span class="keywordtype">int</span> main(<span class="keywordtype">void</span>)
+<a name="l00024"></a>00024 {
+<a name="l00025"></a>00025   size_t n, j;
+<a name="l00026"></a>00026   <span class="keywordtype">double</span> *x0, **x, *f, *xbar, *xr, *xe, *xc;
+<a name="l00027"></a>00027   <span class="keywordtype">double</span> f0;
+<a name="l00028"></a>00028   <span class="keywordtype">double</span> tolf, tolx;
+<a name="l00029"></a>00029   <span class="keywordtype">int</span> maxfun, maxiter, rc, nfun, niter;
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031   n = 2;
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033   x0 = <a name="a114"></a><a class="code" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a>(n);
+<a name="l00034"></a>00034   x = <a name="a115"></a><a class="code" href="util_8h.html#6edefe99eb1df48d1a5107cbd0fff870">nl_dmatrix_create</a>(n + 1, n);
+<a name="l00035"></a>00035   f = <a class="code" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a>(n + 1);
+<a name="l00036"></a>00036   xbar = <a class="code" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a>(n);
+<a name="l00037"></a>00037   xr = <a class="code" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a>(n);
+<a name="l00038"></a>00038   xe = <a class="code" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a>(n);
+<a name="l00039"></a>00039   xc = <a class="code" href="util_8h.html#395ea00a37f001729adc1ac0ce22f54a">nl_dvector_create</a>(n);
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041   x0[0] = -1.2;
+<a name="l00042"></a>00042   x0[1] = 1;
+<a name="l00043"></a>00043   tolf = 1.0e-6;
+<a name="l00044"></a>00044   tolx = 1.0e-6;
+<a name="l00045"></a>00045   maxfun = 200;
+<a name="l00046"></a>00046   maxiter = 50;
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048   <a name="a116"></a><a class="code" href="optim_8h.html#ccda6d12c106580b79afe0850d094e42">opt_nelder_mead</a>(n, func, x0, &amp;f0, 0, x, f, tolf, tolx, maxfun, maxiter, 
+<a name="l00049"></a>00049     &amp;rc, &amp;nfun, &amp;niter, xbar, xr, xe, xc);
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051   <span class="keywordflow">if</span> (rc)
+<a name="l00052"></a>00052   {
+<a name="l00053"></a>00053     printf(<span class="stringliteral">"\nЧисло итераций или количество вычисленных значений функции\n"</span>);
+<a name="l00054"></a>00054     printf(<span class="stringliteral">"превысило максимально допустимое!\n"</span> );
+<a name="l00055"></a>00055   }
+<a name="l00056"></a>00056   <span class="keywordflow">else</span>
+<a name="l00057"></a>00057     printf(<span class="stringliteral">"\nУспешное завершение\n"</span>);
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059   printf(<span class="stringliteral">"\nКоличество вычисленных значений функции: %d\n"</span>, nfun);
+<a name="l00060"></a>00060   printf(<span class="stringliteral">"Число итераций (количество построенных симплексов): %d\n"</span>,niter);
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062   printf(<span class="stringliteral">"\nВычисленная точка минимума:\n"</span>);
+<a name="l00063"></a>00063   <a name="a117"></a><a class="code" href="util_8h.html#fb0e62a1dcae57f968237392f74a15c6">nl_dvector_print</a>(x0, n, <span class="stringliteral">"  %12.6e"</span>);
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065   printf(<span class="stringliteral">"\nЗначение функции в этой точке: %12.6e\n"</span>, f);
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067   printf(<span class="stringliteral">"\nВершины последнего симплекса:\n"</span>);
+<a name="l00068"></a>00068   <a name="a118"></a><a class="code" href="util_8h.html#5a45afb29eb489f6f1794c02ef2aa3fb">nl_dmatrix_print</a>(x, n + 1, n, <span class="stringliteral">"  %12.6e"</span>);
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070   printf(<span class="stringliteral">"\nЗначения функции в вершинах:\n"</span>);
+<a name="l00071"></a>00071   <a class="code" href="util_8h.html#fb0e62a1dcae57f968237392f74a15c6">nl_dvector_print</a>(f, n + 1, <span class="stringliteral">"  %12.6e"</span>);
+<a name="l00072"></a>00072   
+<a name="l00073"></a>00073   <a name="a119"></a><a class="code" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a>(x0);
+<a name="l00074"></a>00074   <a name="a120"></a><a class="code" href="util_8h.html#fb7d0819fe1e3929001fe8648afc1c7d">nl_dmatrix_free</a>(x, n + 1);
+<a name="l00075"></a>00075   <a class="code" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a>(f);
+<a name="l00076"></a>00076   <a class="code" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a>(xbar);
+<a name="l00077"></a>00077   <a class="code" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a>(xr);
+<a name="l00078"></a>00078   <a class="code" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a>(xe);
+<a name="l00079"></a>00079   <a class="code" href="util_8h.html#1ec620dc1da7f4d6fdebccd70eea844a">nl_dvector_free</a>(xc);
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081   <span class="keywordflow">return</span> 0;
+<a name="l00082"></a>00082 }
+</pre></div> <hr size="1"><address style="align: right;"><small>Документация по NL. Последние изменения: Mon Oct 9 12:25:54 2006. Создано системой&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
+</body>
+</html>
