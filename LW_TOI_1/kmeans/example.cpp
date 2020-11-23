@@ -6,9 +6,28 @@
 */
 
 #include "nl.h"
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <list>
+#include <iterator>
+
+
+
 
 int main()
 {
+	setlocale(LC_ALL, "");
+
+	std::list <std::string> stopword = {"о","В","но","не",","};
+	
+	std::string first = stopword.front();
+	std::string last = stopword.back();
+
+	/*Тестовый пример для сингулярного выражения*/
 	double **A, **U, **V, *w, *b, *x;
 	size_t ierr;
 	size_t m = 4;
@@ -61,6 +80,44 @@ int main()
 	nl_dvector_free(w);
 	nl_dvector_free(b);
 	nl_dvector_free(x);
+
+	/*Работа с текстом*/
+	/*Удаление стоп-слов*/
+	char path[] = "C:\\Users\\Kurbatova\\source\\LW2020\\lw_2020\\LW_TOI_1\\kmeans\\tests.txt";
+	//char line[100];
+	std::string line;
+	char search[100];
+
+	std::ifstream input(path);
+
+	while (!input.is_open())
+	{
+		std::cerr << "File error" << std::endl;
+		std::cin.ignore();
+		break;
+	}
+	if (input)
+	{
+		while (!input.eof())
+		{
+			std::getline(input, line);
+			//input.getline(line, sizeof(line));
+			std::cout <<  "Before delete:\n" <<line << std::endl;
+			for (std::list<std::string>::const_iterator i = stopword.begin(); i != stopword.end(); ++i)
+			{
+			/*	std::cout << *i << "\t";
+				for (std::string::const_iterator word = line.begin(); word != line.end(); ++word)
+					if (std::strchr(*i,*word))
+						std::cout << *word << std::endl;*/
+
+				for (std::string::size_type pos = 0; (pos = line.find(*i, pos)) != std::string::npos; )
+						line.erase(pos, 1);
+				std::cout << "After delete:\n"<< line << std::endl;
+			}
+		}
+	}
+
+	system("pause");
 
 	return 0;
 }
