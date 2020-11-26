@@ -1,0 +1,9 @@
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\bin\Debug\LSA_with_cluster.exe.config
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\bin\Debug\LSA_with_cluster.exe
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\bin\Debug\LSA_with_cluster.pdb
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\bin\Debug\alglibnet2.dll
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\obj\Debug\LSA_with_cluster.csprojAssemblyReference.cache
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\obj\Debug\LSA_with_cluster.csproj.CoreCompileInputs.cache
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\obj\Debug\LSA_with_cluster.csproj.CopyComplete
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\obj\Debug\LSA_with_cluster.exe
+C:\Users\Kurbatova\source\LW2020\lw_2020\LSA_with_cluster\obj\Debug\LSA_with_cluster.pdb
