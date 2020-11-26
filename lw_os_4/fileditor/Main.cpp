@@ -141,7 +141,7 @@ void OnIdle(HWND hwnd)
 				else // ANSI-файл
 				{			
 					lpBuffReWri[ovlRead.InternalHigh] = '\0';// задаём нуль-символ в конце строки
-					SetDlgItemTextA(hwnd, IDC_EDIT_TEXT, lpBuffReWri);// копируем ANSI-строку в поле ввода
+					SetDlgItemTextW(hwnd, IDC_EDIT_TEXT, lpBuffReWri);// копируем ANSI-строку в поле ввода
 				} 
 			} 
 			delete[] lpBuffReWri, lpBuffReWri = NULL;	// освобождаем выделенную память
@@ -440,7 +440,7 @@ void SaveProfile(LPCTSTR lpFileName)
 
 BOOL OpenFileAsync(HWND hwndCtl)
 {
-	HANDLE hExistingFile = CreateFile(FileName, 
+	HANDLE hExistingFile = CreateFileW(FileName, 
 		GENERIC_READ | GENERIC_WRITE,//запись и чтние
 		FILE_SHARE_READ, //для совместного чтения
 		NULL, //защиты нет
@@ -470,7 +470,7 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 		// выделяем память для буфера, в который будет считываться данные из файла
-		lpBuffReWri = new CHAR[size.LowPart + 2];
+		lpBuffReWri = new WCHAR[size.LowPart + 2];
 		
 		bRet = ReadAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlRead);// асинхронное чтение данных из файла
 
@@ -517,7 +517,7 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	else
 	{
 		// создаём и открываем файл для чтения и записи
-		hFile = CreateFile(FileName, 
+		hFile = CreateFileW(FileName, 
 			GENERIC_READ | GENERIC_WRITE, 
 			FILE_SHARE_READ, 
 			NULL, 
@@ -532,7 +532,7 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	} 
 	
 	LARGE_INTEGER size;// определяем размер текста
-	size.QuadPart = GetWindowTextLengthA(hwndCtl);
+	size.QuadPart = GetWindowTextLengthW(hwndCtl);
 
 	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
 	
@@ -542,9 +542,9 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 
-		lpBuffReWri = new CHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
+		lpBuffReWri = new WCHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
 
-		GetWindowTextA(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
+		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
 		
 		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
 
@@ -585,10 +585,18 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	ZeroMemory(ovl, sizeof(ovl));
 	ovl->Offset = dwOffset; // младшая часть смещения
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
-	// начинаем асинхронную операцию записи данных в файл
-	//TCHAR tcFF[] = TEXT("\xFF");
-	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
-	//BOOL bRet = WriteFile(hFile, &tcFF,1, dwSize, NULL, ovl);
+	/*-------------------------------------------*/
+	//Теперь если открыть файл обычным текстовым редактором
+	//то он будет распознан с кодировкой UTF8. 
+	//Но вот эта программа выведет знаки вопроса
+	unsigned char smar[3];
+	smar[0] = 0xEF;
+	WriteFile(hFile, smar, 3, &dwSize, NULL);
+	char* utf8 = (char*)malloc(1000);
+	int Ibw = WideCharToMultiByte(CP_UTF8, 0, lpBuffReWri, -1, utf8, 1000, NULL, NULL);
+	BOOL bRet = WriteFile(hFile, utf8,Ibw, &dwSize, ovl);
+	free(utf8);
+	/*-------------------------------------------*/
 
 	DWORD  dwRet = GetLastError();
 	if (FALSE == bRet && ERROR_IO_PENDING != dwRet)
