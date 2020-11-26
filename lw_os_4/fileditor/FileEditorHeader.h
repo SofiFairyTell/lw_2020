@@ -5,6 +5,8 @@
 #include <strsafe.h>
 #include <richedit.h> //why ?
 #include "resource.h"
+#include <atlconv.h>
+
 
 // оконная процедура главного окна
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
