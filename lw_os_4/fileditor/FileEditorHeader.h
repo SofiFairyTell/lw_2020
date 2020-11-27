@@ -6,6 +6,7 @@
 #include <richedit.h> //why ?
 #include "resource.h"
 #include <atlconv.h>
+#include <string>
 
 
 // оконная процедура главного окна

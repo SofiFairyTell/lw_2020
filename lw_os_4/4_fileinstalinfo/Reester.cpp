@@ -179,13 +179,14 @@ void AutorunAppList(HKEY hRootKey, REGSAM AccessRights)
 					
 				DWORD cchValueName = MaxNameLen + 1, dwType, cbData = MaxVallLen;
 				lStatus = RegEnumValue(hKey, i, NameKey, &cchValueName, NULL, &dwType, lpData, &cbData);
-
+				
 				if ((ERROR_SUCCESS == lStatus) && (cchValueName > 0))
 				{
 					//reg_sz - тип данных. его значение UNICODE-строка
 					if ((REG_SZ == dwType) || (REG_EXPAND_SZ == dwType))
 					{
 						_tprintf(TEXT("-----\n%s\n"), NameKey);//имя параметра
+						//RegQueryValueEx(hKey, TEXT("Publisher"), NULL, NULL, (LPBYTE)lpData, &cbData);
 						_tprintf(TEXT("%s\n\n"), (LPTSTR)lpData);//значение параметра
 					} 
 				}

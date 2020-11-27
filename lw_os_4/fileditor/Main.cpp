@@ -131,6 +131,7 @@ void OnIdle(HWND hwnd)
 			{
 				WORD bom = *(LPWORD)lpBuffReWri; // маркер последовательности байтов
 				if ((0xFEFF == bom)||(0xBB ==bom) ||(0xBF ==bom)) // Unicode-файл
+				//if(	IsTextUnicode(lpBuffReWri,sizeof(lpBuffReWri),NULL))
 				{
 					LPWSTR lpszText = (LPWSTR)(lpBuffReWri + sizeof(WORD)); // Unicode-строка
 					// вычисляем длину Unicode-строки
@@ -550,11 +551,11 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 		USES_CONVERSION;
 		LPWSTR x = A2W(lpBuffReWri);
 
-		//GetWindowTextA(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
-		GetWindowTextW(hwndCtl, x, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
+		GetWindowTextA(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
+		//GetWindowTextW(hwndCtl, x, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
 
-		//bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
-		bRet = WriteAsync(hFile, x, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
+		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
+	//	bRet = WriteAsync(hFile, x, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
 
 		if (FALSE == bRet) 
 		{

@@ -293,12 +293,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			PathAppend(FileName, NewFileName);
 			// переименовываем файл/каталог
 			MoveFile(ExistingFileName, FileName);
-		} // if
+		}
 		else
-		{
-			// заменим нуль-символ, раздел€ющий путь и им€ файла/каталога
-			FileName[cchPath] = _T('\\');
-		} // else
+		{		
+			FileName[cchPath] = _T('\\');// заменим нуль-символ, раздел€ющий путь и им€ файла/каталога
+		}
 		// запомним размер и положение окна
 		GetWindowRect(hwnd, &rect);
 
@@ -580,27 +579,22 @@ void ConvertDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
 //work wit regist
 LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded)
 {
-	DWORD dwType;
 	// определ€ем тип получаемого значени€ параметра
-	LSTATUS lStatus = RegQueryValueEx(hKey, lpValueName, NULL, &dwType, NULL, NULL);
-
-	if (ERROR_SUCCESS == lStatus && REG_SZ == dwType)
+	DWORD RegType;
+	LSTATUS retCode = RegQueryValueEx(hKey, lpValueName, NULL, &RegType, NULL, NULL);
+	if (ERROR_SUCCESS == retCode && REG_SZ == RegType)
 	{
-		// вычисл€ем размер буфера (в байтах)
-		DWORD cb = cch * sizeof(TCHAR);
+		DWORD DataBuffer = cch * sizeof(TCHAR);
 		// получаем значение параметра
-		lStatus = RegQueryValueEx(hKey, lpValueName, NULL, NULL, (LPBYTE)lpszData, &cb);
-
-		if (NULL != lpcchNeeded)
-			*lpcchNeeded = cb / sizeof(TCHAR);
-	} // if
-	else if (ERROR_SUCCESS == lStatus)
+		retCode = RegQueryValueEx(hKey,lpValueName, NULL, NULL, (LPBYTE)lpszData, &DataBuffer);
+	} 
+	else if (ERROR_SUCCESS == retCode)
 	{
-		lStatus = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
-	} // if
+		retCode = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
+	} 
 
-	return lStatus;
-} // RegGetValueSZ
+	return retCode;
+}
 
 LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD cb, LPDWORD lpcbNeeded)
 {
