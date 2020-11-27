@@ -280,6 +280,8 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 	TCHAR szInFileName[MAX_PATH + 1];
 	TCHAR szOutFileName[MAX_PATH + 1];
 
+	LPCTSTR FILE = PathFindFileNameW(szInDirName);
+
 	lstrcpy(szFind, szInDirName);
 	lstrcat(szFind, L"\\*.*"); //ищем файлы с любым именем и рысширением
 
@@ -293,16 +295,20 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 		lstrcat(szInFileName, ffd.cFileName);
 
 		//Формируем полный путь (результат)
+
 		lstrcpy(szOutFileName, szOutDirName);
+
+		lstrcat(szOutFileName, FILE);
+
 		lstrcat(szOutFileName, L"\\");
+
 		lstrcat(szOutFileName, ffd.cFileName);
 		bool flag = true;
 		if (flag) //если flag == true, то копируем и папки
 		{
 			if (ffd.dwFileAttributes & 0x00000010)
 			{
-				if (lstrcmp(ffd.cFileName, L".") == 0 ||
-					lstrcmp(ffd.cFileName, L"..") == 0) continue;
+				if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
 
 				CreateDirectory(szOutFileName, NULL);
 				Copy(szInFileName, szOutFileName);
