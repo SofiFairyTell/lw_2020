@@ -1,0 +1,7 @@
+﻿  Main.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(138): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(224): warning C4101: hDC: неиспользованная локальная переменная
+  Создание кода
+  All 27 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  fileditor.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Release\fileditor.exe
