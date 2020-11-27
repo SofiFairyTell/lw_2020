@@ -535,8 +535,11 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	LARGE_INTEGER size;// определ€ем размер текста
 	size.QuadPart = GetWindowTextLengthW(hwndCtl);
 
-	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// измен€ем положение указател€ файла
-	
+	SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// измен€ем положение указател€ файла
+	const WORD BOM = 0XFEFF;
+	//BOOL bRet = WriteFile(hFile, &BOM, sizeof(BOM), &dwSize, ovl);
+	WriteFile(hFile, "0XFEFF", 3, NULL, NULL);
+	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_END);
 	if (FALSE != bRet)
 		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
 
@@ -596,9 +599,9 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие дл€ оповещени€ завершени€ записи
 	// начинаем асинхронную операцию записи данных в файл
 	//TCHAR tcFF[] = TEXT("\xFF");
-	const WORD BOM = 0XFEFF;
+	//const WORD BOM = 0XFEFF;
 	//BOOL bRet = WriteFile(hFile, &BOM, sizeof(BOM), &dwSize, ovl);
-	
+	//WriteFile(hFile, &BOM, sizeof(BOM), NULL, NULL);
 
 	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
 	//BOOL bRet = WriteFile(hFile, &tcFF,1, dwSize, NULL, ovl);

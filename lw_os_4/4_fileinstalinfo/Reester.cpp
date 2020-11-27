@@ -37,7 +37,7 @@ int _tmain()
 
 		AutorunAppList(HKEY_CURRENT_USER, KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE | KEY_WOW64_64KEY);
 	} 
-
+	std::getchar();
 } 
 // ----------------------------------------------------------------------------------------------
 void InstallAppList(REGSAM AccessRights)
