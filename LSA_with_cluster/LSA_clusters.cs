@@ -334,7 +334,7 @@ namespace LSA_with_cluster
             {
                 while ((line = WithoutStopWordHeaders.ReadLine()) != null)
                 {
-                    lines.Add(line);
+                    lines.Add(line);//добавим из файла все строки
                 }
             }
             for (int i = 0; i < lines.Count; i++)
@@ -353,7 +353,7 @@ namespace LSA_with_cluster
                         if ((word != " ") && (word != ""))
                         {
                             word += " ";
-                            tempWord = word;
+                            tempWord = word; //добавим найденное слово во временную строку
                             word = word.ToLower();
                             string savingLine = (string)lines[i];
                             temp = temp.ToLower();
@@ -379,7 +379,7 @@ namespace LSA_with_cluster
                                     }
                                     if (!check)
                                     {
-                                        multiplyWords.Add(tempWord);
+                                        multiplyWords.Add(tempWord);//добавим слово, если ранее его не было в списке временных слов
                                     }
                                 }
                             }
@@ -393,8 +393,11 @@ namespace LSA_with_cluster
             }
             multiplyWords.Sort();
             frequencyMatrix = new double[multiplyWords.Count, lines.Count];
-            m = multiplyWords.Count;
+            m = multiplyWords.Count; 
             n = lines.Count;
+            /*После того, как во временном файле окажутся уникальные слова*/
+            /*Выполним их подсчет для каждой строки */
+            /*Заполним матрицу*/
             for (int i = 0; i < multiplyWords.Count; i++)
             {
                 for (int j = 0; j < lines.Count; j++)
@@ -410,10 +413,10 @@ namespace LSA_with_cluster
                     tempWord = tempWord.ToLower();
                     line = (string)lines[j];
                     line = line.ToLower();
-                    int pos = line.IndexOf(tempWord);
+                    int pos = line.IndexOf(tempWord);//слово было найдено в строке
                     if (pos != -1)
                     {
-                        frequencyMatrix[i, j]++;
+                        frequencyMatrix[i, j]++;//добавим к частоте встречаемости
                     }
                 }
             }
@@ -424,6 +427,7 @@ namespace LSA_with_cluster
         {
             alglib.rmatrixsvd(frequencyMatrix, m, n, 2, 2, 2, out w, out u, out vt);
             VT = new double[rowsCount, n];
+            /*где rowsCount задается при старте программы, а n это количество столбцов*/
             for (int i = 0; i < rowsCount; i++)
             {
                 for (int j = 0; j < n; j++)
@@ -496,7 +500,7 @@ namespace LSA_with_cluster
                 {
                     if (clusters[i].Count != 0)
                     {
-                        centroid1[j, i] /= clusters[i].Count;
+                        centroid1[j, i] /= clusters[i].Count;//пересчет центра кластеров
                     }
                 }
             }
@@ -509,10 +513,10 @@ namespace LSA_with_cluster
                 {
                     for (int j = 0; j < rowsCount; j++)
                     {
-                        changing[i] += Math.Pow(centroid1[j, i] - centroid2[j, i], 2);
+                        changing[i] += Math.Pow(centroid1[j, i] - centroid2[j, i], 2);//определение меры близости между центрами
                     }
 
-                    changing[i] = Math.Sqrt(changing[i]);
+                    changing[i] = Math.Sqrt(changing[i]);//вычисление Евклидового расстояния
                 }
                 return changing.Max();
             }
@@ -521,16 +525,16 @@ namespace LSA_with_cluster
         {
             double[,] centroid1 = new double[rowsCount, clustersCount];
             double[,] centroid2 = new double[rowsCount, clustersCount];
-            InitializeCentroid(centroid1);
-            clusters = new ArrayList[clustersCount];
+            InitializeCentroid(centroid1);//инициализируем класстер значениями из VT
+            clusters = new ArrayList[clustersCount];//количество кластеров задается при вводе
             for (int i = 0; i < clustersCount; i++)
             {
                 clusters[i] = new ArrayList();
             }
-            FindClusters(centroid1);
+            FindClusters(centroid1); 
             CopyCentroids(centroid1, centroid2);
             CreateNewCentroid(centroid1);
-            while (MaxChanging(centroid1, centroid2) > eps)
+            while (MaxChanging(centroid1, centroid2) > eps) 
             {
                 FindClusters(centroid1);
                 CopyCentroids(centroid1, centroid2);
@@ -548,9 +552,9 @@ namespace LSA_with_cluster
                     result.WriteLine("-----------------------", i + 1);
                     foreach (int doc in clusters[i])
                     {
-                        result.WriteLine(HEADERS[doc]);
+                        result.WriteLine(HEADERS[doc]);//запись заголовка под номером
                     }
-                    result.WriteLine("**********************************");
+                    result.WriteLine("-----------------------");
                     result.WriteLine();
                 }
             }
