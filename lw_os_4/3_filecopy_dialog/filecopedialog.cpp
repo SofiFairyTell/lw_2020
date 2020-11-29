@@ -97,6 +97,7 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 }
 
 #pragma endregion
+
 BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
@@ -145,7 +146,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	for (;;)
 	{
-
 
 		// извлекаем сообщение из очереди
 		Ret = GetMessage(&msg, NULL, 0, 0);
@@ -280,8 +280,6 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 	TCHAR szInFileName[MAX_PATH + 1];
 	TCHAR szOutFileName[MAX_PATH + 1];
 
-	LPCTSTR FILE = PathFindFileNameW(szInDirName);
-
 	lstrcpy(szFind, szInDirName);
 	lstrcat(szFind, L"\\*.*"); //ищем файлы с любым именем и рысширением
 
@@ -297,15 +295,9 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 		//Формируем полный путь (результат)
 
 		lstrcpy(szOutFileName, szOutDirName);
-
-		lstrcat(szOutFileName, FILE);
-
 		lstrcat(szOutFileName, L"\\");
-
 		lstrcat(szOutFileName, ffd.cFileName);
-		bool flag = true;
-		if (flag) //если flag == true, то копируем и папки
-		{
+	
 			if (ffd.dwFileAttributes & 0x00000010)
 			{
 				if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
@@ -313,23 +305,14 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 				CreateDirectory(szOutFileName, NULL);
 				Copy(szInFileName, szOutFileName);
 			}
-		} //иначе пропускаем папки
-		else
-			if (ffd.dwFileAttributes & 0x00000010) continue;
-
+		
 		CopyFile(szInFileName, szOutFileName, TRUE);
+
 	} while (FindNextFile(hFind, &ffd));
 
 	FindClose(hFind);
 	return TRUE;
 }
-
-
-
-
-
-
-
 
 void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
@@ -345,11 +328,28 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
 		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));//каталог куда копируем
 		
-		BOOL BRET = Copy(FromName, ToName);
-
-	
-		
-		
+		/*Выясним, что копируется, файл или папка. 
+		Если папка, то сформируем с ней маршрут и продолжим поиск*/
+		WIN32_FIND_DATA ffd;
+		HANDLE hFind;
+		BOOL BRET;
+		LPCTSTR FILE = PathFindFileNameW(FromName);
+		hFind = FindFirstFile(FromName, &ffd); //Ищем файл/каталог
+		if (ffd.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
+		{
+			lstrcat(ToName, L"\\");
+			lstrcat(ToName, FILE);
+			CreateDirectory(ToName, NULL);
+			BRET = Copy(FromName, ToName);
+		}
+		else
+		{
+			lstrcat(ToName, L"\\");
+			lstrcat(ToName, ffd.cFileName);
+			BRET = CopyFile(FromName, ToName, TRUE);
+			
+		}
+			
 		
 		
 		/*
@@ -360,9 +360,7 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		_tcscpy_s(newTo, ToName);
 		newTo[_tcsclen(ToName) + 1] = 0;
-		
-		
-		
+	
 		SHFILEOPSTRUCT fos;
 		memset(&fos, 0, sizeof(SHFILEOPSTRUCT));
 		fos.hwnd = hwnd;
@@ -373,20 +371,25 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		int ResultError = SHFileOperation(&fos);*/
 		
-		/*вернуть позже*/
-		//if (ResultError != 0)
-		//{
-		//	MessageBox(hwnd, L"Файлы не скопированы.", L"Ошибка", MB_YESNO);
-		//	SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
-		//	SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-		//	//ShowMessage(IntToStr(result));
-		//}
-		//else
-		//{
-		//	MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_OK);
-		//	SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
-		//	SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-		//}
+		TCHAR Message[MAX_PATH];
+		if (BRET == 0)
+		{
+			lstrcpy(Message, L"Файлы не скопированы в папку: ");
+			lstrcat(Message, ToName);
+			MessageBox(hwnd, Message, L"Ошибка", MB_OK);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+			//ShowMessage(IntToStr(result));
+		}
+		else
+		{
+			
+			lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
+			lstrcat(Message, ToName);
+			MessageBox(hwnd,Message, L" Успех!", MB_OK);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+		}
 				
 	}	break;
 

@@ -1,0 +1,8 @@
+﻿  filecopedialog.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(111): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(131): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(95): warning C4101: hdc: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(102): warning C4101: nSize: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(103): warning C4101: szBuf: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(232): warning C4101: NewName: неиспользованная локальная переменная
+  3_filecopy_dialog.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\1_sidinfo\Debug\3_filecopy_dialog.exe
