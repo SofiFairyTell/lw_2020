@@ -346,7 +346,9 @@ HANDLE LogonUserToLocalComputer()
 
 		// получаем маркер доступа пользователя
 		HANDLE hToken = OpenUserToken(szUserName, TEXT("."), szPassword,
-			LOGON32_LOGON_INTERACTIVE, TOKEN_QUERY | TOKEN_IMPERSONATE, NULL, TokenImpersonation, SecurityImpersonation);
+			LOGON32_LOGON_INTERACTIVE, 
+			TOKEN_QUERY | TOKEN_IMPERSONATE, //для получения информации о содержимом маркера доступа | разрешение замещать маркер доступа процесса
+			NULL, TokenImpersonation, SecurityImpersonation);
 
 		if (NULL != hToken)
 		{
@@ -355,11 +357,21 @@ HANDLE LogonUserToLocalComputer()
 	} // for
 
 	return NULL;
-} // LogonUserToLocalComputer
+} 
 
 HANDLE OpenUserToken(LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB, TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL)
 {
 	HANDLE TOKEN = NULL;
-	BOOL BRET = LogonUser;
-	return HANDLE();
+	BOOL BRET = LogonUser(
+		lpUserName,lpDomain,lpPassword,LogonType,
+		LOGON32_PROVIDER_DEFAULT, 
+		&TOKEN);//получение маркера доступа указанного пользователя
+	if (FALSE != BRET)
+	{
+		HANDLE newTOKEN = NULL;
+		BRET = DuplicateTokenEx(TOKEN, DesireAcces, PSECUR_ATTRIB, IMPERSONATION_LEVEL, TOKEN_TYP, &newTOKEN);//duble marker of acces
+		CloseHandle(TOKEN);//КАК ОН БУДЕТ РАБОТАТЬ ЕСЛИ МЫ ЕГО ЗАКРЫЛИ???
+		TOKEN = (FALSE != BRET) ? newTOKEN : NULL;
+	}
+	return TOKEN;
 }

@@ -50,5 +50,5 @@ PARAFORMAT pf;//параметры абзацев
 LOGFONT logFont; // параметры шрифта
 HFONT hFont = NULL; // дескриптор шрифта
 
-LPSTR lpBuffReWri = NULL; // указатель на буфер для чтения/записи текстового файла
+LPWSTR lpBuffReWri = NULL; // указатель на буфер для чтения/записи текстового файла
 OVERLAPPED ovlRead = { 0 }, ovlWrite = { 0 };// структуры управления асинхронным доступом к файлу

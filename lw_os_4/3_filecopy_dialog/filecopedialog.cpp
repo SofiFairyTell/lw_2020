@@ -98,7 +98,7 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 
 #pragma endregion
 
-BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName);
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
 
@@ -271,7 +271,7 @@ void Dialog_OnClose(HWND hwnd)
 }
 
 
-BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 {
 	WIN32_FIND_DATA ffd;
 	HANDLE hFind;
@@ -281,10 +281,13 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 	TCHAR szOutFileName[MAX_PATH + 1];
 
 	lstrcpy(szFind, szInDirName);
-	lstrcat(szFind, L"\\*.*"); //ищем файлы с любым именем и рысширением
+	lstrcat(szFind, L"\\*"); //ищем файлы с любым именем и расширением
 
 	hFind = FindFirstFile(szFind, &ffd);
-
+	if (hFind == NULL)
+	{
+		return FALSE;
+	}
 	do
 	{
 		//‘ормируем полный путь (источник)
@@ -298,15 +301,18 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 		lstrcat(szOutFileName, L"\\");
 		lstrcat(szOutFileName, ffd.cFileName);
 	
-			if (ffd.dwFileAttributes & 0x00000010)
-			{
-				if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
+		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
 
-				CreateDirectory(szOutFileName, NULL);
-				Copy(szInFileName, szOutFileName);
-			}
+			CreateDirectory(szOutFileName, NULL);
+			CopyDirectoryContent(szInFileName, szOutFileName);
+		}
+		else
+		{
+			CopyFile(szInFileName, szOutFileName, TRUE);
+		}
 		
-		CopyFile(szInFileName, szOutFileName, TRUE);
 
 	} while (FindNextFile(hFind, &ffd));
 
@@ -334,20 +340,34 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		HANDLE hFind;
 		BOOL BRET;
 		LPCTSTR FILE = PathFindFileNameW(FromName);
-		hFind = FindFirstFile(FromName, &ffd); //»щем файл/каталог
-		if (ffd.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
+		//hFind = FindFirstFile(FromName, &ffd); //»щем файл/каталог
+		
+		DWORD FromAttributes = GetFileAttributes(FromName);//определим, что копируем
+		DWORD ToNameAttributes = GetFileAttributes(ToName);//вы€сним, вы€сним куда копируем
+							
+		if (INVALID_FILE_ATTRIBUTES == ToNameAttributes || INVALID_FILE_ATTRIBUTES == FromAttributes) // (!) если нет файла или каталога
+		{
+			break;
+		} 
+		else 
+			if ((ToNameAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && (FromAttributes& FILE_ATTRIBUTE_DIRECTORY) != 0)//не каталог
+			{
+				SetLastError(ERROR_PATH_NOT_FOUND);
+				MessageBox(hwnd,L"Ќельз€ скопировать папку в файл!", L" !", MB_OK);
+			} 
+											   
+		if ((FromAttributes& FILE_ATTRIBUTE_DIRECTORY)!= 0)//€вл€етс€ каталогом
 		{
 			lstrcat(ToName, L"\\");
 			lstrcat(ToName, FILE);
 			CreateDirectory(ToName, NULL);
-			BRET = Copy(FromName, ToName);
+			BRET = CopyDirectoryContent(FromName, ToName);
 		}
 		else
 		{
 			lstrcat(ToName, L"\\");
 			lstrcat(ToName, ffd.cFileName);
-			BRET = CopyFile(FromName, ToName, TRUE);
-			
+			BRET = CopyFile(FromName, ToName, TRUE);		
 		}
 			
 		

@@ -129,9 +129,9 @@ void OnIdle(HWND hwnd)
 		{
 			if (ERROR_SUCCESS == ovlRead.Internal) // чтение завершено успешно
 			{
+				
 				WORD bom = *(LPWORD)lpBuffReWri; // маркер последовательности байтов
-				if ((0xFEFF == bom)||(0xBB ==bom) ||(0xBF ==bom)) // Unicode-файл
-				//if(	IsTextUnicode(lpBuffReWri,sizeof(lpBuffReWri),NULL))
+				if (0xFEFF == bom) // Unicode-файл
 				{
 					LPWSTR lpszText = (LPWSTR)(lpBuffReWri + sizeof(WORD)); // Unicode-строка
 					// вычисляем длину Unicode-строки
@@ -142,7 +142,7 @@ void OnIdle(HWND hwnd)
 				else // ANSI-файл
 				{			
 					lpBuffReWri[ovlRead.InternalHigh] = '\0';// задаём нуль-символ в конце строки
-					SetDlgItemTextA(hwnd, IDC_EDIT_TEXT, lpBuffReWri);// копируем ANSI-строку в поле ввода
+					SetDlgItemTextW(hwnd, IDC_EDIT_TEXT, lpBuffReWri);// копируем ANSI-строку в поле ввода
 				} 
 			} 
 			delete[] lpBuffReWri, lpBuffReWri = NULL;	// освобождаем выделенную память
@@ -211,11 +211,6 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	
 	return TRUE;
 } 
-
-
-
-
-
 
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
@@ -471,7 +466,7 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 		// выделяем память для буфера, в который будет считываться данные из файла
-		lpBuffReWri = new CHAR[size.LowPart + 2];
+		lpBuffReWri = new WCHAR[size.LowPart + 2];
 		
 		bRet = ReadAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlRead);// асинхронное чтение данных из файла
 
@@ -532,33 +527,29 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 		} 
 	} 
 	
-	LARGE_INTEGER size;// определяем размер текста
+	LARGE_INTEGER size;// для определения размера текста
+	
 	size.QuadPart = GetWindowTextLengthW(hwndCtl);
+	
+	
+	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
+	
 
-	SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
-	const WORD BOM = 0XFEFF;
-	//BOOL bRet = WriteFile(hFile, &BOM, sizeof(BOM), &dwSize, ovl);
-	WriteFile(hFile, "0XFEFF", 3, NULL, NULL);
-	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_END);
+	//BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_END);
+	
 	if (FALSE != bRet)
 		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 
-		lpBuffReWri = new CHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
-		
-		/*С этим конвертером строка читается как Unicode*/
-		/*Сохранение идет в Unicode, но при чтении все ломается*/
-		/*А и еще обрезается текст*/
-		USES_CONVERSION;
-		LPWSTR x = A2W(lpBuffReWri);
+		lpBuffReWri = new WCHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
 
-		GetWindowTextA(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
-		//GetWindowTextW(hwndCtl, x, size.LowPart + 1);		// копируем ANSI-строку из поля ввода в буффер
+		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем UNICODE строку из поля ввода в буффер
+
 
 		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
-	//	bRet = WriteAsync(hFile, x, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
+
 
 		if (FALSE == bRet) 
 		{
@@ -597,14 +588,18 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	ZeroMemory(ovl, sizeof(ovl));
 	ovl->Offset = dwOffset; // младшая часть смещения
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
-	// начинаем асинхронную операцию записи данных в файл
-	//TCHAR tcFF[] = TEXT("\xFF");
-	//const WORD BOM = 0XFEFF;
-	//BOOL bRet = WriteFile(hFile, &BOM, sizeof(BOM), &dwSize, ovl);
-	//WriteFile(hFile, &BOM, sizeof(BOM), NULL, NULL);
 
-	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
-	//BOOL bRet = WriteFile(hFile, &tcFF,1, dwSize, NULL, ovl);
+	// начинаем асинхронную операцию записи данных в файл
+
+	//WCHAR  cUnicodeBOM = 0xFEFF;
+	const char BOM[] = { 0xFF, 0xFE };
+
+	DWORD z = 0;//количество прочитанных байт
+	WriteFile(hFile, &BOM, sizeof(BOM), &z, NULL);//запись сигнатуры
+
+		
+	BOOL bRet = WriteFile(hFile, lpBuffReWri, dwSize*sizeof(wchar_t), &z, ovl);
+
 
 	DWORD  dwRet = GetLastError();
 	if (FALSE == bRet && ERROR_IO_PENDING != dwRet)
