@@ -1,14 +1,18 @@
 #include "FileCopeDialogHeader.h"
 #include <string>
 
-/*ГЏГ®ГЄГ  Г­ГҐ Г°Г Г§ГЎГҐГ°ГіГ±Гј Г¦ГЁГўГҐГІ Г§Г¤ГҐГ±Гј*/
-// ГґГіГ­ГЄГ¶ГЁГї Г¤Г«Гї ГўГµГ®Г¤Г  ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї Г­Г  Г«Г®ГЄГ Г«ГјГ­Г»Г© ГЄГ®Г¬ГЇГјГѕГІГҐГ°
+/*Живут здесь пока не придумаю как переписать*/
 HANDLE LogonUserToLocalComputer();
 HANDLE OpenUserToken(
 	LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, 
 	DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB,
 	TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL);
 
+#include "FileCopeDialogHeader.h"
+#include <string>
+
+
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
 
@@ -21,47 +25,42 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
 
 	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	wcex.lpfnWndProc = MainWindowProc; // Г®ГЄГ®Г­Г­Г Гї ГЇГ°Г®Г¶ГҐГ¤ГіГ°Г 
+	wcex.lpfnWndProc = MainWindowProc; // оконная процедура
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 2);
-	
-	wcex.lpszClassName = TEXT("MainWindowClass"); // ГЁГ¬Гї ГЄГ«Г Г±Г±Г 
+
+	wcex.lpszClassName = TEXT("MainWindowClass"); // имя класса
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-	if (0 == RegisterClassEx(&wcex)) // Р•РЎР›Р РќР• РЈР”РђР›РћРЎР¬ Р—РђР Р•Р“Р•РЎРўР РР РћР’РђРўР¬ РљР›РђРЎРЎ
+	if (0 == RegisterClassEx(&wcex)) // регистрируем класс
 	{
-		return -1; 
+		return -1; // завершаем работу приложения
 	}
 
-	LoadLibrary(TEXT("ComCtl32.dll"));//Г¤Г«Гї ГЅГ«ГҐГ¬ГҐГ­ГІГ®Гў Г®ГЎГ№ГҐГЈГ® ГЇГ®Г«ГјГ§Г®ГўГ Г­ГЁГї
-	// Г±Г®Г§Г¤Г ГҐГ¬ ГЈГ«Г ГўГ­Г®ГҐ Г®ГЄГ­Г® Г­Г  Г®Г±Г­Г®ГўГҐ Г­Г®ГўГ®ГЈГ® Г®ГЄГ®Г­Г­Г®ГЈГ® ГЄГ«Г Г±Г±Г 
-	
+	LoadLibrary(TEXT("ComCtl32.dll"));//для элементов общего пользования
+	// создаем главное окно на основе нового оконного класса
 
-	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW,
-		100, 100, 10, 10, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindowEx(0, TEXT("MainWindowClass"), TEXT("Process"), WS_OVERLAPPEDWINDOW, 100, 100, 10, 10, NULL, NULL, hInstance, NULL);
 
 	if (NULL == hWnd)
 	{
-		return -1; // Г§Г ГўГҐГ°ГёГ ГҐГ¬ Г°Г ГЎГ®ГІГі ГЇГ°ГЁГ«Г®Г¦ГҐГ­ГЁГї
+		return -1; // завершаем работу приложения
 	}
 
-	ShowWindow(hWnd, SW_HIDE); // Г®ГІГ®ГЎГ°Г Г¦Г ГҐГ¬ ГЈГ«Г ГўГ­Г®ГҐ Г®ГЄГ­Г®
-	
-
+	ShowWindow(hWnd, SW_HIDE); // скрываем главное окно
 
 	MSG  msg;
 	BOOL Ret;
 
 	for (;;)
 	{
-
-		// ГЁГ§ГўГ«ГҐГЄГ ГҐГ¬ Г±Г®Г®ГЎГ№ГҐГ­ГЁГҐ ГЁГ§ Г®Г·ГҐГ°ГҐГ¤ГЁ
+		// извлекаем сообщение из очереди
 		Ret = GetMessage(&msg, NULL, 0, 0);
 		if (Ret == FALSE)
 		{
-			break; // ГЇГ®Г«ГіГ·ГҐГ­Г® WM_QUIT, ГўГ»ГµГ®Г¤ ГЁГ§ Г¶ГЁГЄГ«Г 
+			break; // получено WM_QUIT, выход из цикла
 		}
 		else if (!TranslateAccelerator(hWnd, hAccel, &msg))
 		{
@@ -69,7 +68,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 			DispatchMessage(&msg);
 		}
 	}
-	
 	return (int)msg.wParam;
 }
 
@@ -78,16 +76,13 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 {
 	switch (msg)
 	{
-	case WM_CREATE:
-	{
-		HINSTANCE hInstance = GetWindowInstance(hwnd);
-		HWND hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, DialogProc);
-		ShowWindow(hDlg, SW_SHOW);
+		case WM_CREATE:
+			{
+				HINSTANCE hInstance = GetWindowInstance(hwnd);
+				HWND hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, DialogProc);
+				ShowWindow(hDlg, SW_SHOW);
+			} break;
 	}
-	break;
-	
-	}
-
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
@@ -106,47 +101,46 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		DWORD xPos, yPos, nSize;
 		TCHAR szBuf[80];
 
-		// Г‘Г®ГµГ°Г Г­ГїГҐГ¬ ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГ» ГЄГіГ°Г±Г®Г°Г  Г¬Г»ГёГЁ
+		// Сохраняем координаты курсора мыши
 		xPos = LOWORD(lParam);
 		yPos = HIWORD(lParam);
-	
-		/*ГЋГІГ±Г«ГҐГ¤ГЁГ¬ ГІГ®Г·ГЄГЁ Г­Г Г¤ ГЇГҐГ°ГўГ»Г¬ ГЁ ГўГІГ®Г°Г»Г¬ editbox 
-		Г…Г±Г«ГЁ Г¤Г , ГІГ® Г®ГІГЄГ°Г®ГҐГ¬ Г¤Г«Гї Г±Г®Г®ГІГўГҐГІГ±ГІГўГіГѕГ№ГҐГЈГ® editbox Г®ГЄГ­Г  Г¤Г«Гї ГЁГµ Г§Г ГЇГ®Г«Г­ГҐГ­ГЁГї*/
-		if ((xPos > 312 & xPos < 544)&(yPos>39&yPos<81))
+
+		/*Отследим точки над первым и вторым editbox
+		Если да, то откроем для соответствующего editbox окна для их заполнения*/
+		if ((xPos > 312 & xPos < 544)&(yPos > 39 & yPos < 81))
 		{
-			//Г‚ ГЄГ ГЄГіГѕ Г¤ГЁГ°ГҐГЄГІГ®Г°ГЁГѕ Г±ГЄГ®ГЇГЁГ°Г®ГўГ ГІГј
-				//TextOut(hdc, xPos, yPos, szBuf, nSize);
+			//В какую директорию скопировать
+			ZeroMemory(&bi, sizeof(bi));
+			bi.hwndOwner = NULL;
+			bi.pszDisplayName = FileName;
+			bi.lpszTitle = TEXT("Select folder");
+			bi.ulFlags = BIF_RETURNONLYFSDIRS;
+
+			pidl = SHBrowseForFolder(&bi);//open window for select
+			if (pidl)
+			{
+				SHGetPathFromIDList(pidl, FileName);//get path
+				SetDlgItemText(hwndDlg, IDC_EDIT_TO, FileName);
+			}
+
+
+		}
+		else
+			if ((xPos > 36 & xPos < 250)&(yPos > 39 & yPos < 81))
+			{
 				ZeroMemory(&bi, sizeof(bi));
 				bi.hwndOwner = NULL;
 				bi.pszDisplayName = FileName;
 				bi.lpszTitle = TEXT("Select folder");
-				bi.ulFlags = BIF_RETURNONLYFSDIRS;
-
+				bi.ulFlags = BIF_BROWSEINCLUDEFILES;
 				pidl = SHBrowseForFolder(&bi);//open window for select
 				if (pidl)
 				{
 					SHGetPathFromIDList(pidl, FileName);//get path
-					SetDlgItemText(hwndDlg, IDC_EDIT_TO,FileName);
+					SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
 				}
-				
-				
-		}
-		else 
-			if ((xPos > 36 & xPos < 250)&(yPos > 39 & yPos < 81))
-			{
-					ZeroMemory(&bi, sizeof(bi));
-					bi.hwndOwner = NULL;
-					bi.pszDisplayName = FileName;
-					bi.lpszTitle = TEXT("Select folder");
-					bi.ulFlags = BIF_BROWSEINCLUDEFILES;
-					pidl = SHBrowseForFolder(&bi);//open window for select
-					if (pidl)
-					{
-						SHGetPathFromIDList(pidl, FileName);//get path
-						SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
-					}
-					
-				}
+
+			}
 	}break;
 	case WM_INITDIALOG:
 	{
@@ -176,12 +170,12 @@ BOOL Dialog_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 void Dialog_OnClose(HWND hwnd)
 {
 	EndDialog(hwnd, IDCLOSE);
-	DestroyWindow(hwnd); // ГіГ­ГЁГ·ГІГ®Г¦Г ГҐГ¬ Г®ГЄГ­Г®
-	PostQuitMessage(0); // Г®ГІГЇГ°Г ГўГ«ГїГҐГ¬ Г±Г®Г®ГЎГ№ГҐГ­ГЁГҐ WM_QUIT
+	DestroyWindow(hwnd); // уничтожаем окно
+	PostQuitMessage(0); // отправляем сообщение WM_QUIT
 }
 
 
-BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 {
 	WIN32_FIND_DATA ffd;
 	HANDLE hFind;
@@ -191,32 +185,38 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 	TCHAR szOutFileName[MAX_PATH + 1];
 
 	lstrcpy(szFind, szInDirName);
-	lstrcat(szFind, L"\\*.*"); //ГЁГ№ГҐГ¬ ГґГ Г©Г«Г» Г± Г«ГѕГЎГ»Г¬ ГЁГ¬ГҐГ­ГҐГ¬ ГЁ Г°Г»Г±ГёГЁГ°ГҐГ­ГЁГҐГ¬
+	lstrcat(szFind, L"\\*"); //ищем файлы с любым именем и расширением
 
 	hFind = FindFirstFile(szFind, &ffd);
-
+	if (hFind == NULL)
+	{
+		return FALSE;
+	}
 	do
 	{
-		//Г”Г®Г°Г¬ГЁГ°ГіГҐГ¬ ГЇГ®Г«Г­Г»Г© ГЇГіГІГј (ГЁГ±ГІГ®Г·Г­ГЁГЄ)
+		//Формируем полный путь (источник)
 		lstrcpy(szInFileName, szInDirName);
 		lstrcat(szInFileName, L"\\");
 		lstrcat(szInFileName, ffd.cFileName);
 
-		//Г”Г®Г°Г¬ГЁГ°ГіГҐГ¬ ГЇГ®Г«Г­Г»Г© ГЇГіГІГј (Г°ГҐГ§ГіГ«ГјГІГ ГІ)
+		//Формируем полный путь (результат)
 
 		lstrcpy(szOutFileName, szOutDirName);
 		lstrcat(szOutFileName, L"\\");
 		lstrcat(szOutFileName, ffd.cFileName);
-	
-			if (ffd.dwFileAttributes & 0x00000010)
-			{
-				if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
 
-				CreateDirectory(szOutFileName, NULL);
-				Copy(szInFileName, szOutFileName);
-			}
-		
-		CopyFile(szInFileName, szOutFileName, TRUE);
+		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
+
+			CreateDirectory(szOutFileName, NULL);
+			CopyDirectoryContent(szInFileName, szOutFileName);
+		}
+		else
+		{
+			CopyFile(szInFileName, szOutFileName, TRUE);
+		}
+
 
 	} while (FindNextFile(hFind, &ffd));
 
@@ -236,90 +236,69 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		TCHAR NewName[MAX_PATH + 1];
 
 		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
-		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));//ГЄГ ГІГ Г«Г®ГЈ ГЄГіГ¤Г  ГЄГ®ГЇГЁГ°ГіГҐГ¬
-		
-		/*Г‚Г»ГїГ±Г­ГЁГ¬, Г·ГІГ® ГЄГ®ГЇГЁГ°ГіГҐГІГ±Гї, ГґГ Г©Г« ГЁГ«ГЁ ГЇГ ГЇГЄГ . 
-		Г…Г±Г«ГЁ ГЇГ ГЇГЄГ , ГІГ® Г±ГґГ®Г°Г¬ГЁГ°ГіГҐГ¬ Г± Г­ГҐГ© Г¬Г Г°ГёГ°ГіГІ ГЁ ГЇГ°Г®Г¤Г®Г«Г¦ГЁГ¬ ГЇГ®ГЁГ±ГЄ*/
+		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));//каталог куда копируем
+
+		/*Выясним, что копируется, файл или папка.
+		Если папка, то сформируем с ней маршрут и продолжим поиск*/
 		WIN32_FIND_DATA ffd;
 		HANDLE hFind;
 		BOOL BRET;
 		LPCTSTR FILE = PathFindFileNameW(FromName);
-		hFind = FindFirstFile(FromName, &ffd); //Г€Г№ГҐГ¬ ГґГ Г©Г«/ГЄГ ГІГ Г«Г®ГЈ
-		if (ffd.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
+
+
+		DWORD FromAttributes = GetFileAttributes(FromName);//определим, что копируем
+		DWORD ToNameAttributes = GetFileAttributes(ToName);//выясним, выясним куда копируем
+
+		if (INVALID_FILE_ATTRIBUTES == ToNameAttributes || INVALID_FILE_ATTRIBUTES == FromAttributes) // (!) если нет файла или каталога
+		{
+			break;
+		}
+		else
+			if ((ToNameAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && (FromAttributes& FILE_ATTRIBUTE_DIRECTORY) != 0)//не каталог
+			{
+				SetLastError(ERROR_PATH_NOT_FOUND);
+				MessageBox(hwnd, L"Нельзя скопировать папку в файл!", L" !", MB_OK);
+			}
+
+		if ((FromAttributes& FILE_ATTRIBUTE_DIRECTORY) != 0)//является каталогом
 		{
 			lstrcat(ToName, L"\\");
 			lstrcat(ToName, FILE);
 			CreateDirectory(ToName, NULL);
-			BRET = Copy(FromName, ToName);
+			BRET = CopyDirectoryContent(FromName, ToName);
 		}
 		else
 		{
 			lstrcat(ToName, L"\\");
 			lstrcat(ToName, ffd.cFileName);
 			BRET = CopyFile(FromName, ToName, TRUE);
-			
 		}
-		
-		/*ГђГ ГЎГ®ГІГ Гѕ Г­Г Г¤ ГЅГІГЁГ¬*/
-		// ГЇГ®Г«ГіГ·ГЁГ¬ ГЄГ®Г¤ ГЇГ®Г±Г«ГҐГ¤Г­ГҐГ© Г®ГёГЁГЎГЄГЁ
-		DWORD dwError = (FALSE == BRET) ? GetLastError() : ERROR_SUCCESS;
 
-		// Г§Г ГўГҐГ°ГёГ ГҐГ¬ Г®Г«ГЁГ¶ГЁГІГўГ®Г°ГҐГ­ГЁГҐ
-		RevertToSelf();
-
-		if (ERROR_ACCESS_DENIED == dwError) // (!) Г®ГёГЁГЎГЄГ : Г®ГІГЄГ Г§Г Г­Г® Гў Г¤Г®Г±ГІГіГЇГҐ
-		{
-			_tprintf(TEXT("> ГЋГІГЄГ Г§Г Г­Г® Гў Г¤Г®Г±ГІГіГЇГҐ.\n\n"));
-
-			// ГЇГ®Г«ГіГ·Г ГҐГ¬ Г¬Г Г°ГЄГҐГ° Г¤Г®Г±ГІГіГЇГ  ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї
-			HANDLE hToken = LogonUserToLocalComputer();
-
-			if (NULL != hToken)
-			{
-				// Г­Г Г·ГЁГ­Г ГҐГ¬ Г®Г«ГЁГ¶ГЁГІГўГ®Г°ГҐГ­ГЁГҐ
-				ImpersonateLoggedOnUser(hToken);
-				// Г§Г ГЄГ°Г»ГўГ ГҐГ¬ Г¬Г Г°ГЄГҐГ° Г¤Г®Г±ГІГіГЇГ 
-				CloseHandle(hToken);
-			} // if
-			else
-			{
-				break; // (!) ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
-			} // else
-		} // if
-		else
-		{
-			SetLastError(dwError);
-			break; // (!) ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
-		} // else
-
-		/*ГђГ ГЎГ®ГІГ Гѕ Г­Г Г¤ ГЅГІГЁГ¬*/ 
 
 		TCHAR Message[MAX_PATH];
 		if (BRET == 0)
 		{
-			lstrcpy(Message, L"Г”Г Г©Г«Г» Г­ГҐ Г±ГЄГ®ГЇГЁГ°Г®ГўГ Г­Г» Гў ГЇГ ГЇГЄГі: ");
+			lstrcpy(Message, L"Файлы не скопированы в папку: ");
 			lstrcat(Message, ToName);
-			MessageBox(hwnd, Message, L"ГЋГёГЁГЎГЄГ ", MB_OK);
+			MessageBox(hwnd, Message, L"Ошибка", MB_OK);
 			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
 			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-			//ShowMessage(IntToStr(result));
 		}
 		else
 		{
-			
-			lstrcpy(Message, L"Г”Г Г©Г«Г» Г±ГЄГ®ГЇГЁГ°Г®ГўГ Г­Г». ГЏГ°Г®ГўГҐГ°ГјГІГҐ ГЇГ ГЇГЄГі: ");
+			lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
 			lstrcat(Message, ToName);
-			MessageBox(hwnd,Message, L" Г“Г±ГЇГҐГµ!", MB_OK);
+			MessageBox(hwnd, Message, L" Успех!", MB_OK);
 			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
 			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
 		}
-				
+
 	}	break;
 
 	case IDCANCEL:
 	{
 		EndDialog(hwnd, IDCANCEL);
-		DestroyWindow(hwnd); // ГіГ­ГЁГ·ГІГ®Г¦Г ГҐГ¬ Г®ГЄГ­Г®
+		DestroyWindow(hwnd); // уничтожаем окно
 		PostQuitMessage(0);
 	}
 	break;
