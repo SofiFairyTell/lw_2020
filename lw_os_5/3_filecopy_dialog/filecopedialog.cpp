@@ -87,6 +87,26 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 
+BOOL CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM) 
+{
+	switch (uMsg) {
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+		case IDCANCEL:
+			EndDialog(hWnd, 0);
+			break;
+		}
+		break;
+	case WM_CLOSE:
+		EndDialog(hWnd, 0);
+		break;
+	}
+
+	return false;
+}
+
+
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	TCHAR FileName[260];
@@ -283,6 +303,9 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			MessageBox(hwnd, Message, L"������", MB_OK);
 			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
 			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+			/*If something wrong*/
+			HINSTANCE hInstance = GetWindowInstance(hwnd);
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
 		}
 		else
 		{
@@ -292,6 +315,20 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
 			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
 		}
+
+		
+		/*If something wrong*/
+		/*HINSTANCE hInstance = GetWindowInstance(hwnd);
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);*/
+
+
+
+
+
+
+
+
+
 
 	}	break;
 
@@ -304,7 +341,7 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	break;
 	}
 }
-
+/*
 HANDLE LogonUserToLocalComputer()
 {
 	TCHAR szUserName[UNLEN + 1]; // èìÿ ïîëüçîâàòåëÿ
@@ -337,7 +374,7 @@ HANDLE LogonUserToLocalComputer()
 
 	return NULL;
 } 
-
+*/
 HANDLE OpenUserToken(LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB, TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL)
 {
 	HANDLE TOKEN = NULL;
