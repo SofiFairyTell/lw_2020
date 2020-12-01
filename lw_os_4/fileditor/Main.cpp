@@ -315,7 +315,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	break;
 
 	
-case IDM_EDCUT:
+	case IDM_EDCUT:
 		SendMessage(hEdit, WM_CUT, 0, 0);
 		break;
 
@@ -463,11 +463,6 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	LARGE_INTEGER size;// определяем размер файла 
 	BOOL bRet = GetFileSizeEx(hFile, &size);
 
-	/*-----*/
-	DWORD BRE = 0;
-	WORD FILEBOM = 0;
-	ReadFile(hFile, &FILEBOM, sizeof(FILEBOM), &BRE, NULL);
-	/*----*/
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
@@ -486,16 +481,12 @@ BOOL OpenFileAsync(HWND hwndCtl)
 
 BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 {
-	/*
+	
 	if (fSaveAs != FALSE)
 	{
 			// создаём и открываем файл для чтения и записи
-				HANDLE hNewFile = CreateFileW(FileName, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ, //для совместного чтения
-				NULL, //защиты нет
-				CREATE_ALWAYS, //создание нового файла
-				FILE_FLAG_OVERLAPPED,//асинхронный доступ к файлу
-				NULL); //шаблона нет
+		HANDLE hNewFile = CreateFile(FileName,  GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
+
 
 			if (hNewFile == INVALID_HANDLE_VALUE) // не удалось открыть файл
 			{
@@ -517,62 +508,39 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 			}
 		else
 		{
-			// создаём и открываем файл для чтения и записи
-			hFile = CreateFile(	FileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
+			hFile = CreateFile(FileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
+			
 			if (hFile == INVALID_HANDLE_VALUE) // не удалось открыть файл
 			{
 				return FALSE;
 			} 
 		} 
-	*/
 	
+	
+	
+	//HANDLE testFile = CreateFile(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 	LARGE_INTEGER size;// для определения размера текста
 
-	size.QuadPart = GetWindowTextLengthW(hwndCtl);
-	
-	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
-	
-
-	//BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_END); */
-	
+	size.QuadPart = GetWindowTextLengthW(hwndCtl);//получение размера для чтения строки
+	BOOL bRet;
+ bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
+		
 	if (FALSE != bRet)
 		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
 
-	if ((FALSE != bRet) && (size.LowPart > 0))
+	/*if ( && (size.LowPart > 0))*/
+
+	//if ((FALSE != bRet)&&
+		
+	if ((size.LowPart > 0))//файл не пустой
 	{
 
 		lpBuffReWri = new WCHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
 		
-		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart+1);		// копируем UNICODE строку из поля ввода в буффер
+		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart+2);		// копируем UNICODE строку из поля ввода в буффер
 
-		//BOOL bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
+		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
 		
-		//WCHAR FileName2[MAX_PATH] = L"C:\\test\\68.txt";
-		HANDLE File = CreateFile(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, NULL, NULL);
-		const WORD BOM = 0xFEFF;
-		DWORD BytesWritten = 0;
-		WriteFile(File, &BOM, sizeof(BOM), &BytesWritten, NULL);
-		//const wchar_t* Text = L"КНЯЖЕ ТЫ ДИБИЛУШКА";
-		WriteFile(File, lpBuffReWri, wcslen(lpBuffReWri) * sizeof(wchar_t), &BytesWritten, NULL);
-		CloseHandle(File);
-
-		HANDLE File2 = CreateFile(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-		DWORD BytesRead = 0;
-		WORD FileBOM = 0;
-		ReadFile(File2, &FileBOM, sizeof(FileBOM), &BytesRead, NULL);
-		wchar_t FileText[ 20 + 1] = L"";
-		if (FileBOM == BOM) 
-		{
-			ReadFile(File2, &FileText, (20 + 1) * sizeof(wchar_t), &BytesRead, NULL);
-			FileText[4] = L'\0';
-		}
-
-		CloseHandle(File);
-
-
-
-
-
 
 		if (FALSE == bRet) 
 		{
@@ -608,13 +576,57 @@ BOOL ReadAsync(HANDLE hFile, LPVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOV
 /*пока не трогаем*/
 BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOVERLAPPED ovl)
 {
+	/* //ИЗ ПРИМЕРА
 	// инициализируем структуру OVERLAPPED
+	*/
 	ZeroMemory(ovl, sizeof(ovl));
 	ovl->Offset = dwOffset; // младшая часть смещения
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
-
+	/*
 	// начинаем асинхронную операцию записи данных в файл
+
+	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
+
+	if (FALSE == bRet && ERROR_IO_PENDING != GetLastError())
+	{
+		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
+		return FALSE;
+	} 
+	*/
+
 	
+	//HANDLE File =
+		//CreateFile(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, NULL, NULL);
+
+	const WORD BOM = 0xFEFF;
+	DWORD BytesWritten = 0;
+
+	WriteFile(hFile, &BOM, sizeof(BOM), &BytesWritten, ovl);
+
+	//BOOL bRet = WriteFile(hFile, lpBuffer, wcslen((wchar_t*)lpBuffer) * sizeof(wchar_t), NULL, NULL);
+	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
+
+
+	if (FALSE == bRet && ERROR_IO_PENDING != GetLastError())
+	{
+		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
+		return FALSE;
+	}
+
+	CloseHandle(hFile);
+	
+	HANDLE File2 = CreateFile(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	DWORD BytesRead = 0;
+	WORD FileBOM = 0;
+	ReadFile(File2, &FileBOM, sizeof(FileBOM), &BytesRead, NULL);
+	wchar_t FileText[40 + 1] = L"";
+	if (FileBOM == BOM)
+	{
+		ReadFile(File2, &FileText, (40 + 1) * sizeof(wchar_t), &BytesRead, NULL);
+		FileText[4] = L'\0';
+	}
+
+	CloseHandle(File2);
 	
 	
 	return TRUE;
