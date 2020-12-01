@@ -42,7 +42,7 @@ void OnIdle(HWND hwnd);
 POINT WindowPosition; // положение окна
 SIZE WindowSize; // размер окна
 
-TCHAR FileName[MAX_PATH] = TEXT(""); // имя редактируемого текстового файла
+WCHAR FileName[MAX_PATH] = L""; // имя редактируемого текстового файла
 HANDLE hFile = INVALID_HANDLE_VALUE; // дескриптор редактируемого текстового файла
 
 CHARFORMAT cf;//параметры символов

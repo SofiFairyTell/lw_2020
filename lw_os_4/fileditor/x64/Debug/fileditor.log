@@ -2,6 +2,8 @@
   Main.cpp
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(138): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(219): warning C4101: hDC: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(595): warning C4838: преобразование из "int" в "const char" требует сужающего преобразования
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(595): warning C4309: инициализация: усечение константного значения
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(561): warning C4267: аргумент: преобразование из "size_t" в "DWORD"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(605): warning C4305: инициализация: усечение из "int" в "char"
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(605): warning C4309: инициализация: усечение константного значения
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(611): warning C4267: аргумент: преобразование из "size_t" в "DWORD"; возможна потеря данных
   fileditor.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\fileditor.exe

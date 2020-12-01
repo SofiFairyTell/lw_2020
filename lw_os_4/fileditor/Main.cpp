@@ -436,6 +436,7 @@ void SaveProfile(LPCTSTR lpFileName)
 
 BOOL OpenFileAsync(HWND hwndCtl)
 {
+	
 	HANDLE hExistingFile = CreateFile(FileName, 
 		GENERIC_READ | GENERIC_WRITE,//запись и чтние
 		FILE_SHARE_READ, //для совместного чтения
@@ -446,7 +447,6 @@ BOOL OpenFileAsync(HWND hwndCtl)
 
 	if (INVALID_HANDLE_VALUE == hExistingFile) // не удалось открыть файл
 	{
-		CloseHandle(hExistingFile);
 		return FALSE;
 	} 
 
@@ -462,6 +462,12 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	
 	LARGE_INTEGER size;// определяем размер файла 
 	BOOL bRet = GetFileSizeEx(hFile, &size);
+
+	/*-----*/
+	DWORD BRE = 0;
+	WORD FILEBOM = 0;
+	ReadFile(hFile, &FILEBOM, sizeof(FILEBOM), &BRE, NULL);
+	/*----*/
 
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
@@ -482,60 +488,59 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 {
 	if (fSaveAs != FALSE)
 	{
-		// создаём и открываем файл для чтения и записи
-			HANDLE hNewFile = CreateFileW(FileName,
-			GENERIC_READ | GENERIC_WRITE,//запись и чтние
-			FILE_SHARE_READ, //для совместного чтения
-			NULL, //защиты нет
-			CREATE_ALWAYS, //создание нового файла
-			FILE_FLAG_OVERLAPPED,//асинхронный доступ к файлу
-			NULL); //шаблона нет
+			// создаём и открываем файл для чтения и записи
+				HANDLE hNewFile = CreateFileW(FileName,
+				GENERIC_READ | GENERIC_WRITE,//запись и чтние
+				FILE_SHARE_READ, //для совместного чтения
+				NULL, //защиты нет
+				CREATE_ALWAYS, //создание нового файла
+				FILE_FLAG_OVERLAPPED,//асинхронный доступ к файлу
+				NULL); //шаблона нет
 
+			if (hNewFile == INVALID_HANDLE_VALUE) // не удалось открыть файл
+			{
+				return FALSE;
+			}
 
-		if (hNewFile == INVALID_HANDLE_VALUE) // не удалось открыть файл
-		{
-			CloseHandle(hNewFile);
-			return FALSE;
-		}
+			if (hFile != INVALID_HANDLE_VALUE)
+			{		
+				FinishIo(&ovlWrite);// ожидаем завершения операции ввода/вывода
+				CloseHandle(hFile);
+			} 
 
+			hFile = hNewFile;
+	} 
+	else 
 		if (hFile != INVALID_HANDLE_VALUE)
-		{		
-			FinishIo(&ovlWrite);// ожидаем завершения операции ввода/вывода
-			CloseHandle(hFile);
-		} 
-
-		hFile = hNewFile;
-	} 
-	else if (hFile != INVALID_HANDLE_VALUE)
-	{	
-		FinishIo(&ovlWrite);// ожидаем завершения операции ввода/вывода
-	}
-	else
-	{
-		// создаём и открываем файл для чтения и записи
-		hFile = CreateFile(FileName, 
-			GENERIC_READ | GENERIC_WRITE, 
-			FILE_SHARE_READ, 
-			NULL, 
-			CREATE_ALWAYS, 
-			FILE_FLAG_OVERLAPPED, NULL);
-
-		if (hFile == INVALID_HANDLE_VALUE) // не удалось открыть файл
+			{	
+				FinishIo(&ovlWrite);// ожидаем завершения операции ввода/вывода
+			}
+		else
 		{
-			CloseHandle(hFile);
-			return FALSE;
+			// создаём и открываем файл для чтения и записи
+			hFile = CreateFile(
+				FileName, 
+				GENERIC_READ | GENERIC_WRITE, 
+				FILE_SHARE_READ, 
+				NULL, 
+				CREATE_ALWAYS, 
+				FILE_FLAG_OVERLAPPED, NULL);
+
+			if (hFile == INVALID_HANDLE_VALUE) // не удалось открыть файл
+			{
+				return FALSE;
+			} 
 		} 
-	} 
+	
 	
 	LARGE_INTEGER size;// для определения размера текста
-	
+
 	size.QuadPart = GetWindowTextLengthW(hwndCtl);
-	
 	
 	BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
 	
 
-	//BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_END);
+	//BOOL bRet = SetFilePointerEx(hFile, size, NULL, FILE_END); */
 	
 	if (FALSE != bRet)
 		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
@@ -544,11 +549,14 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 	{
 
 		lpBuffReWri = new WCHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
+		
+		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart+1);		// копируем UNICODE строку из поля ввода в буффер
 
-		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart + 1);		// копируем UNICODE строку из поля ввода в буффер
-
-
-		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
+		//BOOL bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
+		const WORD bom = 0xFEFF;
+		DWORD byRead = 0;
+		WriteFile(hFile, &bom, sizeof(bom), &byRead, NULL);
+		BOOL bRet = WriteFile(hFile, lpBuffReWri, wcslen(lpBuffReWri) * sizeof(wchar_t), &byRead, NULL);
 
 
 		if (FALSE == bRet) 
@@ -571,17 +579,18 @@ BOOL ReadAsync(HANDLE hFile, LPVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOV
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
 
 	// начинаем асинхронную операцию чтения данных из файла
-	BOOL bRet = ReadFile(hFile, lpBuffer, dwSize, NULL, ovl);
-	DWORD  dwRet = GetLastError();
-	if (FALSE == bRet && ERROR_IO_PENDING != dwRet)
-	{
-		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
-		return FALSE;
-	}
+			BOOL bRet = ReadFile(hFile, lpBuffer, dwSize, NULL, ovl);
+			DWORD  dwRet = GetLastError();
+			if (FALSE == bRet && ERROR_IO_PENDING != dwRet)
+			{
+				CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
+				return FALSE;
+			}
 
 	return TRUE;
 } 
 
+/*пока не трогаем*/
 BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOVERLAPPED ovl)
 {
 	// инициализируем структуру OVERLAPPED
@@ -592,27 +601,29 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	// начинаем асинхронную операцию записи данных в файл
 
 	//WCHAR  cUnicodeBOM = 0xFEFF;
-	const char BOM[] = { 0xFF, 0xFE };
+	const char BOM = 0xFEFF;
 
-	DWORD z = 0;//количество прочитанных байт
-	WriteFile(hFile, &BOM, sizeof(BOM), &z, NULL);//запись сигнатуры
+	DWORD BytesWritten = 0;//количество прочитанных байт
+	WriteFile(hFile, &BOM, sizeof(BOM), &BytesWritten, NULL);//запись сигнатуры
 
-		
-	BOOL bRet = WriteFile(hFile, lpBuffReWri, dwSize*sizeof(wchar_t), &z, ovl);
+		//УБрать ovl??
+	BOOL bRet = WriteFile(hFile, lpBuffReWri, wcslen(lpBuffReWri)*sizeof(wchar_t), &BytesWritten, ovl);
 
 
 	DWORD  dwRet = GetLastError();
 	if (FALSE == bRet && ERROR_IO_PENDING != dwRet)
 	{
 		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
+		
 		return FALSE;
 	} 
+	CloseHandle(hFile);
 	return TRUE;
 
 	
 
 } 
-
+/*пока не трогаме*/
 BOOL FinishIo(LPOVERLAPPED ovl)
 {
 	if (NULL != ovl->hEvent)
