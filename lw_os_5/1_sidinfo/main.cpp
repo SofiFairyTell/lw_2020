@@ -4,14 +4,15 @@
 #include <stdio.h>
 #include <locale.h>
 #include <NTSecAPI.h>//for las_handle
+#include <AclAPI.h>
 #include <winnt.h>
 #include <sddl.h>//for ConvertSidToStringSidW
 #include <LMCons.h>
 #include <cwchar>
 #include <iostream>
-//#include <>
 
-//int _tmain();
+#define SAFE_FREE(ptr) if (NULL != (ptr)) LocalFree(ptr)
+
 
 /*Функции и переменные*/
 LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType);//открытие дескриптора политики безопасности локального пк
@@ -25,13 +26,13 @@ void CoutSID(PSID psid);//вывод списков на экран
 //UNICODE проект
 int _tmain()
 {
-	_tsetlocale(LC_ALL, TEXT(" "));
+	_tsetlocale(LC_ALL, TEXT(""));
 
 	/*Pointer Security ID*/
 	PSID sidDomain = NULL; //security ID для локального ПК
 	PSID sidUser = NULL; //security ID для локального пользователя
 	PSID sidWellKnow;//о
-	LSA_HANDLE PolicyHandle = OpenLocalPolicy(POLICY_LOOKUP_NAMES);
+
 
 	/*Вспомогательные переменные*/
 	DWORD count_char;//для определения размеров
@@ -41,7 +42,7 @@ int _tmain()
 	/*Переменные для вывода имен ПК и пользователя*/
 	WCHAR ComputerName[MAX_COMPUTERNAME_LENGTH + 1] = TEXT("");
 	WCHAR UserName[UNLEN + 1] = L"";
-	
+
 	/*Начало*/
 	count_char = _countof(ComputerName);
 
@@ -50,7 +51,7 @@ int _tmain()
 	if (RetRes != FALSE)
 	{
 		RetRes = GetAccountSID_W(ComputerName, &sidDomain);
-		
+
 		if ((RetRes != FALSE) && (sidDomain != NULL))
 		{
 			CoutSID(sidDomain);
@@ -65,6 +66,7 @@ int _tmain()
 	count_char = _countof(UserName);
 
 	RetRes = GetUserName(UserName, &count_char);//узнаем имя пользователя
+	LSA_HANDLE PolicyHandle = OpenLocalPolicy(POLICY_LOOKUP_NAMES);
 	if (RetRes != FALSE)
 	{
 		RetRes = GetAccountSID_W(UserName, &sidUser);
@@ -73,14 +75,10 @@ int _tmain()
 		{
 			CoutSID(sidUser);
 			//вывод списка привелегий
-
-			if (PolicyHandle != NULL)
-			{
-				ListOfPrivilegesAndRights_User(PolicyHandle, sidUser);
-			LocalFree(sidUser);//повреждение кучи?
-			}
-
+			if (PolicyHandle != NULL) 	ListOfPrivilegesAndRights_User(PolicyHandle, sidUser);
 			
+			LocalFree(sidUser);//повреждение кучи?
+
 		}
 	}
 
@@ -106,20 +104,19 @@ int _tmain()
 			if (PolicyHandle != NULL)
 			{
 				ListOfPrivilegesAndRights_User(PolicyHandle, sidWellKnow);
-
 			}
 
-			//LocalFree(sidWellKnow);
+			LocalFree(sidWellKnow);
 		}
 	}
 
-	system("pause");
-  FreeSid(sidDomain);
-  FreeSid(sidUser);
-  FreeSid(sidWellKnow);
-  LsaClose(PolicyHandle);
+		system("pause");
+		SAFE_FREE(sidDomain);
+
+		LsaClose(PolicyHandle);
 
 }
+
 
 
 LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType)
@@ -259,17 +256,19 @@ BOOL GetWellKnowSID(WELL_KNOWN_SID_TYPE WellKnowSidType, PSID sidDomain, PSID *s
 void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser)
 {
 	/*Переменные для вывода*/
-	PLSA_UNICODE_STRING List_Rights; //список прав
-	WCHAR DisplayName[256];//дружественное имя
+	LSA_UNICODE_STRING* List_Rights; //список прав
+
 
 	/*Вспомогательные счетчики*/
 	DWORD count_char;//подсчет количества символов в строке
 	DWORD lpLanguageID;//ID языка?
-	ULONG count_list;//элементы в списке прав
+	ULONG count_list = 0;//элементы в списке прав
 
 	BOOL RetRes = FALSE;
 
+	//Error: 0xc0000034 Определять права для группы?
 	NTSTATUS ntstatus = LsaEnumerateAccountRights(PolicyHandle, sidUser, &List_Rights, &count_list);
+	
 	if (LSA_SUCCESS(ntstatus))
 	{
 		std::cout << L"Список прав учетных записей" << std::endl;
@@ -277,7 +276,7 @@ void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser)
 		{
 			LPCWSTR UserRight = List_Rights[i].Buffer;
 			std::cout << "\t" << i + 1 << "  " << UserRight;
-
+			WCHAR DisplayName[256];//дружественное имя
 			count_char = _countof(DisplayName);//определеим количество символов в строке
 
 			RetRes = LookupPrivilegeDisplayName(NULL, UserRight, DisplayName, &count_char, &lpLanguageID);
@@ -330,7 +329,7 @@ void CoutSID(PSID psid)
 		std::wcout << AccountName << "  " << lpSID<< std::endl;
 	}
 	/*Очистка памяти?*/
-	FreeSid(psid);
-	//delete AccountName;
+	SAFE_FREE(psid);
+	SAFE_FREE(AccountName);
 }
 
