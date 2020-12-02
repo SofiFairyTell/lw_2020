@@ -13,39 +13,39 @@
 
 //int _tmain();
 
-/*Функции и переменные*/
-LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType);//открытие дескриптора политики безопасности локального пк
+/*Р¤СѓРЅРєС†РёРё Рё РїРµСЂРµРјРµРЅРЅС‹Рµ*/
+LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType);//РѕС‚РєСЂС‹С‚РёРµ РґРµСЃРєСЂРёРїС‚РѕСЂР° РїРѕР»РёС‚РёРєРё Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё Р»РѕРєР°Р»СЊРЅРѕРіРѕ РїРє
 
-BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid);//узнаем SID ПК
-BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName);//определеим имя аккаунта по его SID
-BOOL GetWellKnowSID(WELL_KNOWN_SID_TYPE WellKnowSidType, PSID sidDomain, PSID *sidWellKnow);//определение хорошо известного SID
+BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid);//СѓР·РЅР°РµРј SID РџРљ
+BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName);//РѕРїСЂРµРґРµР»РµРёРј РёРјСЏ Р°РєРєР°СѓРЅС‚Р° РїРѕ РµРіРѕ SID
+BOOL GetWellKnowSID(WELL_KNOWN_SID_TYPE WellKnowSidType, PSID sidDomain, PSID *sidWellKnow);//РѕРїСЂРµРґРµР»РµРЅРёРµ С…РѕСЂРѕС€Рѕ РёР·РІРµСЃС‚РЅРѕРіРѕ SID
 
-void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser);//вывод списка привелегий пользователя
-void CoutSID(PSID psid);//вывод списков на экран
-//UNICODE проект
+void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser);//РІС‹РІРѕРґ СЃРїРёСЃРєР° РїСЂРёРІРµР»РµРіРёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+void CoutSID(PSID psid);//РІС‹РІРѕРґ СЃРїРёСЃРєРѕРІ РЅР° СЌРєСЂР°РЅ
+//UNICODE РїСЂРѕРµРєС‚
 int _tmain()
 {
 	_tsetlocale(LC_ALL, TEXT(" "));
 
 	/*Pointer Security ID*/
-	PSID sidDomain = NULL; //security ID для локального ПК
-	PSID sidUser = NULL; //security ID для локального пользователя
-	PSID sidWellKnow;//о
+	PSID sidDomain = NULL; //security ID РґР»СЏ Р»РѕРєР°Р»СЊРЅРѕРіРѕ РџРљ
+	PSID sidUser = NULL; //security ID РґР»СЏ Р»РѕРєР°Р»СЊРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+	PSID sidWellKnow;//Рѕ
 	LSA_HANDLE PolicyHandle = OpenLocalPolicy(POLICY_LOOKUP_NAMES);
 
-	/*Вспомогательные переменные*/
-	DWORD count_char;//для определения размеров
-	BOOL RetRes = FALSE; //для результатов
-	DWORD dwError = NULL; //для ошибки
+	/*Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ*/
+	DWORD count_char;//РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ СЂР°Р·РјРµСЂРѕРІ
+	BOOL RetRes = FALSE; //РґР»СЏ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+	DWORD dwError = NULL; //РґР»СЏ РѕС€РёР±РєРё
 
-	/*Переменные для вывода имен ПК и пользователя*/
+	/*РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РІС‹РІРѕРґР° РёРјРµРЅ РџРљ Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ*/
 	WCHAR ComputerName[MAX_COMPUTERNAME_LENGTH + 1] = TEXT("");
 	WCHAR UserName[UNLEN + 1] = L"";
 	
-	/*Начало*/
+	/*РќР°С‡Р°Р»Рѕ*/
 	count_char = _countof(ComputerName);
 
-	RetRes = GetComputerNameW(ComputerName, &count_char);//узнаем имя ПК
+	RetRes = GetComputerNameW(ComputerName, &count_char);//СѓР·РЅР°РµРј РёРјСЏ РџРљ
 
 	if (RetRes != FALSE)
 	{
@@ -58,13 +58,13 @@ int _tmain()
 	}
 	else
 	{
-		SetLastError(dwError);//ловим ошибку?
-		return 0; //завершаем работу программы
+		SetLastError(dwError);//Р»РѕРІРёРј РѕС€РёР±РєСѓ?
+		return 0; //Р·Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ РїСЂРѕРіСЂР°РјРјС‹
 	}
 
 	count_char = _countof(UserName);
 
-	RetRes = GetUserName(UserName, &count_char);//узнаем имя пользователя
+	RetRes = GetUserName(UserName, &count_char);//СѓР·РЅР°РµРј РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	if (RetRes != FALSE)
 	{
 		RetRes = GetAccountSID_W(UserName, &sidUser);
@@ -72,12 +72,12 @@ int _tmain()
 		if ((RetRes != FALSE) && (sidUser != NULL))
 		{
 			CoutSID(sidUser);
-			//вывод списка привелегий
+			//РІС‹РІРѕРґ СЃРїРёСЃРєР° РїСЂРёРІРµР»РµРіРёР№
 
 			if (PolicyHandle != NULL)
 			{
 				ListOfPrivilegesAndRights_User(PolicyHandle, sidUser);
-			//	LocalFree(sidUser);//повреждение кучи?
+			LocalFree(sidUser);//РїРѕРІСЂРµР¶РґРµРЅРёРµ РєСѓС‡Рё?
 			}
 
 			
@@ -101,7 +101,7 @@ int _tmain()
 		if ((RetRes != FALSE) && (sidWellKnow != NULL))
 		{
 			CoutSID(sidDomain);
-			//вывод списка привелегий
+			//РІС‹РІРѕРґ СЃРїРёСЃРєР° РїСЂРёРІРµР»РµРіРёР№
 
 			if (PolicyHandle != NULL)
 			{
@@ -128,33 +128,33 @@ LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType)
 	LSA_HANDLE PolicyHandle;
 	LSA_OBJECT_ATTRIBUTES ObjAtr;
 	
-	ZeroMemory(&ObjAtr, sizeof(ObjAtr));//Инициализация структуры LSA_OBJECT_ATTRIBUTES
+	ZeroMemory(&ObjAtr, sizeof(ObjAtr));//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃС‚СЂСѓРєС‚СѓСЂС‹ LSA_OBJECT_ATTRIBUTES
 	
-	NTSTATUS ntstatus = LsaOpenPolicy(NULL, &ObjAtr, AccessType, &PolicyHandle);//получение дескриптора политики безопасности
+	NTSTATUS ntstatus = LsaOpenPolicy(NULL, &ObjAtr, AccessType, &PolicyHandle);//РїРѕР»СѓС‡РµРЅРёРµ РґРµСЃРєСЂРёРїС‚РѕСЂР° РїРѕР»РёС‚РёРєРё Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё
 
-	SetLastError(LsaNtStatusToWinError(ntstatus)); //для ошибок
+	SetLastError(LsaNtStatusToWinError(ntstatus)); //РґР»СЏ РѕС€РёР±РѕРє
 
-	return LSA_SUCCESS(ntstatus) ? PolicyHandle : NULL; //если завершено успешно, то вернуть PolicyHandle
+	return LSA_SUCCESS(ntstatus) ? PolicyHandle : NULL; //РµСЃР»Рё Р·Р°РІРµСЂС€РµРЅРѕ СѓСЃРїРµС€РЅРѕ, С‚Рѕ РІРµСЂРЅСѓС‚СЊ PolicyHandle
 
 }
 
-/*Определения функций определяющих SID*/
+/*РћРїСЂРµРґРµР»РµРЅРёСЏ С„СѓРЅРєС†РёР№ РѕРїСЂРµРґРµР»СЏСЋС‰РёС… SID*/
 BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid)
 {
 	BOOL RetRes = FALSE;
-	SID_NAME_USE SidType;//переменная перечисляемого типа, сюда сохраним определенный тип SID
+	SID_NAME_USE SidType;//РїРµСЂРµРјРµРЅРЅР°СЏ РїРµСЂРµС‡РёСЃР»СЏРµРјРѕРіРѕ С‚РёРїР°, СЃСЋРґР° СЃРѕС…СЂР°РЅРёРј РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ С‚РёРї SID
 
-	/*Переменные для определения имени и SID*/
+	/*РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РёРјРµРЅРё Рё SID*/
 	LPWSTR RefDomainName = NULL;
 	PSID psid = NULL;
 	DWORD cbSID = 0, cchRefDomainName = 0;
 
-	LookupAccountNameW(NULL, AccountName, NULL, &cbSID, NULL, &cchRefDomainName, NULL);//определение размеров буфера под имена
+	LookupAccountNameW(NULL, AccountName, NULL, &cbSID, NULL, &cchRefDomainName, NULL);//РѕРїСЂРµРґРµР»РµРЅРёРµ СЂР°Р·РјРµСЂРѕРІ Р±СѓС„РµСЂР° РїРѕРґ РёРјРµРЅР°
 
 	if ((cbSID > 0) && (cchRefDomainName > 0))
 	{
-		psid = (PSID)LocalAlloc(LMEM_FIXED, cbSID); //выделение памяти из локальной кучи процесса
-		RefDomainName = (LPWSTR)LocalAlloc(LMEM_FIXED, cchRefDomainName * sizeof(WCHAR));// -||- для имени домена
+		psid = (PSID)LocalAlloc(LMEM_FIXED, cbSID); //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РёР· Р»РѕРєР°Р»СЊРЅРѕР№ РєСѓС‡Рё РїСЂРѕС†РµСЃСЃР°
+		RefDomainName = (LPWSTR)LocalAlloc(LMEM_FIXED, cchRefDomainName * sizeof(WCHAR));// -||- РґР»СЏ РёРјРµРЅРё РґРѕРјРµРЅР°
 	}
 
 	if ((psid != NULL) && (RefDomainName != NULL))
@@ -170,13 +170,13 @@ BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid)
 	{
 		if (psid != NULL)
 		{
-			LocalFree(psid);//освбодждаем память
+			LocalFree(psid);//РѕСЃРІР±РѕРґР¶РґР°РµРј РїР°РјСЏС‚СЊ
 		}
 }
 
 if (RefDomainName != NULL)
 {
-	LocalFree(RefDomainName);//освбодждаем память
+	LocalFree(RefDomainName);//РѕСЃРІР±РѕРґР¶РґР°РµРј РїР°РјСЏС‚СЊ
 }
 
 return RetRes;
@@ -184,8 +184,8 @@ return RetRes;
 BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 {
 	BOOL RetRes = FALSE;
-	SID_NAME_USE SidType;//переменная перечисляемого типа, сюда сохраним определенный тип SID
-	/*Переменные для вывода*/
+	SID_NAME_USE SidType;//РїРµСЂРµРјРµРЅРЅР°СЏ РїРµСЂРµС‡РёСЃР»СЏРµРјРѕРіРѕ С‚РёРїР°, СЃСЋРґР° СЃРѕС…СЂР°РЅРёРј РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ С‚РёРї SID
+	/*РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РІС‹РІРѕРґР°*/
 	LPWSTR Name = NULL;
 	DWORD cch = 0, cchRefDomainName = 0;
 
@@ -194,11 +194,11 @@ BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 		return FALSE;
 	}
 
-	LookupAccountSid(NULL, psid, NULL, &cch, NULL, &cchRefDomainName, NULL);//определим размеры буферов
+	LookupAccountSid(NULL, psid, NULL, &cch, NULL, &cchRefDomainName, NULL);//РѕРїСЂРµРґРµР»РёРј СЂР°Р·РјРµСЂС‹ Р±СѓС„РµСЂРѕРІ
 	DWORD cb = (cch + cchRefDomainName) * sizeof(WCHAR);
 	if (cb > 0)
 	{
-		Name = (LPWSTR)LocalAlloc(LMEM_FIXED, cb);//выделение памяти из локальной кучи процесса
+		Name = (LPWSTR)LocalAlloc(LMEM_FIXED, cb);//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РёР· Р»РѕРєР°Р»СЊРЅРѕР№ РєСѓС‡Рё РїСЂРѕС†РµСЃСЃР°
 	}
 
 	if (Name != NULL)
@@ -216,14 +216,14 @@ BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 			}
 			else
 			{
-				std::wcscpy(Name, Name + 1);//копирование для вовзрата в основую функциию
+				std::wcscpy(Name, Name + 1);//РєРѕРїРёСЂРѕРІР°РЅРёРµ РґР»СЏ РІРѕРІР·СЂР°С‚Р° РІ РѕСЃРЅРѕРІСѓСЋ С„СѓРЅРєС†РёРёСЋ
 			}
 		}
-		*AccountName = Name; //вернем полученнное имя в программу
+		*AccountName = Name; //РІРµСЂРЅРµРј РїРѕР»СѓС‡РµРЅРЅРЅРѕРµ РёРјСЏ РІ РїСЂРѕРіСЂР°РјРјСѓ
 	}
 	else
 	{
-		ConvertSidToStringSidW(psid, AccountName);//если не получилось получить имя, то вернем SID
+		ConvertSidToStringSidW(psid, AccountName);//РµСЃР»Рё РЅРµ РїРѕР»СѓС‡РёР»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёРјСЏ, С‚Рѕ РІРµСЂРЅРµРј SID
 		if (Name != NULL)
 		{
 			LocalFree(Name);
@@ -239,13 +239,13 @@ BOOL GetWellKnowSID(WELL_KNOWN_SID_TYPE WellKnowSidType, PSID sidDomain, PSID *s
 
 	if (localSID == NULL)
 	{
-		return FALSE; //определеить SID не удалось. 
+		return FALSE; //РѕРїСЂРµРґРµР»РµРёС‚СЊ SID РЅРµ СѓРґР°Р»РѕСЃСЊ. 
 	}
 
 	BOOL RetRes = CreateWellKnownSid(WellKnowSidType, sidDomain, localSID, &MaxSidSize);
 	if (RetRes != FALSE)
 	{
-		*sidWellKnow = localSID;//возращаем созданный SID
+		*sidWellKnow = localSID;//РІРѕР·СЂР°С‰Р°РµРј СЃРѕР·РґР°РЅРЅС‹Р№ SID
 	}
 	else
 	{
@@ -258,27 +258,27 @@ BOOL GetWellKnowSID(WELL_KNOWN_SID_TYPE WellKnowSidType, PSID sidDomain, PSID *s
 
 void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser)
 {
-	/*Переменные для вывода*/
-	PLSA_UNICODE_STRING List_Rights; //список прав
-	WCHAR DisplayName[256];//дружественное имя
+	/*РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РІС‹РІРѕРґР°*/
+	PLSA_UNICODE_STRING List_Rights; //СЃРїРёСЃРѕРє РїСЂР°РІ
+	WCHAR DisplayName[256];//РґСЂСѓР¶РµСЃС‚РІРµРЅРЅРѕРµ РёРјСЏ
 
-	/*Вспомогательные счетчики*/
-	DWORD count_char;//подсчет количества символов в строке
-	DWORD lpLanguageID;//ID языка?
-	ULONG count_list;//элементы в списке прав
+	/*Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ СЃС‡РµС‚С‡РёРєРё*/
+	DWORD count_char;//РїРѕРґСЃС‡РµС‚ РєРѕР»РёС‡РµСЃС‚РІР° СЃРёРјРІРѕР»РѕРІ РІ СЃС‚СЂРѕРєРµ
+	DWORD lpLanguageID;//ID СЏР·С‹РєР°?
+	ULONG count_list;//СЌР»РµРјРµРЅС‚С‹ РІ СЃРїРёСЃРєРµ РїСЂР°РІ
 
 	BOOL RetRes = FALSE;
 
 	NTSTATUS ntstatus = LsaEnumerateAccountRights(PolicyHandle, sidUser, &List_Rights, &count_list);
 	if (LSA_SUCCESS(ntstatus))
 	{
-		std::cout << "Список прав учетных записей" << std::endl;
+		std::cout << L"РЎРїРёСЃРѕРє РїСЂР°РІ СѓС‡РµС‚РЅС‹С… Р·Р°РїРёСЃРµР№" << std::endl;
 		for (ULONG i = 0; i < count_list; ++i)
 		{
 			LPCWSTR UserRight = List_Rights[i].Buffer;
 			std::cout << "\t" << i + 1 << "  " << UserRight;
 
-			count_char = _countof(DisplayName);//определеим количество символов в строке
+			count_char = _countof(DisplayName);//РѕРїСЂРµРґРµР»РµРёРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРёРјРІРѕР»РѕРІ РІ СЃС‚СЂРѕРєРµ
 
 			RetRes = LookupPrivilegeDisplayName(NULL, UserRight, DisplayName, &count_char, &lpLanguageID);
 
@@ -288,19 +288,19 @@ void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser)
 			}
 			else
 			{
-				/*Константы прав учетных записей*/
+				/*РљРѕРЅСЃС‚Р°РЅС‚С‹ РїСЂР°РІ СѓС‡РµС‚РЅС‹С… Р·Р°РїРёСЃРµР№*/
 				constexpr LPCWSTR Right_array[20] =
 				{
-					SE_INTERACTIVE_LOGON_NAME, TEXT("Локальный вход в систему"),
-					SE_DENY_INTERACTIVE_LOGON_NAME, TEXT("Запретить локальный вход"),
-					SE_NETWORK_LOGON_NAME, TEXT("Доступ к компьютеру из сети"),
-					SE_DENY_NETWORK_LOGON_NAME, TEXT("Отказать в доступе к этому компьютеру"),
-					SE_BATCH_LOGON_NAME, TEXT("Вход в качестве пакетного задания"),
-					SE_DENY_BATCH_LOGON_NAME, TEXT("Отказать во входе в качестве пакетного задания"),
-					SE_SERVICE_LOGON_NAME, TEXT("Вход в качестве службы"),
-					SE_DENY_SERVICE_LOGON_NAME, TEXT("Отказать во входе в качестве службы"),
-					SE_REMOTE_INTERACTIVE_LOGON_NAME, TEXT("Разрешать вход в систему через службы удаленных рабочих столов"),
-					SE_DENY_REMOTE_INTERACTIVE_LOGON_NAME, TEXT("Запретить вход в систему через службы удаленных рабочих столов")
+					SE_INTERACTIVE_LOGON_NAME, TEXT("Р›РѕРєР°Р»СЊРЅС‹Р№ РІС…РѕРґ РІ СЃРёСЃС‚РµРјСѓ"),
+					SE_DENY_INTERACTIVE_LOGON_NAME, TEXT("Р—Р°РїСЂРµС‚РёС‚СЊ Р»РѕРєР°Р»СЊРЅС‹Р№ РІС…РѕРґ"),
+					SE_NETWORK_LOGON_NAME, TEXT("Р”РѕСЃС‚СѓРї Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ РёР· СЃРµС‚Рё"),
+					SE_DENY_NETWORK_LOGON_NAME, TEXT("РћС‚РєР°Р·Р°С‚СЊ РІ РґРѕСЃС‚СѓРїРµ Рє СЌС‚РѕРјСѓ РєРѕРјРїСЊСЋС‚РµСЂСѓ"),
+					SE_BATCH_LOGON_NAME, TEXT("Р’С…РѕРґ РІ РєР°С‡РµСЃС‚РІРµ РїР°РєРµС‚РЅРѕРіРѕ Р·Р°РґР°РЅРёСЏ"),
+					SE_DENY_BATCH_LOGON_NAME, TEXT("РћС‚РєР°Р·Р°С‚СЊ РІРѕ РІС…РѕРґРµ РІ РєР°С‡РµСЃС‚РІРµ РїР°РєРµС‚РЅРѕРіРѕ Р·Р°РґР°РЅРёСЏ"),
+					SE_SERVICE_LOGON_NAME, TEXT("Р’С…РѕРґ РІ РєР°С‡РµСЃС‚РІРµ СЃР»СѓР¶Р±С‹"),
+					SE_DENY_SERVICE_LOGON_NAME, TEXT("РћС‚РєР°Р·Р°С‚СЊ РІРѕ РІС…РѕРґРµ РІ РєР°С‡РµСЃС‚РІРµ СЃР»СѓР¶Р±С‹"),
+					SE_REMOTE_INTERACTIVE_LOGON_NAME, TEXT("Р Р°Р·СЂРµС€Р°С‚СЊ РІС…РѕРґ РІ СЃРёСЃС‚РµРјСѓ С‡РµСЂРµР· СЃР»СѓР¶Р±С‹ СѓРґР°Р»РµРЅРЅС‹С… СЂР°Р±РѕС‡РёС… СЃС‚РѕР»РѕРІ"),
+					SE_DENY_REMOTE_INTERACTIVE_LOGON_NAME, TEXT("Р—Р°РїСЂРµС‚РёС‚СЊ РІС…РѕРґ РІ СЃРёСЃС‚РµРјСѓ С‡РµСЂРµР· СЃР»СѓР¶Р±С‹ СѓРґР°Р»РµРЅРЅС‹С… СЂР°Р±РѕС‡РёС… СЃС‚РѕР»РѕРІ")
 				};
 
 				for (int j = 0; j < _countof(Right_array); j+=2)
@@ -322,14 +322,14 @@ void ListOfPrivilegesAndRights_User(LSA_HANDLE PolicyHandle, PSID sidUser)
 
 void CoutSID(PSID psid)
 {
-	LPWSTR lpSID = NULL, AccountName = NULL;//переменные для вывода
+	LPWSTR lpSID = NULL, AccountName = NULL;//РїРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РІС‹РІРѕРґР°
 	ConvertSidToStringSidW(psid, &lpSID);
 	GetAccountName_W(psid, &AccountName);
 	if ((AccountName != NULL) && (psid != NULL))
 	{
 		std::wcout << AccountName << "  " << lpSID<< std::endl;
 	}
-	/*Очистка памяти?*/
+	/*РћС‡РёСЃС‚РєР° РїР°РјСЏС‚Рё?*/
 	FreeSid(psid);
 	//delete AccountName;
 }
