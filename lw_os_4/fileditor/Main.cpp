@@ -515,32 +515,26 @@ BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
 				return FALSE;
 			} 
 		} 
+
 	
-	
-	
-	//HANDLE testFile = CreateFile(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 	LARGE_INTEGER size;// для определения размера текста
 
 	size.QuadPart = GetWindowTextLengthW(hwndCtl);//получение размера для чтения строки
-	BOOL bRet;
- bRet = SetFilePointerEx(hFile, size, NULL, FILE_BEGIN);// изменяем положение указателя файла
-		
-	if (FALSE != bRet)
-		bRet = SetEndOfFile(hFile);// устанавливаем конец файла
+	BOOL bRet = FALSE;
 
-	/*if ( && (size.LowPart > 0))*/
-
-	//if ((FALSE != bRet)&&
 		
-	if ((size.LowPart > 0))//файл не пустой
+	if (size.LowPart > 0)//файл не пустой
 	{
-
-		lpBuffReWri = new WCHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл
+		lpBuffReWri = new WCHAR[size.LowPart + 2];	// выделяем память для буфера, из которого будут записываться данные в файл + 2 на сигнатуру
 		
-		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart+2);		// копируем UNICODE строку из поля ввода в буффер
+		/*------For UNICODE---------*/
+		*(WORD*)lpBuffReWri = 0xfeff;//записывает в начало файла сигнатуру BOM для того, чтобы файл был UNICODE. UNICODE, BOM. 
+		/*------For UNICODE---------*/
 
-		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл
-		
+		GetWindowTextW(hwndCtl, lpBuffReWri+1, size.LowPart+1);		// копируем UNICODE строку из поля ввода в буффер
+
+		bRet = WriteAsync(hFile, lpBuffReWri, 0, size.LowPart*2+2, &ovlWrite);// асинхронная запись данных в файл
+																			//размер *2, потому что использую WCHAR, +2 на сигнатуру
 
 		if (FALSE == bRet) 
 		{
@@ -573,17 +567,13 @@ BOOL ReadAsync(HANDLE hFile, LPVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOV
 	return TRUE;
 } 
 
-/*пока не трогаем*/
+
 BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOVERLAPPED ovl)
 {
-	/* //ИЗ ПРИМЕРА
 	// инициализируем структуру OVERLAPPED
-	*/
 	ZeroMemory(ovl, sizeof(ovl));
 	ovl->Offset = dwOffset; // младшая часть смещения
 	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
-	/*
-	// начинаем асинхронную операцию записи данных в файл
 
 	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
 
@@ -591,50 +581,11 @@ BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LP
 	{
 		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
 		return FALSE;
-	} 
-	*/
-
-	
-	//HANDLE File =
-		//CreateFile(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, NULL, NULL);
-
-	const WORD BOM = 0xFEFF;
-	DWORD BytesWritten = 0;
-
-	WriteFile(hFile, &BOM, sizeof(BOM), &BytesWritten, ovl);
-
-	//BOOL bRet = WriteFile(hFile, lpBuffer, wcslen((wchar_t*)lpBuffer) * sizeof(wchar_t), NULL, NULL);
-	BOOL bRet = WriteFile(hFile, lpBuffer, dwSize, NULL, ovl);
-
-
-	if (FALSE == bRet && ERROR_IO_PENDING != GetLastError())
-	{
-		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
-		return FALSE;
 	}
 
-	CloseHandle(hFile);
-	
-	HANDLE File2 = CreateFile(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-	DWORD BytesRead = 0;
-	WORD FileBOM = 0;
-	ReadFile(File2, &FileBOM, sizeof(FileBOM), &BytesRead, NULL);
-	wchar_t FileText[40 + 1] = L"";
-	if (FileBOM == BOM)
-	{
-		ReadFile(File2, &FileText, (40 + 1) * sizeof(wchar_t), &BytesRead, NULL);
-		FileText[4] = L'\0';
-	}
-
-	CloseHandle(File2);
-	
-	
 	return TRUE;
-
-	
-
 } 
-/*пока не трогаме*/
+
 BOOL FinishIo(LPOVERLAPPED ovl)
 {
 	if (NULL != ovl->hEvent)
@@ -651,7 +602,6 @@ BOOL FinishIo(LPOVERLAPPED ovl)
 
 	return FALSE;
 } 
-
 
 BOOL TryFinishIo(LPOVERLAPPED lpOverlapped)
 {
