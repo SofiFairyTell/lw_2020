@@ -11,7 +11,7 @@
 #include <iostream>
 //#include <>
 
-int _tmain();
+//int _tmain();
 
 /*Функции и переменные*/
 LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType);//открытие дескриптора политики безопасности локального пк
@@ -113,6 +113,7 @@ int _tmain()
 		}
 	}
 
+	system("pause");
   FreeSid(sidDomain);
   FreeSid(sidUser);
   FreeSid(sidWellKnow);
@@ -140,37 +141,37 @@ LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType)
 /*Определения функций определяющих SID*/
 BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid)
 {
-BOOL RetRes = FALSE;
-SID_NAME_USE SidType;//переменная перечисляемого типа, сюда сохраним определенный тип SID
+	BOOL RetRes = FALSE;
+	SID_NAME_USE SidType;//переменная перечисляемого типа, сюда сохраним определенный тип SID
 
-/*Переменные для определения имени и SID*/
-LPWSTR RefDomainName = NULL;
-PSID psid = NULL;
-DWORD cbSID = 0, cchRefDomainName = 0;
+	/*Переменные для определения имени и SID*/
+	LPWSTR RefDomainName = NULL;
+	PSID psid = NULL;
+	DWORD cbSID = 0, cchRefDomainName = 0;
 
-LookupAccountNameW(NULL, AccountName, NULL, &cbSID, NULL, &cchRefDomainName, NULL);//определение размеров буфера под имена
+	LookupAccountNameW(NULL, AccountName, NULL, &cbSID, NULL, &cchRefDomainName, NULL);//определение размеров буфера под имена
 
-if ((cbSID > 0) && (cchRefDomainName > 0))
-{
-	psid = (PSID)LocalAlloc(LMEM_FIXED, cbSID); //выделение памяти из локальной кучи процесса
-	RefDomainName = (LPWSTR)LocalAlloc(LMEM_FIXED, cchRefDomainName * sizeof(WCHAR));// -||- для имени домена
-}
-
-if ((psid != NULL) && (RefDomainName != NULL))
-{
-	RetRes = LookupAccountNameW(NULL, AccountName, psid, &cbSID, RefDomainName, &cchRefDomainName, &SidType);
-}
-
-if (RetRes != FALSE)
-{
-	*ppsid = psid;
-}
-else
-{
-	if (psid != NULL)
+	if ((cbSID > 0) && (cchRefDomainName > 0))
 	{
-		LocalFree(psid);//освбодждаем память
+		psid = (PSID)LocalAlloc(LMEM_FIXED, cbSID); //выделение памяти из локальной кучи процесса
+		RefDomainName = (LPWSTR)LocalAlloc(LMEM_FIXED, cchRefDomainName * sizeof(WCHAR));// -||- для имени домена
 	}
+
+	if ((psid != NULL) && (RefDomainName != NULL))
+	{
+		RetRes = LookupAccountNameW(NULL, AccountName, psid, &cbSID, RefDomainName, &cchRefDomainName, &SidType);
+	}
+
+	if (RetRes != FALSE)
+	{
+		*ppsid = psid;
+	}
+	else
+	{
+		if (psid != NULL)
+		{
+			LocalFree(psid);//освбодждаем память
+		}
 }
 
 if (RefDomainName != NULL)
@@ -326,7 +327,7 @@ void CoutSID(PSID psid)
 	GetAccountName_W(psid, &AccountName);
 	if ((AccountName != NULL) && (psid != NULL))
 	{
-		std::wcout << AccountName << "  " << psid << std::endl;
+		std::wcout << AccountName << "  " << lpSID<< std::endl;
 	}
 	/*Очистка памяти?*/
 	FreeSid(psid);

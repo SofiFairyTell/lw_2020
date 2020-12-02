@@ -130,10 +130,10 @@ void OnIdle(HWND hwnd)
 			if (ERROR_SUCCESS == ovlRead.Internal) // чтение завершено успешно
 			{
 				
-				WORD bom = *(LPWORD)lpBuffReWri; // маркер последовательности байтов
+				WORD bom = *(WORD*)lpBuffReWri; // маркер последовательности байтов
 				if (0xFEFF == bom) // Unicode-файл
 				{
-					LPWSTR lpszText = (LPWSTR)(lpBuffReWri + sizeof(WORD)); // Unicode-строка
+					LPWSTR lpszText = (LPWSTR)(lpBuffReWri + sizeof(WORD)-2); // Unicode-строка
 					// вычисляем длину Unicode-строки
 					DWORD cch = (ovlRead.InternalHigh - sizeof(WORD)) / sizeof(WCHAR);				
 					lpszText[cch] = L'\0';// задаём нуль-символ в конце строки			
@@ -467,7 +467,7 @@ BOOL OpenFileAsync(HWND hwndCtl)
 	if ((FALSE != bRet) && (size.LowPart > 0))
 	{
 		// выделяем память для буфера, в который будет считываться данные из файла
-		lpBuffReWri = new WCHAR[size.LowPart + 2];
+		lpBuffReWri = new WCHAR[size.LowPart + 1];
 		
 		bRet = ReadAsync(hFile, lpBuffReWri, 0, size.LowPart, &ovlRead);// асинхронное чтение данных из файла
 
