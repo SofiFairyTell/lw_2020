@@ -14,7 +14,6 @@ void AutorunAppList(HKEY hRootKey, REGSAM samDesired);
 
 void SubFind(LSTATUS retCode, DWORD CMVlen, HKEY hSubKey);
 
-LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded);
 // функция для определения, является ли операционная система 64-разрядной версией Windows
 BOOL IsWin64();
 
@@ -38,7 +37,7 @@ int _tmain()
 
 		AutorunAppList(HKEY_CURRENT_USER, KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE | KEY_WOW64_64KEY);
 	} 
-
+	std::getchar();
 } 
 // ----------------------------------------------------------------------------------------------
 void InstallAppList(REGSAM AccessRights)
@@ -64,7 +63,7 @@ void InstallAppList(REGSAM AccessRights)
 			for ( i = 0;  i< cSubKeys; ++i)
 			{
 				HKEY hSubKey = NULL; // дескриптор вложенного ключа реестра
-				// получим имя вложенного ключа с индексом dwIndex
+	
 				DWORD cchValue = cbMaxSubKey + 1;
 
 				if (ERROR_SUCCESS == RegEnumKeyEx(hKey, i, szSubKeyName, &cchValue, NULL, NULL, NULL, NULL))
@@ -73,8 +72,11 @@ void InstallAppList(REGSAM AccessRights)
 					if (ERROR_SUCCESS == RegOpenKeyEx(hKey, szSubKeyName, REG_OPTION_NON_VOLATILE, AccessRights, &hSubKey))
 					{
 						DWORD cMaxValueLen = 0;//для определения максимальной длины значения
+
 						retCode = RegQueryInfoKey(hSubKey, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &cMaxValueLen, NULL, NULL);
+
 						SubFind(retCode, cMaxValueLen, hSubKey);//демонстрация содержимого по вложенному ключу			
+
 						RegCloseKey(hSubKey), hSubKey = NULL;// закрываем дескриптор вложенного ключа реестра
 					}
 				}		
@@ -88,40 +90,67 @@ void InstallAppList(REGSAM AccessRights)
 
 void SubFind(LSTATUS retCode, DWORD CMVlen, HKEY hSubKey)
 {
+	DWORD RegType;//для определения типа данных параметров
+	DWORD DataBuffer;//размер содержимого значений
+	LPTSTR lpData = new TCHAR[CMVlen];//для определения содержимого значений
+
 	if ((ERROR_SUCCESS == retCode) && (CMVlen > 0))
 	{
-		// выделим память под буфер для значений
-		LPTSTR lpData = new TCHAR[CMVlen];
-
-		// получим строковое значение
-		retCode = RegGetValueSZ(hSubKey, TEXT("DisplayName"), lpData, CMVlen, NULL);
-
-		if ((ERROR_SUCCESS == retCode) && (_T('\0') != lpData[0]))
-		{
-			_tprintf(TEXT("-----\n%s\n"), lpData);
-
-			// получим строковое значение
-			retCode = RegGetValueSZ(hSubKey, TEXT("Publisher"), lpData, CMVlen, NULL);
-
-			if ((ERROR_SUCCESS == retCode) && (_T('\0') != lpData[0]))
-			{
-				_tprintf(TEXT("%s\n"), lpData);
-			} 
-
-			// получим строковое значение
-			retCode = RegGetValueSZ(hSubKey, TEXT("DisplayVersion"), lpData, CMVlen, NULL);
-
-			if ((ERROR_SUCCESS == retCode) && (_T('\0') != lpData[0]))
-			{
-				_tprintf(TEXT("%s\n"), lpData);
-			} // if
 		
-			std::cout <<  "\n";
-		} 
+	/*-------------Отобразить наименование ----------------------*/
+		retCode = RegQueryValueEx(hSubKey, TEXT("DisplayName"), NULL, &RegType, NULL, NULL);
+		if (RegType == REG_DWORD || retCode == ERROR_SUCCESS)
+		{
+			DataBuffer = CMVlen * sizeof(TCHAR);
+			// получаем значение параметра
+			retCode = RegQueryValueEx(hSubKey, TEXT("DisplayName"), NULL, NULL, (LPBYTE)lpData, &DataBuffer);
+			_tprintf(TEXT("%s\n"), lpData);
+		}
+		else
+			if (retCode != ERROR_SUCCESS)
+			{
+				retCode = ERROR_UNSUPPORTED_TYPE;
+			}
+	/*--------------------------------------------------------*/
 
-		delete[] lpData;// освободим выделенную память
-	}
+	/*-------------Отобразить издателя----------------------*/
+		retCode = RegQueryValueEx(hSubKey, TEXT("Publisher"), NULL, &RegType, NULL, NULL);
+		if (RegType == REG_DWORD || retCode == ERROR_SUCCESS)
+		{
+			DataBuffer = CMVlen * sizeof(TCHAR);
+			// получаем значение параметра
+			retCode = RegQueryValueEx(hSubKey, TEXT("Publisher"), NULL, NULL, (LPBYTE)lpData, &DataBuffer);
+			_tprintf(TEXT("%s\n"), lpData);
+		}
+		else
+			if (retCode != ERROR_SUCCESS)
+			{
+				retCode = ERROR_UNSUPPORTED_TYPE;
+			}
+		/*--------------------------------------------------------*/
+			
+		/*-------------Отобразить номер версии----------------------*/
+		retCode = RegQueryValueEx(hSubKey, TEXT("DisplayVersion"), NULL, &RegType, NULL, NULL);
+		if (RegType == REG_DWORD || retCode == ERROR_SUCCESS)
+		{
+			DataBuffer = CMVlen * sizeof(TCHAR);
+			// получаем значение параметра
+			retCode = RegQueryValueEx(hSubKey, TEXT("DisplayVersion"), NULL, NULL, (LPBYTE)lpData, &DataBuffer);
+			_tprintf(TEXT("%s\n"), lpData);
+		}
+		else
+			if (retCode != ERROR_SUCCESS)
+			{
+				retCode = ERROR_UNSUPPORTED_TYPE;
+			}
+		/*--------------------------------------------------------*/
+	
+			std::cout <<  "\n";
+	} 
+
+	delete[] lpData;// освободим выделенную память
 }
+
 
 
 void AutorunAppList(HKEY hRootKey, REGSAM AccessRights)
@@ -150,13 +179,14 @@ void AutorunAppList(HKEY hRootKey, REGSAM AccessRights)
 					
 				DWORD cchValueName = MaxNameLen + 1, dwType, cbData = MaxVallLen;
 				lStatus = RegEnumValue(hKey, i, NameKey, &cchValueName, NULL, &dwType, lpData, &cbData);
-
+				
 				if ((ERROR_SUCCESS == lStatus) && (cchValueName > 0))
 				{
 					//reg_sz - тип данных. его значение UNICODE-строка
 					if ((REG_SZ == dwType) || (REG_EXPAND_SZ == dwType))
 					{
 						_tprintf(TEXT("-----\n%s\n"), NameKey);//имя параметра
+						//RegQueryValueEx(hKey, TEXT("Publisher"), NULL, NULL, (LPBYTE)lpData, &cbData);
 						_tprintf(TEXT("%s\n\n"), (LPTSTR)lpData);//значение параметра
 					} 
 				}
@@ -170,27 +200,7 @@ void AutorunAppList(HKEY hRootKey, REGSAM AccessRights)
 	} 
 } 
 
-  //work wit regist
-
-	LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR section, LPTSTR key, DWORD cch, LPDWORD lpcchNeeded)
-	{
-		DWORD dwType;
-		LSTATUS res = RegQueryValueEx(hKey, section, NULL, &dwType, NULL, NULL);
-			if (res != ERROR_SUCCESS)
-			{
-					res = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
-			}
-			else
-				if (ERROR_SUCCESS == res)
-				{
-					DWORD cb = cch * sizeof(TCHAR);
-						// получаем значение параметра
-					res = RegQueryValueEx(hKey, section, NULL, NULL, (LPBYTE)key, &cb);
-					if (NULL != lpcchNeeded) *lpcchNeeded = cb / sizeof(TCHAR);
-				}
-		return res;
-	} 
-
+  
 
 	BOOL IsWin64()
 	{

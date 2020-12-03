@@ -616,18 +616,18 @@ void PrintDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
 
 
 //work wit regist
-LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded)
+LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR ValueN, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded)
 {
 	DWORD dwType;
 	// определяем тип получаемого значения параметра
-	LSTATUS lStatus = RegQueryValueEx(hKey, lpValueName, NULL, &dwType, NULL, NULL);
+	LSTATUS lStatus = RegQueryValueEx(hKey, ValueN, NULL, &dwType, NULL, NULL);
 
 	if (ERROR_SUCCESS == lStatus && REG_SZ == dwType)
 	{
 		// вычисляем размер буфера (в байтах)
 		DWORD cb = cch * sizeof(TCHAR);
 		// получаем значение параметра
-		lStatus = RegQueryValueEx(hKey, lpValueName, NULL, NULL, (LPBYTE)lpszData, &cb);
+		lStatus = RegQueryValueEx(hKey, ValueN, NULL, NULL, (LPBYTE)lpszData, &cb);
 
 		if (NULL != lpcchNeeded)
 			*lpcchNeeded = cb / sizeof(TCHAR);
@@ -638,7 +638,7 @@ LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch
 	} // if
 
 	return lStatus;
-} // RegGetValueSZ
+} 
 
 LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD cb, LPDWORD lpcbNeeded)
 {

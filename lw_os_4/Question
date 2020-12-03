@@ -1,0 +1,67 @@
+Если функцию записи файла в Unicode с BOM определяю следующим образом: 
+
+BOOL SaveFileAsync(HWND hwndCtl, BOOL fSaveAs)
+{
+	HANDLE testFile = CreateFile(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, NULL, NULL);
+	LARGE_INTEGER size;// для определения размера текста
+
+	size.QuadPart = GetWindowTextLengthW(hwndCtl);//получение размера для чтения строки
+	BOOL bRet;	
+	if ((size.LowPart > 0))//файл не пустой
+	{
+		lpBuffReWri = new WCHAR[size.LowPart + 1];	// выделяем память для буфера, из которого будут записываться данные в файл	
+		GetWindowTextW(hwndCtl, lpBuffReWri, size.LowPart+2); // копируем UNICODE строку из поля ввода в буффер
+		bRet = WriteAsync(testFile, lpBuffReWri, 0, size.LowPart, &ovlWrite);// асинхронная запись данных в файл	
+		if (FALSE == bRet) 
+		{
+			delete[] lpBuffReWri, lpBuffReWri = NULL;// освобождаем выделенную память
+		} 
+	} 
+	return bRet;
+} 
+
+BOOL WriteAsync(HANDLE hFile, LPCVOID lpBuffer, DWORD dwOffset, DWORD dwSize, LPOVERLAPPED ovl)
+{
+	/* //ИЗ ПРИМЕРА
+	// инициализируем структуру OVERLAPPED
+	*/
+	ZeroMemory(ovl, sizeof(ovl));
+	ovl->Offset = dwOffset; // младшая часть смещения
+	ovl->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //событие для оповещения завершения записи
+	
+
+	const WORD BOM = 0xFEFF;
+	DWORD BytesWritten = 0;
+
+	WriteFile(hFile, &BOM, sizeof(BOM), &BytesWritten, NULL);
+
+	BOOL bRet = WriteFile(hFile, lpBuffer, wcslen((wchar_t*)lpBuffer) * sizeof(wchar_t), NULL, NULL);
+	
+	if (FALSE == bRet && ERROR_IO_PENDING != GetLastError())
+	{
+		CloseHandle(ovl->hEvent), ovl->hEvent = NULL;
+		return FALSE;
+	}
+
+	CloseHandle(hFile);
+
+/*Блок проверки записи BOM*/
+	HANDLE File2 = CreateFile(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	DWORD BytesRead = 0;
+	WORD FileBOM = 0;
+	ReadFile(File2, &FileBOM, sizeof(FileBOM), &BytesRead, NULL);
+	wchar_t FileText[40 + 1] = L"";
+	if (FileBOM == BOM)//успешно проходит проверку
+	{
+		ReadFile(File2, &FileText, (40 + 1) * sizeof(wchar_t), &BytesRead, NULL);
+		FileText[4] = L'\0';//читает не весь файл, но это и не важно. вывод не нужен. 
+	}
+
+	CloseHandle(File2);
+
+/*Блок проверки записи BOM*/
+	
+	return TRUE;
+} 
+
+То, что выше работает. 

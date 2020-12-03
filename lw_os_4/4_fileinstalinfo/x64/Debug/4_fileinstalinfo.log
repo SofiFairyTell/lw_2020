@@ -1,2 +1,6 @@
 ﻿  Reester.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\4_fileinstalinfo\reester.cpp(178): warning C4477: "wprintf": в строке форматирования "%s" требуется аргумент типа "wchar_t *", но вариативный аргумент "1" имеет тип "LPBYTE"
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\4_fileinstalinfo\reester.cpp(178): note: рекомендуется использовать "%hs" в строке форматирования
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\4_fileinstalinfo\reester.cpp(178): note: рекомендуется использовать "%Ts" в строке форматирования
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\4_fileinstalinfo\reester.cpp(178): note: это предупреждение основано на нестандартной семантике, используемой Visual C++
   4_fileinstalinfo.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\4_fileinstalinfo.exe

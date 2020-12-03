@@ -1,50 +1,8 @@
-#include <windows.h>
-#include <iostream>
-#include <stdio.h>
-#include <conio.h>
-
-#include <WindowsX.h>
-#include <tchar.h>
-#include <CommCtrl.h>
-#include <strsafe.h>
-#include <wchar.h>
-#include <shlobj.h>
-#include <shlwapi.h>
-#include <shobjidl.h>//for browserinfo
-#include <fileapi.h>
+#include "FileCopeDialogHeader.h"
 #include <string>
 
-#include "resource.h"
-
-using namespace std;
-#pragma warning(disable : 4996) //отключает Ошибку deprecate. Возникает, когда используется устаревшая функци
-#pragma comment(linker,"\"/manifestdependency:type='win32' \
-name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
-processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#pragma comment (lib, "shlwapi.lib")
-
-
-
-
-typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
-BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC lpFunc);
-
-// процедура диалогового окна 
-INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-// обработчик сообщения WM_INITDIALOG
-BOOL Dialog_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);
-// обработчик сообщения WM_CLOSE
-void Dialog_OnClose(HWND hwnd);
-// обработчик сообщения WM_COMMAND
-void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
-
-HWND hDlg = NULL;
-HWND hwnd = NULL;
-
-
+#pragma region CopyBlock
+/*Хорошие функции с алгоритмами*/
 BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
 {
 	LPCTSTR lpTargetDirectory = (LPCTSTR)lpvParam; // каталог, в который нужно скопировать файл/каталог
@@ -138,7 +96,9 @@ BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC
 	return bRet;
 }
 
+#pragma endregion
 
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
 
@@ -177,8 +137,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 		return -1; // завершаем работу приложения
 	}
 
-	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
-
+	ShowWindow(hWnd, SW_HIDE); // отображаем главное окно
+	
 
 
 	MSG  msg;
@@ -186,7 +146,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 	for (;;)
 	{
-
 
 		// извлекаем сообщение из очереди
 		Ret = GetMessage(&msg, NULL, 0, 0);
@@ -257,8 +216,10 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				if (pidl)
 				{
 					SHGetPathFromIDList(pidl, FileName);//get path
+					SetDlgItemText(hwndDlg, IDC_EDIT_TO,FileName);
 				}
-				SetDlgItemText(hwndDlg, IDC_EDIT_TO,FileName);
+				
+				
 		}
 		else 
 			if ((xPos > 36 & xPos < 250)&(yPos > 39 & yPos < 81))
@@ -272,8 +233,9 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if (pidl)
 					{
 						SHGetPathFromIDList(pidl, FileName);//get path
+						SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
 					}
-					SetDlgItemText(hwndDlg, IDC_EDIT_FROM, FileName);
+					
 				}
 	}break;
 	case WM_INITDIALOG:
@@ -308,35 +270,151 @@ void Dialog_OnClose(HWND hwnd)
 	PostQuitMessage(0); // отправляем сообщение WM_QUIT
 }
 
+
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
+{
+	WIN32_FIND_DATA ffd;
+	HANDLE hFind;
+
+	TCHAR szFind[MAX_PATH + 1];
+	TCHAR szInFileName[MAX_PATH + 1];
+	TCHAR szOutFileName[MAX_PATH + 1];
+
+	lstrcpy(szFind, szInDirName);
+	lstrcat(szFind, L"\\*"); //ищем файлы с любым именем и расширением
+
+	hFind = FindFirstFile(szFind, &ffd);
+	if (hFind == NULL)
+	{
+		return FALSE;
+	}
+	do
+	{
+		//Формируем полный путь (источник)
+		lstrcpy(szInFileName, szInDirName);
+		lstrcat(szInFileName, L"\\");
+		lstrcat(szInFileName, ffd.cFileName);
+
+		//Формируем полный путь (результат)
+
+		lstrcpy(szOutFileName, szOutDirName);
+		lstrcat(szOutFileName, L"\\");
+		lstrcat(szOutFileName, ffd.cFileName);
+	
+		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
+
+			CreateDirectory(szOutFileName, NULL);
+			CopyDirectoryContent(szInFileName, szOutFileName);
+		}
+		else
+		{
+			CopyFile(szInFileName, szOutFileName, TRUE);
+		}
+		
+
+	} while (FindNextFile(hFind, &ffd));
+
+	FindClose(hFind);
+	return TRUE;
+}
+
 void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
 	switch (id)
 	{
-	
+
 	case IDOK:
 	{
 		TCHAR FromName[260];
 		TCHAR ToName[260];
-		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
-		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));
-		BOOL bRet = FileOperation(FromName, ToName, Copy);
-		if (!(bRet == FALSE))
-		{
+		TCHAR NewName[MAX_PATH + 1];
 
-			MessageBox(hwnd, L"Файлы скопированы. Проверьте папку назначание", L" Успех!", MB_OK);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"...");
+		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
+		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));//каталог куда копируем
+		
+		/*Выясним, что копируется, файл или папка. 
+		Если папка, то сформируем с ней маршрут и продолжим поиск*/
+		WIN32_FIND_DATA ffd;
+		HANDLE hFind;
+		BOOL BRET;
+		LPCTSTR FILE = PathFindFileNameW(FromName);
+		//hFind = FindFirstFile(FromName, &ffd); //Ищем файл/каталог
+		
+		DWORD FromAttributes = GetFileAttributes(FromName);//определим, что копируем
+		DWORD ToNameAttributes = GetFileAttributes(ToName);//выясним, выясним куда копируем
+							
+		if (INVALID_FILE_ATTRIBUTES == ToNameAttributes || INVALID_FILE_ATTRIBUTES == FromAttributes) // (!) если нет файла или каталога
+		{
+			break;
+		} 
+		else 
+			if ((ToNameAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 && (FromAttributes& FILE_ATTRIBUTE_DIRECTORY) != 0)//не каталог
+			{
+				SetLastError(ERROR_PATH_NOT_FOUND);
+				MessageBox(hwnd,L"Нельзя скопировать папку в файл!", L" !", MB_OK);
+			} 
+											   
+		if ((FromAttributes& FILE_ATTRIBUTE_DIRECTORY)!= 0)//является каталогом
+		{
+			lstrcat(ToName, L"\\");
+			lstrcat(ToName, FILE);
+			CreateDirectory(ToName, NULL);
+			BRET = CopyDirectoryContent(FromName, ToName);
 		}
 		else
 		{
-			MessageBox(hwnd, L"Файлы не скопированы.", L"Ошибка", MB_YESNO);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L"...");
+			lstrcat(ToName, L"\\");
+			lstrcat(ToName, ffd.cFileName);
+			BRET = CopyFile(FromName, ToName, TRUE);		
 		}
-	}
-	break;
+			
+		
+		
+		/*
+		//копирование файлов с помощью структуры SHFILEOPSTRUCT
+		TCHAR newFrom[MAX_PATH], newTo[MAX_PATH];
+		_tcscpy_s(newFrom, FromName);
+		newFrom[_tcsclen(FromName) + 1] = 0;
+
+		_tcscpy_s(newTo, ToName);
+		newTo[_tcsclen(ToName) + 1] = 0;
+	
+		SHFILEOPSTRUCT fos;
+		memset(&fos, 0, sizeof(SHFILEOPSTRUCT));
+		fos.hwnd = hwnd;
+		fos.wFunc = FO_COPY;
+		fos.pFrom = newFrom;
+		fos.pTo = newTo;
+		fos.fFlags = FOF_SILENT;
+
+		int ResultError = SHFileOperation(&fos);*/
+		
+		TCHAR Message[MAX_PATH];
+		if (BRET == 0)
+		{
+			lstrcpy(Message, L"Файлы не скопированы в папку: ");
+			lstrcat(Message, ToName);
+			MessageBox(hwnd, Message, L"Ошибка", MB_OK);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+			//ShowMessage(IntToStr(result));
+		}
+		else
+		{
+			
+			lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
+			lstrcat(Message, ToName);
+			MessageBox(hwnd,Message, L" Успех!", MB_OK);
+			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+		}
+				
+	}	break;
 
 	case IDCANCEL:
 	{
-		// завершаем работу диалогового окна
 		EndDialog(hwnd, IDCANCEL);
 		DestroyWindow(hwnd); // уничтожаем окно
 		PostQuitMessage(0);
