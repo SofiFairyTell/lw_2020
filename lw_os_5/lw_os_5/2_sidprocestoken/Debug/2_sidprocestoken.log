@@ -1,2 +1,6 @@
 ﻿  2_sidprocestoken.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\2_sidprocestoken\2_sidprocestoken.cpp(1053): warning C4018: <: несоответствие типов со знаком и без знака
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\2_sidprocestoken\2_sidprocestoken.cpp(1076): warning C4018: <: несоответствие типов со знаком и без знака
+  main.cpp
+  Создание кода...
   2_sidprocestoken.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\Debug\2_sidprocestoken.exe

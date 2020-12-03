@@ -22,6 +22,8 @@
 #define IDC_PRIVILEGES					2008
 #define IDC_PRIVILEGE_CHECK				2009
 
+
+
 HANDLE hJob = NULL; // дескриптор задания
 // оконная процедура главного окна
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -317,215 +319,71 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 		if (LBN_SELCHANGE == codeNotify)
 		{
-			//WORK HERE
-		}
+			
+			int iItem = ListBox_GetCurSel(hwndCtl);//номер выбранной привилегии
 
-	
-	}
-	break;
-	/*Программа приостановит свою работу пока не завершит процесс.
-	Если завершение не произойдет по истечению заданного времени, то вернет сообщение об ошибке*/
-	case ID_WAITPROCCESS: // Ожидание процесса
-	{
-		UINT Milliseconds = INFINITE;
-
-		HWND hwndList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
-
-		// определяем индекс выбранного элемента в списке процессов
-		int iItem = ListBox_GetCurSel(hwndList);
-
-		if (iItem != -1)
-		{
-			TCHAR Text[] = TEXT("Программа приостановит работу до завершения выбранного процесса если нажмете ДА\n Программа приостановит работу до истечения 10 секунд если нажмете НЕТ\n Нажмите ОТМЕНА для выхода");
-
-			int mes = MessageBox(hwnd, Text, TEXT("Ожидание завершения процесса"), MB_ICONQUESTION | MB_YESNOCANCEL | MB_DEFBUTTON1);
-
-			switch (mes)
+			if (iItem != -1)
 			{
-			case IDYES:
-				Milliseconds = INFINITE;
-				break;
+			
+				DWORD atrb = (DWORD)ListBox_GetItemData(hwndCtl, iItem);// определяем атрибуты привилегии
 
-			case IDNO:
-				Milliseconds = 10000;
-				break;
-
-			case IDCANCEL:
-				iItem = -1;
-				break;
-			}
-		}
-
-		if (iItem != -1)
-		{
-			UINT PID = (DWORD)ListBox_GetItemData(hwndList, iItem); // определяем идентификатор процесса
-
-			DWORD ExitCode;// ожидаем завершения работы процесса
-			BOOL bRet = WaitProcessById(PID, Milliseconds, &ExitCode);// ожидаем завершения работы процесса
-
-			if ((FALSE != bRet) && (STILL_ACTIVE != ExitCode)) // если процесс был завершен
-			{
-				MessageBox(hwnd, TEXT("Процесс завершен"), TEXT("Ожидание завершения процесса"), MB_ICONINFORMATION | MB_OK);
-
-				/*После заврешения процесса удалить его и его модули из списка*/
-				ListBox_DeleteString(hwndList, iItem);
-				//ListBox_ResetContent(GetDlgItem(hwnd, IDC_LB_MODULES));
-			}
-			else if (FALSE != bRet) // если истекло время ожидания
-			{
-				MessageBox(hwnd, TEXT("Истекло время ожидания"), TEXT("Ожидание завершения процесса"), MB_ICONWARNING | MB_OK);
-			}
-			else
-			{
-				MessageBox(hwnd, TEXT("Возникла ошибка"), NULL, MB_ICONERROR | MB_OK);
-			}
-		}
-	}
-	break;
-	/*Завершение без приостановки работы*/
-	case ID_ENDPROCESS: // Завершение процесса
-	{
-		HWND hwndLB = GetDlgItem(hwnd, IDC_LB_PROCESSES);//дескпритор списка с процессами
-
-		int SelItem = ListBox_GetCurSel(hwndLB);//  индекс выбранного элемента 
-
-		if (SelItem != -1)
-		{
-			int mess = MessageBox(hwnd, TEXT("Завершить процесс?"), TEXT("Завершение процесса"), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2);
-			if (IDYES != mess) SelItem = -1;
-		}
-
-		if (SelItem != -1)
-		{
-
-			UINT PID = (DWORD)ListBox_GetItemData(hwndLB, SelItem);// определяем идентификатор процесса
-			HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, PID);
-			BOOL bRet = FALSE;
-
-			if (NULL != hProcess)
-			{
-				bRet = TerminateProcess(hProcess, 0); // завершаем процесс
-				CloseHandle(hProcess);
-			}
-
-			if (FALSE != bRet)
-			{
-				MessageBox(hwnd, TEXT("Процесс завершен"), TEXT("Завершение процесса"), MB_ICONINFORMATION | MB_OK);
-				/*После завершения процесса удалить его и его модули из списка*/
-				ListBox_DeleteString(hwndLB, SelItem);
-				//ListBox_ResetContent(GetDlgItem(hwnd, IDC_LB_MODULES));
-			}
-			else
-			{
-				MessageBox(hwnd, TEXT("Неудалось завершить процесс"), TEXT("Завершение процесса"), MB_ICONWARNING | MB_OK);
-			}
-		}
-	}
-	break;
-
-	case ID_NEWPROCESS: // Создание новых процессов в задании
-	{
-		TCHAR szFileName[1024] = TEXT("");
-		OPENFILENAME ofn = { sizeof(OPENFILENAME) };
-
-		ofn.hwndOwner = hwnd;
-		ofn.hInstance = GetWindowInstance(hwnd);
-		ofn.lpstrFilter = TEXT("Программы (*.exe)\0*.exe\0");
-		ofn.lpstrFile = szFileName;
-		ofn.nMaxFile = _countof(szFileName);
-		ofn.lpstrTitle = TEXT("Запустить программу");
-		ofn.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT;
-		ofn.lpstrDefExt = TEXT("exe");
-
-		if (GetOpenFileName(&ofn) == TRUE)
-		{
-			BOOL bRet = FALSE;
-
-			//(?Кажется не работает)
-			UINT FileCount = 0;// определяем количество выбранных файлов
-			LPCTSTR filename = ofn.lpstrFile;
-			while ((*filename) != 0)
-			{
-				filename += _tcslen(filename) + 1;
-				++FileCount;
-			}
-
-			if (FileCount-- > 1) // если выбрано несколько файлов
-			{
-				LPCTSTR lpszName = szFileName + _tcslen(szFileName) + 1;
-				LPTSTR *aCmdLine = new LPTSTR[FileCount];// создаём массив строк для нескольких файлов
-
-				for (UINT i = 0; i < FileCount; ++i)
+				if (atrb & SE_PRIVILEGE_ENABLED)
 				{
+					
+					EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_ENABLE), FALSE);// отключим кнопку "Включить"			
+					EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_DISABLE), TRUE);// включим кнопку "Выключить"
+				} 
+				else
+				{				
+					EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_ENABLE), TRUE);// включим кнопку "Включить"		
+					EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_DISABLE), FALSE);// отключим кнопку "Выключить"
+				} 
+			} 
+		}
+	}	break;
+	
+	/*
+	case IDC_BUTTON_PRIVILEGE_ENABLE: // включить привилегию
+	case IDC_BUTTON_PRIVILEGE_DISABLE: // выключить привилегию
+	{
+		HWND hwnd_ProcessList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
+		HWND hwnd_PrivilegList = GetDlgItem(hwnd, IDC_LB_PRIVILEGES);
+		
+		UINT PID;
 
-					aCmdLine[i] = new TCHAR[MAX_PATH];// выделяем память для командной строки
+		int item = ListBox_GetCurSel(hwnd_ProcessList);
+		if (item != -1)
+		{
+			PID = (UINT)ListBox_GetItemData(hwnd_ProcessList, item);//выбранный процесс
+			item = ListBox_GetCurSel(hwnd_PrivilegList); //выбранная привилегеия
+		}
 
-					StringCchPrintf(aCmdLine[i], MAX_PATH, TEXT("%s\\%s"), szFileName, lpszName);// формируем командную строку
-
-					lpszName += _tcslen(lpszName) + 1;
-				} // for
-
-
-				bRet = StartGroupProcessesAsJob(hJob, (LPCTSTR *)aCmdLine, FileCount, FALSE, 0);// создаём группу процессов в одном задании
-
-				/* освобождаем выделенную память*/
-				for (UINT i = 0; i < FileCount; ++i)
-					delete[] aCmdLine[i];
-				delete[] aCmdLine;
-			}
-			else
+		if (item != -1)
+		{
+			HANDLE token = OpenProcessTokenPID(PID, TOKEN_QUERY);//получить маркер доступа процесса 
+			if (token != NULL)
 			{
-				LPCTSTR aCmdLine[1] = { szFileName };
+				TCHAR NamePrivil[256];
+				ListBox_GetText(hwnd_PrivilegList, item, NamePrivil);//получение имени привилегии
 
-				bRet = StartGroupProcessesAsJob(hJob, aCmdLine, 1, FALSE, 0);// создаём процессы в одном задании
-			}
+				LPTSTR priv = _tcschr(NamePrivil, TEXT(' ')); //для удаления суффикса состояния привилегии
+				if (priv != NULL)
+				{
+					*priv = TEXT('\0');
+				}
 
-			if (FALSE != bRet)
-			{
-				HWND hwndList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
+				BOOL RetRes = EnablePrivilege(token, NamePrivil, (IDC_BUTTON_PRIVILEGE_ENABLE == id) ? TRUE : FALSE);
 
-				ToLB_LoadProcessesInJob(hwndList, hJob);// получаем список процессов в созданном задании
-
-				//ListBox_ResetContent(GetDlgItem(hwnd, IDC_LB_MODULES));// очистим список модулей
-			}
-			else
-			{
-				MessageBox(hwnd, TEXT("Ошибка"), NULL, MB_ICONERROR | MB_OK);
+				//
 			}
 		}
-	}
-	break;
+		
+	}break; */
 
-	case ID_CURRENT_WORKING_PROCESS: // Процессы в текущем задании
-	{
-		HWND hwndList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
-
-		ToLB_LoadProcessesInJob(hwndList);// получаем список процессов в текущем задании
-
-		//ListBox_ResetContent(GetDlgItem(hwnd, IDC_LB_MODULES));
-	}
-	break;
-
-
-	case ID_GROUP_PROCESS_IN_TASK: // Процессы, сгрупированные в задание
-	{
-		HWND hwndList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
-
-
-		ToLB_LoadProcessesInJob(hwndList, hJob);	// получаем список процессов в созданном задании
-
-		//ListBox_ResetContent(GetDlgItem(hwnd, IDC_LB_MODULES));	// очистим список модулей
-	}
-	break;
-
-	case ID_PRIORCHANGE: // Изменение приоритета
-	{
-		/*Создание диалогового окна для изменения приоритета с использование HANDLE от приложения*/
-		HINSTANCE hInstance = GetWindowInstance(hwnd);// получим дескриптор экземпляра приложения
-
-		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hwnd, DialProc);
-	}
-	break;
+	/*В задании ничего не сказано про включение и выключение привилегий. Нужно лишь проверить факт ее наличия и статус. 
+	А значит зачем эти кнопки? Оставим только то, что нужно по заданию*/
+	
+	
 	}
 }
 
