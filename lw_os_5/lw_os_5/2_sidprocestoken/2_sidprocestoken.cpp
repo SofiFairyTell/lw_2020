@@ -156,18 +156,19 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 
 	//список для перечисления групп
 	CreateWindowEx(0, TEXT("Static"), TEXT("Группы"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
-		420, 80, 400, 20, hwnd, NULL, lpCreateStruct->hInstance, NULL);
+		420, 10, 400, 200, hwnd, NULL, lpCreateStruct->hInstance, NULL);
 
 	CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER,
-		420, 30, 400, 400, hwnd, (HMENU)IDC_LB_GROUPS, lpCreateStruct->hInstance, NULL);
+		420, 30, 50, 30, hwnd, (HMENU)IDC_LB_GROUPS, lpCreateStruct->hInstance, NULL);
 
+	
 	//Поле "Пользователь"
 	CreateWindowEx(0, TEXT("Static"), TEXT("Пользователь:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
-		420, 30, 110, 20, hwnd, NULL, lpCreateStruct->hInstance, NULL);
+		570, 30, 100, 20, hwnd, NULL, lpCreateStruct->hInstance, NULL);
 
 	CreateWindowEx(0, TEXT("Edit"), TEXT(""), WS_CHILD | WS_VISIBLE | ES_LEFT | ES_READONLY | ES_AUTOHSCROLL,
-		570, 30, 400, 20, hwnd, (HMENU)IDC_EDIT_ACCOUNT, lpCreateStruct->hInstance, NULL);
-
+		570, 130, 100, 20, hwnd, (HMENU)IDC_EDIT_ACCOUNT, lpCreateStruct->hInstance, NULL);
+/*
 	// Поле "SID"
 	CreateWindowEx(0, TEXT("Static"), TEXT("SID:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
 		420, 50, 110, 20, hwnd, NULL, lpCreateStruct->hInstance, NULL);
@@ -182,6 +183,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | LBS_STANDARD,
 		420, 330, 400, 200, hwnd, (HMENU)IDC_LB_PRIVILEGES, lpCreateStruct->hInstance, NULL);
 
+	/*
 	// Кнопки Вкл/Выкл
 	hwndCtl = CreateWindowEx(0, TEXT("Button"), TEXT("Включить"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		420, 535, 110, 30, hwnd, (HMENU)IDC_BUTTON_PRIVILEGE_ENABLE, lpCreateStruct->hInstance, NULL);
@@ -190,7 +192,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	hwndCtl = CreateWindowEx(0, TEXT("Button"), TEXT("Выключить"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		530, 535, 110, 30, hwnd, (HMENU)IDC_BUTTON_PRIVILEGE_DISABLE, lpCreateStruct->hInstance, NULL);
 	EnableWindow(hwndCtl, FALSE);	// отключение "Выключить"
-
+	*/
 	//ComboBox для привелегий
 	hwndCtl = CreateWindowEx(0, TEXT("ComboBox"), TEXT(""), WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST,
 		420, 580, 400, 30, hwnd, (HMENU)IDC_PRIVILEGES, lpCreateStruct->hInstance, NULL);
@@ -229,16 +231,13 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy)
 		MoveWindow(GetDlgItem(hwnd, IDC_LB_PROCESSES), 10, 30, 400, cy - 40, TRUE);
 
 		// изменяем высоту списка для перечисления ГРУПП
-		MoveWindow(GetDlgItem(hwnd, IDC_LB_GROUPS), 420, 30, cx - 430, cy - 40, TRUE);
-
-		// изменяем высоту списка для перечисления загруженных модулей
-		MoveWindow(GetDlgItem(hwnd, IDC_LB_GROUPS), 420, 30, cx - 430, cy - 40, TRUE);
+		MoveWindow(GetDlgItem(hwnd, IDC_LB_GROUPS), 420, 30, 250, cy - 40, TRUE);
 
 		// изменяем ширину списка привилегий
 		MoveWindow(GetDlgItem(hwnd, IDC_LB_PRIVILEGES), 420, 330, cx - 430, 200, TRUE);
 
 		// изменяем ширину поля "Пользователь"
-		MoveWindow(GetDlgItem(hwnd, IDC_EDIT_ACCOUNT), 570, 30, cx - 580, 20, TRUE);
+		MoveWindow(GetDlgItem(hwnd, IDC_EDIT_ACCOUNT), 570, 30, 100, 20, TRUE);
 		// изменяем ширину поля "SID"
 		MoveWindow(GetDlgItem(hwnd, IDC_EDIT_SID), 570, 50, cx - 580, 20, TRUE);
 
@@ -382,7 +381,19 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	/*В задании ничего не сказано про включение и выключение привилегий. Нужно лишь проверить факт ее наличия и статус. 
 	А значит зачем эти кнопки? Оставим только то, что нужно по заданию*/
-	
+	case IDC_PRIVILEGE_CHECK:
+	{
+		HWND hwnd_ProcessList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
+		HWND hwnd_PrivilegList = GetDlgItem(hwnd, IDC_PRIVILEGES);
+
+		UINT PID;
+		int item = ListBox_GetCurSel(hwnd_ProcessList);
+		if (item != -1)
+		{
+
+		}
+
+	}break;
 	
 	}
 }
