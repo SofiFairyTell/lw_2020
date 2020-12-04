@@ -20,12 +20,11 @@
 #define IDC_BUTTON_PRIVILEGE_ENABLE		2006
 #define IDC_BUTTON_PRIVILEGE_DISABLE	2007
 #define IDC_PRIVILEGES					2008
-#define IDC_PRIVILEGE_CHECK				2009
 
 
 
-HANDLE hJob = NULL; // дескриптор задания
-// оконная процедура главного окна
+
+
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 /*Обработчики сообщений WM_CREATE WM_DESTROY WM_SIZE WM_COMMAND */
 
@@ -34,30 +33,6 @@ void OnDestroy(HWND hwnd);
 void OnSize(HWND hwnd, UINT state, int cx, int cy);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
-
-
-/*На удаление через какое-то время*/
-		/*Для ожидания завершения процесса*/
-		BOOL WaitProcessById(DWORD PID, DWORD WAITTIME, LPDWORD lpExitCode);
-
-		/*Диалоговое окно для изменения приоритета процесса*/
-		INT_PTR CALLBACK DialProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);// процедура диалогового окна
-
-		BOOL Dialog_InitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);//инициализация диалогового окна
-
-		void Dialog_Close(HWND hwnd);//закрытие диалогового окна
-		void Dialog_Command(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);//когда надо изменить приоритет
-		
-		void ToLB_LoadModules(HWND hwndCtl, DWORD PID);//перечисление модулей в LB
-
-		void ToLB_LoadProcessesInJob(HWND hwndCtl, HANDLE hJob = NULL);//  процессы в задании
-
-		// функция, запускающая группу процессов в одном задании
-		BOOL StartGroupProcessesAsJob(HANDLE hJob, LPCTSTR lpszCmdLine[], DWORD nCount, BOOL bInheritHandles, DWORD CreationFlags);
-		// функция, которая возвращает список идентификаторов включенных в задание процессов
-		BOOL EnumProcessesInJob(HANDLE hJob, DWORD* lpPID, DWORD cb, LPDWORD lpcbNeeded);
-
-/*На удаление через какое-то время*/
 // ------------------------------------------------------------------------------------------------
 
 		/*для токенов*/
@@ -68,6 +43,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 		BOOL	GetTokenUser(HANDLE token, PSID* psid);//узнать маркер доступа пользователя по его SID
 		BOOL	GetTokenGR(HANDLE token, PTOKEN_GROUPS *tk_groups);//узнать список ГРУПП по маркеру доступа
 		BOOL	GetTokenPR(HANDLE token, PTOKEN_PRIVILEGES *tk_PR);//узнать список ПРИВИЛЕГИЙ по маркеру доступа
+		BOOL	ExistPR(HWND hwnd, HANDLE token, LPCWSTR PrivilName);//узнать если ли искомая привлегия и у процесса
+		
 		/*Загрузка процессов и модулей этих процессов в LISTBOX*/
 		void	ToLB_LoadProcesses(HWND hwndCtl);//процессы в LB
 		void	ToLB_LoadTokenGroup(HWND hwndListGroups, HANDLE token);//группы привелегий в LB
@@ -111,9 +88,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	}
 
 
-	// создаем задание
-	hJob = CreateJobObject(NULL, TEXT("FirstJob"));
-
 	ShowWindow(hWnd, nCmdShow); // отображаем главное окно
 
 	MSG  msg;
@@ -128,7 +102,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 		}
 	}
 
-	CloseHandle(hJob);// закрываем дескриптор задания
+	
 	return (int)msg.wParam;
 }
 
@@ -195,8 +169,15 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	*/
 
 	//ComboBox для привелегий
-	hwndCtl = CreateWindowEx(0, TEXT("ComboBox"), TEXT(""), WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST,
-		420, 430, 300, 200, hwnd, (HMENU)IDC_PRIVILEGES, lpCreateStruct->hInstance, NULL);
+	/*hwndCtl = CreateWindowEx(0, TEXT("ComboBox"), TEXT(""), WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST,
+		420, 430, 300, 200, hwnd, (HMENU)IDC_PRIVILEGES, lpCreateStruct->hInstance, NULL);*/
+	
+	//список привелегий для поиска
+	CreateWindowEx(0, TEXT("Static"), TEXT("Для проверки:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
+		420, 400, 300, 20, hwnd, NULL, lpCreateStruct->hInstance, NULL);
+	hwndCtl = CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | LBS_STANDARD,
+		420, 430, 300, 50, hwnd, (HMENU)IDC_PRIVILEGES, lpCreateStruct->hInstance, NULL);
+
 
 	constexpr LPCTSTR Privilege[5] =
 	{
@@ -206,13 +187,13 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	};
 	for (int i = 0; i < _countof(Privilege); ++i)
 	{
-		int iItem = ComboBox_AddString(hwndCtl, Privilege[i]);
+		int iItem = ListBox_AddString(hwndCtl, Privilege[i]);
 	}
-	ComboBox_SetCurSel(hwndCtl, 0);
+	ListBox_SetCurSel(hwndCtl, 0);
 
-	// кнопка "Проверить"
+/*	// кнопка "Проверить"
 	CreateWindowEx(0, TEXT("Button"), TEXT("Проверка"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		420, 615, 110, 30, hwnd, (HMENU)IDC_PRIVILEGE_CHECK, lpCreateStruct->hInstance, NULL);
+		420, 615, 110, 30, hwnd, (HMENU)IDC_PRIVILEGE_CHECK, lpCreateStruct->hInstance, NULL);*/
 
 	return TRUE;
 }
@@ -385,11 +366,43 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		HWND hwnd_PrivilegList = GetDlgItem(hwnd, IDC_PRIVILEGES);
 
 		UINT PID;
+		BOOL RetRes = FALSE;
 		int item = ListBox_GetCurSel(hwnd_ProcessList);
 		if (item != -1)
 		{
-
+			PID = (DWORD)ListBox_GetItemData(hwnd_ProcessList, item);
+			item = ListBox_GetCurSel(hwnd_PrivilegList);
 		}
+		if (item != -1)
+		{
+			HANDLE token = OpenProcessTokenPID(PID, TOKEN_QUERY);
+			if (token != NULL)
+			{
+				WCHAR PrivilName[256];
+				ListBox_GetText(hwnd_PrivilegList, item, PrivilName);
+				RetRes = ExistPR(hwnd,token, PrivilName);
+				if (RetRes == -1)
+				{
+					MessageBox(hwnd, L"Наличие привилегии в маркере не определено", L"НЕПОПРАВИМАЯ ОШИБКА" ,MB_OK);
+				}
+				else 
+					if (RetRes == FALSE)
+					{
+						MessageBox(hwnd, L"Такой привилегии у процесса нет ",L"Результат" ,MB_OK);
+					}
+					/*else 
+						if (RetRes == TRUE)
+							{
+								MessageBox(hwnd, L"Такая привелегия у процесса есть и она включена", L"Результат", MB_OK);
+							}*/			
+				CloseHandle(token);
+			}		
+			else
+			{
+				MessageBox(hwnd, L"Маркер доступа открыть не удалось", L"Результат", MB_OK);
+			}
+	}
+		
 
 	}break;
 	
@@ -399,45 +412,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 
 
-void ToLB_LoadProcesses(HWND hwndCtl)
-{
-	ListBox_ResetContent(hwndCtl);//очистка списка
 
-	DWORD PIDarray[1024], cbNeeded = 0;//массив для ID созданных процессов
-	BOOL bRet = EnumProcesses(PIDarray, sizeof(PIDarray), &cbNeeded);//получение списка ID созданных процессоров
-
-	if (FALSE != bRet)
-	{
-		TCHAR ProcessName[MAX_PATH], szBuffer[300];
-
-		for (DWORD i = 0,
-			n = cbNeeded / sizeof(DWORD); i < n; ++i)
-		{
-			DWORD PID = PIDarray[i], cch = 0;
-			if (0 == PID) continue;
-
-
-			HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, PID);//получение дескриптора процесса по его ID
-
-			if (NULL != hProcess)
-			{
-				cch = GetModuleBaseName(hProcess, NULL, ProcessName, _countof(ProcessName));// получаем имя главного модуля процесса
-
-				CloseHandle(hProcess); // закрываем объект ядра
-			}
-
-			if (0 == cch)
-				StringCchCopy(ProcessName, MAX_PATH, TEXT("Имя процесса не определено"));
-
-			StringCchPrintf(szBuffer, _countof(szBuffer), TEXT("%s (PID: %u)"), ProcessName, PID);
-
-
-			int iItem = ListBox_AddString(hwndCtl, szBuffer);
-
-			ListBox_SetItemData(hwndCtl, iItem, PID);//запись в ListBox имени процесса
-		}
-	}
-}
 
 
 
@@ -456,7 +431,6 @@ HANDLE OpenProcessTokenPID(UINT PID, DWORD AccessRIGHT)
 	}
 	return token;
 }
-
 
 /*Получение имени аккаунта по его SID*/
 BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
@@ -514,7 +488,48 @@ BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 }
 
 
-/*Load's*/
+/*To ListBox load's*/
+
+void ToLB_LoadProcesses(HWND hwndCtl)
+{
+	ListBox_ResetContent(hwndCtl);//очистка списка
+
+	DWORD PIDarray[1024], cbNeeded = 0;//массив для ID созданных процессов
+	BOOL bRet = EnumProcesses(PIDarray, sizeof(PIDarray), &cbNeeded);//получение списка ID созданных процессоров
+
+	if (FALSE != bRet)
+	{
+		TCHAR ProcessName[MAX_PATH], szBuffer[300];
+
+		for (DWORD i = 0,
+			n = cbNeeded / sizeof(DWORD); i < n; ++i)
+		{
+			DWORD PID = PIDarray[i], cch = 0;
+			if (0 == PID) continue;
+
+
+			HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, PID);//получение дескриптора процесса по его ID
+
+			if (NULL != hProcess)
+			{
+				cch = GetModuleBaseName(hProcess, NULL, ProcessName, _countof(ProcessName));// получаем имя главного модуля процесса
+
+				CloseHandle(hProcess); // закрываем объект ядра
+			}
+
+			if (0 == cch)
+				StringCchCopy(ProcessName, MAX_PATH, TEXT("Имя процесса не определено"));
+
+			StringCchPrintf(szBuffer, _countof(szBuffer), TEXT("%s (PID: %u)"), ProcessName, PID);
+
+
+			int iItem = ListBox_AddString(hwndCtl, szBuffer);
+
+			ListBox_SetItemData(hwndCtl, iItem, PID);//запись в ListBox имени процесса
+		}
+	}
+}
+
 void ToLB_LoadTokenGroup(HWND hwndListGroups, HANDLE token)
 {
 	ListBox_ResetContent(hwndListGroups);
@@ -522,7 +537,7 @@ void ToLB_LoadTokenGroup(HWND hwndListGroups, HANDLE token)
 
 	if (GetTokenGR(token, &tk_groups) != FALSE)
 	{
-		for (int i = 0; i < tk_groups->GroupCount; ++i)
+		for (UINT i = 0; i < tk_groups->GroupCount; ++i)
 		{
 			LPWSTR Name = NULL;
 			GetAccountName_W(tk_groups->Groups[i].Sid, &Name);
@@ -545,7 +560,7 @@ void ToLB_LoadTokenPrivil(HWND hwndListPrivileges, HANDLE token)
 	if (GetTokenPR(token, &tk_PR) != FALSE)
 	{
 		TCHAR Name[256];
-		for (int i = 0; i < tk_PR->PrivilegeCount; ++i)
+		for (UINT i = 0; i < tk_PR->PrivilegeCount; ++i)
 		{
 			//LUID -   structure is an opaque structure that specifies an 
 			// identifier that is guaranteed to be unique on the local machine
@@ -650,5 +665,57 @@ BOOL GetTokenPR(HANDLE token, PTOKEN_PRIVILEGES *tk_PR)
 	{
 		LocalFree(privil);
 	}
+	return RetRes;
+}
+
+BOOL ExistPR(HWND hwnd, HANDLE token, LPCWSTR PrivilName)
+{
+	LUID luid;
+	BOOL RetRes, ResSetPriv, result;
+
+	PTOKEN_PRIVILEGES tk_PR = NULL;
+	PRIVILEGE_SET privil_set;//проверим состояние в которое установлена привилегия
+
+	privil_set.PrivilegeCount = 1;//количество привилегий
+	privil_set.Control = PRIVILEGE_SET_ALL_NECESSARY;//if all of the privileges must be enabled;
+	//or set it to zero if it is sufficient that any one of the privileges be enabled.
+
+	RetRes = LookupPrivilegeValueW(NULL,PrivilName,&luid); 
+	ResSetPriv = LookupPrivilegeValueW(NULL, PrivilName, &privil_set.Privilege[0].Luid); //а они случайно одно и то же не делают?
+
+	if (RetRes != FALSE)
+	{
+		RetRes = GetTokenPR(token, &tk_PR);
+	}
+	if (RetRes != FALSE)
+	{
+		for (UINT i = 0; i < tk_PR->PrivilegeCount; ++i)
+		{
+			int res = memcmp(&tk_PR->Privileges[i].Luid, &luid, sizeof(LUID));
+			if (res == 0)
+			{
+				RetRes = TRUE;
+				//выясним состояние привилегии -> включена/выключена
+				if (ResSetPriv != FALSE)
+				{
+					ResSetPriv = PrivilegeCheck(token, &privil_set, &result);
+					if (result != FALSE)
+					{
+						MessageBox(hwnd, L"Такая привелегия у процесса есть и она включена", L"Результат", MB_OK);
+					}
+					else
+					{
+						MessageBox(hwnd, L"Такая привелегия у процесса есть и она выключена", L"Результат", MB_OK);
+					}
+					
+				}			
+				
+			}
+		}
+	}
+	else {	return -1; }
+
+	LocalFree(tk_PR);//освобождение памяти
+
 	return RetRes;
 }
