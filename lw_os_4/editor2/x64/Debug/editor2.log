@@ -1,4 +1,4 @@
 ﻿  editor2.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\editor2\editor2.cpp(138): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\editor2\editor2.cpp(219): warning C4101: hDC: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\editor2\editor2.cpp(139): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\editor2\editor2.cpp(220): warning C4101: hDC: неиспользованная локальная переменная
   editor2.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\editor2.exe

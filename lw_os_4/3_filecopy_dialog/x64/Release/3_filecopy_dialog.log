@@ -1,14 +1,4 @@
-﻿  filecopedialog.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(205): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(225): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(189): warning C4101: hdc: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(196): warning C4101: nSize: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(197): warning C4101: szBuf: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(334): warning C4101: hFind: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\3_filecopy_dialog\filecopedialog.cpp(326): warning C4101: NewName: неиспользованная локальная переменная
-  Создание кода
-  2 of 8 functions (25.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+﻿  Создание кода
   Создание кода завершено
+  All 8 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   3_filecopy_dialog.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Release\3_filecopy_dialog.exe

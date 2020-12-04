@@ -133,8 +133,9 @@ void OnIdle(HWND hwnd)
 				WORD bom = *(LPWORD)lpBuffReWri; // маркер последовательности байтов
 				if (0xFEFF == bom) // Unicode-файл
 				{
-					LPWSTR lpszText = (LPWSTR)((BYTE*)lpBuffReWri) + sizeof(WORD); // Unicode-строка
+					//LPWSTR lpszText = (LPWSTR)((BYTE*)lpBuffReWri);// +sizeof(WORD); // Unicode-строка
 					// вычисляем длину Unicode-строки
+					LPWSTR lpszText = (LPWSTR)((BYTE*)lpBuffReWri + sizeof(WORD));
 					DWORD cch = (ovlRead.InternalHigh - sizeof(WORD)) / sizeof(WCHAR);
 					lpszText[cch] = L'\0';// задаём нуль-символ в конце строки			
 					SetDlgItemTextW(hwnd, IDC_EDIT_TEXT, lpszText);// копируем Unicode-строку в поле ввода
