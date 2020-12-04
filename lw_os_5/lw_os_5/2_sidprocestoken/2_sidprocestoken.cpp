@@ -51,6 +51,9 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 		void	ToLB_LoadTokenPrivil(HWND hwndListPrivileges, HANDLE token);
 // ------------------------------------------------------------------------------------------------
 
+		/*Кнопки*/
+		BOOL AdjustPrivileges(HANDLE hToken, LPCTSTR names[], DWORD NewState[], DWORD dwCount);
+		BOOL SwitchOnPrivil(HANDLE hToken, LPCWSTR PrivilName, BOOL bEnable);
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
@@ -157,20 +160,18 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	CreateWindowEx(0, TEXT("ListBox"), TEXT(""), WS_CHILD | WS_VISIBLE | LBS_STANDARD,
 		730, 30, 300, 300, hwnd, (HMENU)IDC_LB_PRIVILEGES, lpCreateStruct->hInstance, NULL);
 
-	/*
+	
 	// Кнопки Вкл/Выкл
 	hwndCtl = CreateWindowEx(0, TEXT("Button"), TEXT("Включить"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		420, 535, 110, 30, hwnd, (HMENU)IDC_BUTTON_PRIVILEGE_ENABLE, lpCreateStruct->hInstance, NULL);
+		630, 480, 110, 30, hwnd, (HMENU)IDC_BUTTON_PRIVILEGE_ENABLE, lpCreateStruct->hInstance, NULL);
 	EnableWindow(hwndCtl, FALSE);	// отключение "Включить"
 
 	hwndCtl = CreateWindowEx(0, TEXT("Button"), TEXT("Выключить"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		530, 535, 110, 30, hwnd, (HMENU)IDC_BUTTON_PRIVILEGE_DISABLE, lpCreateStruct->hInstance, NULL);
+		730, 480, 110, 30, hwnd, (HMENU)IDC_BUTTON_PRIVILEGE_DISABLE, lpCreateStruct->hInstance, NULL);
 	EnableWindow(hwndCtl, FALSE);	// отключение "Выключить"
-	*/
 
-	//ComboBox для привелегий
-	/*hwndCtl = CreateWindowEx(0, TEXT("ComboBox"), TEXT(""), WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST,
-		420, 430, 300, 200, hwnd, (HMENU)IDC_PRIVILEGES, lpCreateStruct->hInstance, NULL);*/
+
+
 	
 	//список привелегий для поиска
 	CreateWindowEx(0, TEXT("Static"), TEXT("Для проверки:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
@@ -320,7 +321,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		}
 	}	break;
 	
-	/*
 	case IDC_BUTTON_PRIVILEGE_ENABLE: // включить привилегию
 	case IDC_BUTTON_PRIVILEGE_DISABLE: // выключить привилегию
 	{
@@ -344,22 +344,51 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				TCHAR NamePrivil[256];
 				ListBox_GetText(hwnd_PrivilegList, item, NamePrivil);//получение имени привилегии
 
-				LPTSTR priv = _tcschr(NamePrivil, TEXT(' ')); //для удаления суффикса состояния привилегии
+				LPTSTR priv = _tcschr(NamePrivil, L' '); //для удаления суффикса состояния привилегии
+				
 				if (priv != NULL)
 				{
 					*priv = TEXT('\0');
 				}
 
-				BOOL RetRes = EnablePrivilege(token, NamePrivil, (IDC_BUTTON_PRIVILEGE_ENABLE == id) ? TRUE : FALSE);
+				BOOL RetRes = SwitchOnPrivil(token, NamePrivil, (IDC_BUTTON_PRIVILEGE_ENABLE == id) ? TRUE : FALSE);
+				if (FALSE != RetRes)
+				{
+					// загрузим список привилегий
+					ToLB_LoadTokenPrivil(hwnd_PrivilegList, token);
 
-				//
+					// задаём текущий элемент списка привилегий
+					ListBox_SetCurSel(hwnd_PrivilegList, item);
+					// передаём фокус клавиатуры списку привилегий
+					SetFocus(hwnd_PrivilegList);
+
+					if (IDC_BUTTON_PRIVILEGE_ENABLE == id) // привилегия была включена
+					{
+						// отключим кнопку "Включить"
+						EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_ENABLE), FALSE);
+						// включим кнопку "Выключить"
+						EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_DISABLE), TRUE);
+					} // if
+					else // привилегия была выключена
+					{
+						// включим кнопку "Включить"
+						EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_ENABLE), TRUE);
+						// отключим кнопку "Выключить"
+						EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_PRIVILEGE_DISABLE), FALSE);
+					} // else
+				} // if
+				else
+				{
+					MessageBox(hwnd, TEXT("Не удалось изменить состояние привилегии"), NULL, MB_OK);
+				}
+				// закрываем дескриптор маркера доступа
+				CloseHandle(token);
 			}
 		}
 		
-	}break; */
+	}break; 
 
-	/*В задании ничего не сказано про включение и выключение привилегий. Нужно лишь проверить факт ее наличия и статус. 
-	А значит зачем эти кнопки? Оставим только то, что нужно по заданию*/
+
 	case IDC_PRIVILEGE_CHECK:
 	{
 		HWND hwnd_ProcessList = GetDlgItem(hwnd, IDC_LB_PROCESSES);
@@ -408,14 +437,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	
 	}
 }
-
-
-
-
-
-
-
-
 
 
 /*Определение токена по идентификатору процесса*/
@@ -719,3 +740,52 @@ BOOL ExistPR(HWND hwnd, HANDLE token, LPCWSTR PrivilName)
 
 	return RetRes;
 }
+
+/*Кнопки*/
+BOOL SwitchOnPrivil(HANDLE hToken, LPCWSTR PrivilName, BOOL bEnable)
+{
+	TOKEN_PRIVILEGES Privileges;
+	Privileges.PrivilegeCount = 1; // количество привилегий
+
+	// установим новое состояние указанной привилегии
+	Privileges.Privileges[0].Attributes = (FALSE != bEnable) ? SE_PRIVILEGE_ENABLED : 0;
+
+	// определяем LUID указанной привилегии
+	BOOL bRet = LookupPrivilegeValue(NULL, PrivilName, &Privileges.Privileges[0].Luid);
+
+	if (FALSE != bRet)
+	{
+		// изменяем состояние указанной привилегии
+		bRet = AdjustTokenPrivileges(hToken, FALSE, &Privileges, sizeof(TOKEN_PRIVILEGES), NULL, NULL);//ошибка здесь
+	} // if
+
+	return bRet;
+} 
+
+BOOL AdjustPrivileges(HANDLE hToken, LPCTSTR names[], DWORD NewState[], DWORD dwCount)
+{
+
+	DWORD cb = sizeof(TOKEN_PRIVILEGES) + (dwCount - 1) * sizeof(LUID_AND_ATTRIBUTES);// определеям размер блока памяти (в байтах)
+
+	PTOKEN_PRIVILEGES Privileges = (PTOKEN_PRIVILEGES)LocalAlloc(LPTR, cb);	// выделяем блок памяти
+	if (NULL == Privileges) return FALSE;
+
+	BOOL bRet = TRUE;
+	// задаем количество указанных привилегий
+	Privileges->PrivilegeCount = dwCount;
+
+	for (DWORD i = 0; i < dwCount && FALSE != bRet; ++i)
+	{
+		Privileges->Privileges[i].Attributes = NewState[i];
+		bRet = LookupPrivilegeValue(NULL, names[i], &Privileges->Privileges[i].Luid);
+	} 
+
+	if (FALSE != bRet)
+	{
+		// изменяем состояние указанных привилегий
+		bRet = AdjustTokenPrivileges(hToken, FALSE, Privileges, cb, NULL, NULL);
+	} 
+	// освобождаем выделенную память
+	LocalFree(Privileges);
+	return bRet;
+} 

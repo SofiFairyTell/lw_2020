@@ -2,4 +2,5 @@
   Main.cpp
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(138): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileditor\main.cpp(219): warning C4101: hDC: неиспользованная локальная переменная
+  LINK : не найден или не выполнена сборка C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\fileditor.exe при последней инкрементной компоновке; выполняется полная компоновка
   fileditor.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Debug\fileditor.exe
