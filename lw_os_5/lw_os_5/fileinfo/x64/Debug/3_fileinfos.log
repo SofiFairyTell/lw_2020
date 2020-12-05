@@ -1,0 +1,2 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (x64\Debug\) содержит файлы, которые используются совместно с другим проектом (2_fileinfo.vcxproj, 2_fileproperties.vcxproj).  Это может привести к ошибкам очистки и перестроения.
+  3_fileinfos.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Debug\3_fileinfo.exe

@@ -1,8 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (x64\Debug\) содержит файлы, которые используются совместно с другим проектом (2_fileinfo.vcxproj).  Это может привести к ошибкам очистки и перестроения.
-  Source.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\fileinfo\source.cpp(360): warning C4101: TimeBuffer: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\fileinfo\source.cpp(360): warning C4101: Buffer: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\fileinfo\source.cpp(593): warning C4101: length_of_arg: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\fileinfo\source.cpp(591): warning C4101: size: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\fileinfo\source.cpp(636): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
-  2_fileproperties.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Debug\2_fileproperties.exe
