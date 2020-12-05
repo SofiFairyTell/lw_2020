@@ -52,7 +52,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 // ------------------------------------------------------------------------------------------------
 
 		/*Кнопки*/
-		BOOL AdjustPrivileges(HANDLE hToken, LPCTSTR names[], DWORD NewState[], DWORD dwCount);
 		BOOL SwitchOnPrivil(HANDLE hToken, LPCWSTR PrivilName, BOOL bEnable);
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
@@ -330,6 +329,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		UINT PID;
 
 		int item = ListBox_GetCurSel(hwnd_ProcessList);
+		
 		if (item != -1)
 		{
 			PID = (UINT)ListBox_GetItemData(hwnd_ProcessList, item);//выбранный процесс
@@ -338,13 +338,14 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		if (item != -1)
 		{
-			HANDLE token = OpenProcessTokenPID(PID, TOKEN_QUERY);//получить маркер доступа процесса 
+			//HANDLE token = OpenProcessTokenPID(PID, TOKEN_QUERY);//получить маркер доступа процесса 
+			HANDLE token = OpenProcessTokenPID(PID, TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES);//получить маркер доступа процесса 
 			if (token != NULL)
 			{
 				TCHAR NamePrivil[256];
 				ListBox_GetText(hwnd_PrivilegList, item, NamePrivil);//получение имени привилегии
 
-				LPTSTR priv = _tcschr(NamePrivil, L' '); //для удаления суффикса состояния привилегии
+				LPTSTR priv = _tcschr(NamePrivil, TEXT(' ')); //для удаления суффикса состояния привилегии
 				
 				if (priv != NULL)
 				{
@@ -447,7 +448,7 @@ HANDLE OpenProcessTokenPID(UINT PID, DWORD AccessRIGHT)
 
 	if (process != NULL)
 	{
-		OpenProcessToken(process, AccessRIGHT, &token);//определение маркера доступа по PID
+		OpenProcessToken(process, AccessRIGHT , &token);//определение маркера доступа по PID
 		CloseHandle(process);
 	}
 	return token;
@@ -594,7 +595,7 @@ void ToLB_LoadTokenPrivil(HWND hwndListPrivileges, HANDLE token)
 			
 			if (atrb & SE_PRIVILEGE_ENABLED)
 			{
-				StringCchCat(Name, _countof(Name), TEXT("(включена)")); //добавление суффикса для отображения состояния привилегии
+				StringCchCat(Name, _countof(Name), TEXT(" (включена)")); //добавление суффикса для отображения состояния привилегии
 			}
 				int item = ListBox_AddString(hwndListPrivileges, Name);//запись имени привилегии
 				ListBox_SetItemData(hwndListPrivileges, item, atrb);//запись полученных атрибутов
@@ -744,48 +745,25 @@ BOOL ExistPR(HWND hwnd, HANDLE token, LPCWSTR PrivilName)
 /*Кнопки*/
 BOOL SwitchOnPrivil(HANDLE hToken, LPCWSTR PrivilName, BOOL bEnable)
 {
-	TOKEN_PRIVILEGES Privileges;
-	Privileges.PrivilegeCount = 1; // количество привилегий
+	TOKEN_PRIVILEGES 	tokenPriv;
+	
+	tokenPriv.PrivilegeCount = 1; // количество привилегий
 
 	// установим новое состояние указанной привилегии
-	Privileges.Privileges[0].Attributes = (FALSE != bEnable) ? SE_PRIVILEGE_ENABLED : 0;
+	tokenPriv.Privileges[0].Attributes = (FALSE != bEnable) ? SE_PRIVILEGE_ENABLED : 0;
+	//LUID luidDebug;
+	//tokenPriv.PrivilegeCount = 1;
+	//tokenPriv.Privileges[0].Luid = luidDebug;
+	//tokenPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
 	// определяем LUID указанной привилегии
-	BOOL bRet = LookupPrivilegeValue(NULL, PrivilName, &Privileges.Privileges[0].Luid);
+	BOOL bRet = LookupPrivilegeValue(NULL, PrivilName, &tokenPriv.Privileges[0].Luid);
 
 	if (FALSE != bRet)
 	{
 		// изменяем состояние указанной привилегии
-		bRet = AdjustTokenPrivileges(hToken, FALSE, &Privileges, sizeof(TOKEN_PRIVILEGES), NULL, NULL);//ошибка здесь
+		bRet = AdjustTokenPrivileges(hToken, FALSE, &tokenPriv, sizeof(TOKEN_PRIVILEGES), NULL, NULL);//ошибка здесь
 	} // if
 
-	return bRet;
-} 
-
-BOOL AdjustPrivileges(HANDLE hToken, LPCTSTR names[], DWORD NewState[], DWORD dwCount)
-{
-
-	DWORD cb = sizeof(TOKEN_PRIVILEGES) + (dwCount - 1) * sizeof(LUID_AND_ATTRIBUTES);// определеям размер блока памяти (в байтах)
-
-	PTOKEN_PRIVILEGES Privileges = (PTOKEN_PRIVILEGES)LocalAlloc(LPTR, cb);	// выделяем блок памяти
-	if (NULL == Privileges) return FALSE;
-
-	BOOL bRet = TRUE;
-	// задаем количество указанных привилегий
-	Privileges->PrivilegeCount = dwCount;
-
-	for (DWORD i = 0; i < dwCount && FALSE != bRet; ++i)
-	{
-		Privileges->Privileges[i].Attributes = NewState[i];
-		bRet = LookupPrivilegeValue(NULL, names[i], &Privileges->Privileges[i].Luid);
-	} 
-
-	if (FALSE != bRet)
-	{
-		// изменяем состояние указанных привилегий
-		bRet = AdjustTokenPrivileges(hToken, FALSE, Privileges, cb, NULL, NULL);
-	} 
-	// освобождаем выделенную память
-	LocalFree(Privileges);
 	return bRet;
 } 

@@ -1,2 +1,2 @@
 ﻿  2_sidprocestoken.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\2_sidprocestoken\2_sidprocestoken.cpp : fatal error C1041: невозможно открыть базу данных программы C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\2_sidprocestoken\x64\Debug\vc141.idb; если несколько файлов CL.EXE осуществляют запись в один и тот же PDB-файл, воспользуйтесь /FS
+  2_sidprocestoken.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Debug\2_sidprocestoken.exe

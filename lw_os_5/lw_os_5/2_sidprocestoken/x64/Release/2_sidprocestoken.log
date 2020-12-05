@@ -1,5 +1,7 @@
 ﻿  2_sidprocestoken.cpp
   Создание кода
-  All 29 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  6 of 29 functions (20.7%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   2_sidprocestoken.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Release\2_sidprocestoken.exe
