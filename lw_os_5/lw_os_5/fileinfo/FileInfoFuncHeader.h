@@ -16,7 +16,7 @@
 #include <sddl.h>//for ConvertSidToStringSidW
 
 
-#define IDC_EDIT_TEXT        2001
+
 
 #pragma warning(disable : 4996) //отключает Ошибку deprecate. Возникает, когда используется устаревшая функци
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -55,10 +55,11 @@ DWORD cchPath = 0; // длина пути к файлу/каталогу
 HKEY hKey = NULL; // дескриптор ключа рееста
 
 /**/
-PSECURITY_DESCRIPTOR pSD;//дескриптор безопасности
+PSECURITY_DESCRIPTOR Sec_Descriptor;//дескриптор безопасности
 TCHAR FileName[MAX_PATH] = TEXT(""); // путь до редактируемого файла/папки
 
 /*Функции*/
 BOOL GetFileSecurityDescriptor(LPCWSTR lpFileName, SECURITY_INFORMATION RequestedInformation, PSECURITY_DESCRIPTOR *ppSD);
-BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR pSD, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries);
+BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR Sec_Descriptor, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries);
 BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName);
+BOOL GetOwnerName_W(PSECURITY_DESCRIPTOR Sec_Descriptor, LPWSTR *OwnerName);

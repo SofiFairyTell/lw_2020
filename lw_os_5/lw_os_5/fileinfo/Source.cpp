@@ -1,7 +1,6 @@
 
 #include "FileInfoFuncHeader.h"
 
-
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
 
@@ -90,7 +89,7 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
 	case WM_SIZE:
 	{
-		HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
+		HWND hwndCtl = GetDlgItem(hwnd,	IDC_EDIT_TEXT);
 		MoveWindow(hwndCtl, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE); // изменяем размеры поля ввода
 	}
 
@@ -111,8 +110,9 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
-	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 30, 10, 400, 30, hwnd, (HMENU)IDC_EDIT_FILENAME, lpCRStr->hInstance, NULL);
-	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS, 30, 40, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 30, 10, 400, 20, hwnd, (HMENU)IDC_EDIT_FILENAME, lpCRStr->hInstance, NULL);
+
+	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS, 30, 50, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 
 	//значения атрибутов
 	/*
@@ -141,6 +141,11 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 		// вставляем столбец
 		ListView_InsertColumn(hwndLV, i, &lvColumns[i]);
 	}
+	
+	CreateWindowEx(0, TEXT("Static"), TEXT("Владелец:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
+		30, 220, 80, 20, hwnd, NULL, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 110, 220, 200, 20, hwnd, (HMENU)IDC_EDIT_OWNER, lpCRStr->hInstance, NULL);
+
 	//if (FileName != NULL) //если путь не пустой, то заполнить список
 	//{
 	//	ListViewInit(FileName, hwnd);
@@ -157,54 +162,24 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 	case ID_OPEN_FILE: // Открыть
 	{
-		/*OPENFILENAME openfile = { sizeof(OPENFILENAME) };
-
-		openfile.hInstance = GetWindowInstance(hwnd);
-		openfile.lpstrFilter = TEXT("Текстовые документы (*.txt)\0*.txt\0");
-		openfile.lpstrFile = FileName;
-
-		openfile.nMaxFile = _countof(FileName);
-		openfile.lpstrTitle = TEXT("Открыть");
-		openfile.Flags = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;
-		openfile.lpstrDefExt = TEXT("txt");*/
-
-		//if (GetOpenFileName(&openfile) != FALSE)
-		/*{
-			// получаем информацию о файле
-			//get info about file
-			if (!(ListViewInit(FileName, hwnd)))
-			{
-				GetLastError();
-				break;
-			}
-			else
-			{
-				break;
-			}
-		}
-		else
-		{
-			MessageBox(NULL, TEXT("Не удалось открыть текстовый файл."), NULL, MB_OK | MB_ICONERROR);
-			FileName[0] = _T('\0');
-		}*/
-
-		/*Пока не открывает файл, видимо перепутала кнопки*/
 		BROWSEINFO bi;//structure for open special box with folder in treview
 		LPITEMIDLIST pidl;
 		ZeroMemory(&bi, sizeof(bi));
 		bi.hwndOwner = NULL;
 		bi.pszDisplayName = FileName;
-		bi.lpszTitle = TEXT("Select folder");
+		bi.lpszTitle = TEXT("Select file");
 		bi.ulFlags = BIF_BROWSEINCLUDEFILES; 
 		pidl = SHBrowseForFolder(&bi);//open window for select
 		if (pidl)
 		{
 			SHGetPathFromIDList(pidl, FileName);//get path
-			SetDlgItemText(hwnd, IDC_EDIT, FileName);
+			//SetDlgItemText(hwnd, IDC_EDIT_FILENAME, FileName);
+			if (!(ListViewInit(FileName, hwnd)))
+			{
+				GetLastError();
+				break;
+			}
 		}
-
-
-
 	}
 	break;
 	case ID_OPEN_DIR://Открыть папку
@@ -373,23 +348,24 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	ListView_DeleteAllItems(hwndLV); //очистка списка просмотра
 
 	// освобождаем выделенную память
-	if (NULL != pSD) LocalFree(pSD), pSD = NULL;
+	if (NULL != Sec_Descriptor) LocalFree(Sec_Descriptor), Sec_Descriptor = NULL;
 	// получим дескриптор безопасности
-	BOOL RetRes = GetFileSecurityDescriptor(FileName, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, &pSD);
+	BOOL RetRes = GetFileSecurityDescriptor(FileName, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, &Sec_Descriptor);
 
 	if (RetRes != FALSE)
 	{
-		/*// копируем имя учетной записи владельца в поле "Текущий владелец"
-			SetDlgItemText(hwnd, IDC_EDIT_OWNER, lpAccountOwner);
-			// освобождаем выделенную память
-			LocalFree(lpAccountOwner);
-		*/
+		LPWSTR Owner = NULL; 
+		RetRes = GetOwnerName_W(Sec_Descriptor, &Owner);
+		SetDlgItemText(hwnd, IDC_EDIT_OWNER, Owner);// копируем имя учетной записи владельца в поле "Текущий владелец"
+		// освобождаем выделенную память
+		LocalFree(Owner);
+		
 	}
 
 	ULONG uCount = 0; // количество элементов в массиве ACE
 	PEXPLICIT_ACCESS pEA = NULL; // массив ACE
 
-	RetRes = GetItemFromDACL(pSD, &uCount, &pEA);
+	RetRes = GetItemFromDACL(Sec_Descriptor, &uCount, &pEA);
 
 	if (RetRes != FALSE)
 	{
@@ -739,7 +715,7 @@ LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD c
 	return lStatus;
 } // RegGetValueBinary
 
-/*Дескприторы*/
+/*Дескрипторы*/
 BOOL GetFileSecurityDescriptor(LPCWSTR lpFileName, SECURITY_INFORMATION RequestedInformation, PSECURITY_DESCRIPTOR *ppSD)
 {
 	DWORD cb = 0;
@@ -766,7 +742,7 @@ BOOL GetFileSecurityDescriptor(LPCWSTR lpFileName, SECURITY_INFORMATION Requeste
 	return bRet;
 } // GetFileSecurityDescriptor
 
-BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR pSD, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries)
+BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR Sec_Descriptor, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries)
 {
 	PACL pDacl = NULL;
 	BOOL bDaclPresent = FALSE, bDaclDefaulted = FALSE;
@@ -841,4 +817,22 @@ BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 		}
 	}
 	return RetRes;
+}
+
+/*Получение имени пользователя по дескриптору безопасности*/
+BOOL GetOwnerName_W(PSECURITY_DESCRIPTOR Sec_Descriptor, LPWSTR *OwnerName)
+{
+	PSID psid;
+	BOOL bDefaulted;
+
+	// получаем SID владельца
+	BOOL bRet = GetSecurityDescriptorOwner(Sec_Descriptor, &psid, &bDefaulted);
+
+	if (FALSE != bRet)
+	{
+		// определяем имя учетной записи владельца
+		bRet = GetAccountName_W(psid, lpName);
+	} // if
+
+	return bRet;
 }

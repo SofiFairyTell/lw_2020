@@ -29,6 +29,12 @@
 #define ID_OPEN_FILE                    40002
 #define ID_OPEN_DIR                     40003
 
+/*Текстовые поля*/
+#define IDC_EDIT_TEXT					2001
+#define IDC_EDIT_OWNER			        2002
+
+
+
 #define IDC_ATTRIBUTE_HIDDEN            40012
 
 #define IDC_ATTRIBUTE_ARCHIVE           40013
