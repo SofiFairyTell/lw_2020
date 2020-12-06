@@ -112,7 +112,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
 	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 30, 10, 400, 20, hwnd, (HMENU)IDC_EDIT_FILENAME, lpCRStr->hInstance, NULL);
 
-	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS, 30, 50, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
+	HWND hwndLV = CreateWindowEx(0, TEXT("SysListView32"), NULL, WS_CHILD | WS_VISIBLE| WS_BORDER | LVS_REPORT | LVS_SHOWSELALWAYS, 30, 50, 400, 150, hwnd, (HMENU)IDC_LIST1, lpCRStr->hInstance, NULL);
 
 	//значения атрибутов
 	/*
@@ -273,12 +273,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 	case ID_CHANGE_OWNER://переименование без сохранения атрибутов
 	{
-		
-		WCHAR NewOwner[MAX_PATH]; // новое имя владельца
+		/*//Скроет?
+		HWND hHide = GetDlgItem(hwnd, IDC_LIST1);
+		ShowWindow(hHide, SW_HIDE);
+		/*да!*/
+
+		TCHAR NewOwner[UNLEN + 1]; // новое имя владельца
 		
 		GetDlgItemText(hwnd, IDC_NEW_OWNER, NewOwner, _countof(NewOwner));//это имя и его к указателю lpszFileName
 
-		BOOL RetRes = SetFileSecurityInfo(FileName,NewOwner,0,NULL, FALSE);
+		BOOL RetRes = SetFileSecurityInfo(FileName,NewOwner,0,NULL, FALSE);//не меняет, почему???
 
 		if (RetRes != FALSE)
 		{
@@ -414,108 +418,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 		}
 	}
 
-	//получение информации о размере файла
-	//get info about size of file
-	//LARGE_INTEGER LI_Size;
-	//ULARGE_INTEGER sizeDir = { 0 };
-	//hFile = CreateFile(
-	//	FileName,   // имя файла
-	//	GENERIC_READ,          // чтение из файла
-	//	FILE_SHARE_READ,       // совместный доступ к файлу
-	//	NULL,                  // защиты нет
-	//	OPEN_EXISTING,         // открываем существующий файл
-	//	FILE_ATTRIBUTE_NORMAL,  // асинхронный ввод
-	//	NULL                   // шаблона нет
-	//);
-	//if (!GetFileSizeEx(hFile, &LI_Size))
-	//{
-	//	//обработка ошибки
-	//}
-	//if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	//{
-	//	//расчет для папки 
-	//	CalculateSize(path, &bhfi, &sizeDir);
-	//	ConvertDirectSize(Buffer, _countof(Buffer), sizeDir);
-	//}
-	//else
-	//{
-
-	//	ConvertFileSize(Buffer, _countof(Buffer), LI_Size);
-	//	
-	//}
-
-	/*Определим имя текущего владельца*/
-
-
-
-
-
-
 	/*
-
-	LPTSTR lpFN = PathFindFileNameW(path);
-	SetDlgItemText(hwnd, IDC_EDIT_FILENAME, lpFN);
-
-	//Добавление найденных атрибутов в список просмотра
-	HWND hwndLV = GetDlgItem(hwnd, IDC_LIST1);
-	// добавляем новый элемент в список просмотра
-	ListView_DeleteAllItems(hwndLV);
-	LVITEM lvItem = { LVIF_TEXT | LVIF_PARAM };
-	lvItem.iItem = ListView_GetItemCount(hwndLV);
-	//Размер
-	lvItem.pszText = (LPWSTR)(L"ТЕКУЩИЙ ВЛАДЕЛЕЦ:");
-	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-	if ((lvItem.iItem != -1))
-	{
-		ListView_SetItemText(hwndLV, lvItem.iItem, 1, Buffer);
-	}
-	//третий параметр
-	lvItem.pszText = (LPWSTR)(L"Время изменения:");
-	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-	if ((lvItem.iItem != -1))
-	{
-		GetFileTimeFormat(&bhfi.ftCreationTime, TimeBuffer, _countof(TimeBuffer));//время создания
-		ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
-	}
-	//второй параметр
-	lvItem.pszText = (LPWSTR)(L"Время последнего обращения:");
-	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-	if ((lvItem.iItem != -1))
-	{
-		GetFileTimeFormat(&bhfi.ftLastAccessTime, TimeBuffer, _countof(TimeBuffer));//время последнего обращения
-		ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
-	}
-	//первый параметр
-	lvItem.pszText = (LPWSTR)(L"Время создания:");
-	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-	if ((lvItem.iItem != -1))
-	{
-		GetFileTimeFormat(&bhfi.ftLastWriteTime, TimeBuffer, _countof(TimeBuffer));//время изменения
-		ListView_SetItemText(hwndLV, lvItem.iItem, 1, TimeBuffer);
-	}
-	//Расположение
-	lvItem.pszText = (LPWSTR)(L"Расположение:");
-	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-	if ((lvItem.iItem != -1))
-	{
-		ListView_SetItemText(hwndLV, lvItem.iItem, 1, path);
-	}
-	//Тип
-	lvItem.pszText = (LPWSTR)(L"Тип:");
-	lvItem.iItem = ListView_InsertItem(hwndLV, &lvItem);
-	if ((lvItem.iItem != -1))
-	{
-		if (!(bhfi.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY))
-		{
-			ListView_SetItemText(hwndLV, lvItem.iItem, 1, (LPWSTR)(L"Файл"));
-		}
-		else
-			if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-					ListView_SetItemText(hwndLV, lvItem.iItem, 1, (LPWSTR)(L"Папка с файлами"));
-			}
-
-	}
 
 	// массив атрибутов
 	constexpr DWORD attr[] = {
@@ -537,7 +440,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	}
 
 	// закрываем дескриптор файла */
-	CloseHandle(hFile);
+	//CloseHandle(hFile);
 	return TRUE;
 }
 
@@ -886,13 +789,17 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 
 	if (RetRes != FALSE && NewOwner != NULL)
 	{
+		
 		RetRes = GetAccountSID_W(NewOwner, &psid_Owner);//по имени владельца получим его SID
+
+		LPWSTR CheckOwner;
+		BOOL check = GetAccountName_W(psid_Owner, &CheckOwner);
+
 		if (RetRes != FALSE)
 		{
 			RetRes = SetSecurityDescriptorOwner(&secur_desc, psid_Owner, FALSE);//для связи дескриптора с SID
 		}
 	}
-
 	//не удалось связать. не заходит сюда. Почему?
 	if (RetRes != FALSE && CountOfEntries > 0 && pListOfEntries != NULL)
 	{

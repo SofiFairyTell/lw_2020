@@ -14,7 +14,7 @@
 #include <AccCtrl.h>
 #include <aclapi.h>//GetExplicitEntriesFromAclA function (aclapi.h)
 #include <sddl.h>//for ConvertSidToStringSidW
-
+#include  <Lmcons.h> //для UNLEN
 
 
 

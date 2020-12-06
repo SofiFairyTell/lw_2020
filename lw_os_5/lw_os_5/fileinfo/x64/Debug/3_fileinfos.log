@@ -1,8 +1,10 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (x64\Debug\) содержит файлы, которые используются совместно с другим проектом (2_fileinfo.vcxproj, 2_fileproperties.vcxproj).  Это может привести к ошибкам очистки и перестроения.
   Source.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(326): warning C4101: TimeBuffer: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(326): warning C4101: Buffer: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(560): warning C4101: length_of_arg: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(558): warning C4101: size: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(603): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\resource.h(58): warning C4005: IDC_EDIT_OWNER: изменение макроопределения
+  c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\resource.h(35): note: см. предыдущее определение "IDC_EDIT_OWNER"
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(329): warning C4101: TimeBuffer: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(329): warning C4101: Buffer: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(462): warning C4101: length_of_arg: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(460): warning C4101: size: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(505): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
   3_fileinfos.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Debug\3_fileinfo.exe
