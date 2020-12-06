@@ -144,7 +144,12 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 	
 	CreateWindowEx(0, TEXT("Static"), TEXT("Владелец:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
 		30, 220, 80, 20, hwnd, NULL, lpCRStr->hInstance, NULL);
-	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 110, 220, 200, 20, hwnd, (HMENU)IDC_EDIT_OWNER, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 110, 220, 310, 20, hwnd, (HMENU)IDC_EDIT_OWNER, lpCRStr->hInstance, NULL);
+
+	CreateWindowEx(0, TEXT("Static"), TEXT("Изменить на:"), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
+		30, 250, 80, 20, hwnd, NULL, lpCRStr->hInstance, NULL);
+	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER, 110, 250, 310, 20, hwnd, (HMENU)IDC_NEW_OWNER, lpCRStr->hInstance, NULL);
+
 
 	//if (FileName != NULL) //если путь не пустой, то заполнить список
 	//{
@@ -266,40 +271,24 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		ListViewInit(FileName, hwnd);*/
 	}
 
-	case ID_RENAME://переименование без сохранения атрибутов
+	case ID_CHANGE_OWNER://переименование без сохранения атрибутов
 	{
-		/*
-		TCHAR NewFileName[MAX_PATH]; // новое имя файла/каталога
-		GetDlgItemText(hwnd, IDC_EDIT_FILENAME, NewFileName, _countof(NewFileName));//это имя и его к указателю lpszFileName
+		
+		WCHAR NewOwner[MAX_PATH]; // новое имя владельца
+		
+		GetDlgItemText(hwnd, IDC_NEW_OWNER, NewOwner, _countof(NewOwner));//это имя и его к указателю lpszFileName
 
-			// найдём имя в пути к файлу/каталогу
-		lpszFileName = PathFindFileName(FileName);
+		BOOL RetRes = SetFileSecurityInfo(FileName,NewOwner,0,NULL, FALSE);
 
-		// вычисляем длину пути к файлу/каталогу
-		cchPath = (DWORD)(lpszFileName - FileName) - 1;
-		// разделяем нуль-символом путь и имя файла/каталога
-		FileName[cchPath] = _T('\0');
-
-		if (CompareString(LOCALE_USER_DEFAULT, 0, lpszFileName, -1, NewFileName, -1) != CSTR_EQUAL) // (!) изменилось имя файла/каталога
+		if (RetRes != FALSE)
 		{
-			TCHAR ExistingFileName[MAX_PATH]; // старое имя файла/каталога
-			StringCchPrintf(ExistingFileName, _countof(ExistingFileName), TEXT("%s\\%s"), FileName, lpszFileName);
-
-			// формируем новый путь к файлу/каталогу
-			PathAppend(FileName, NewFileName);
-			// переименовываем файл/каталог
-			MoveFile(ExistingFileName, FileName);
+			SetDlgItemText(hwnd, IDC_NEW_OWNER, NULL);
 		}
 		else
 		{
-			FileName[cchPath] = _T('\\');// заменим нуль-символ, разделяющий путь и имя файла/каталога
+			MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя."), NULL, MB_OK | MB_ICONERROR);
 		}
-		// запомним размер и положение окна
-		GetWindowRect(hwnd, &rect);
-
-		ListViewInit(FileName, hwnd);*/
-	}
-	break;
+	}	break;
 
 	case ID_EXIT:
 		SendMessage(hwnd, WM_CLOSE, 0, 0);
@@ -748,7 +737,7 @@ BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR Sec_Descriptor, PULONG pcCountOfEntrie
 	BOOL bDaclPresent = FALSE, bDaclDefaulted = FALSE;
 
 	// получаем DACL
-	BOOL bRet = GetSecurityDescriptorDacl(pSD, &bDaclPresent, &pDacl, &bDaclDefaulted);
+	BOOL bRet = GetSecurityDescriptorDacl(Sec_Descriptor, &bDaclPresent, &pDacl, &bDaclDefaulted);
 
 	if (FALSE != bRet && FALSE != bDaclPresent)
 	{
@@ -764,7 +753,7 @@ BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR Sec_Descriptor, PULONG pcCountOfEntrie
 	return bRet;
 }
 
-/*Получение имени аккаунта по его SID*/
+/*Получение имени аккаунта по его SID и по имени аккаунта*/
 BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 {
 	BOOL RetRes = FALSE;
@@ -819,6 +808,51 @@ BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 	return RetRes;
 }
 
+/*Определения функций определяющих SID*/
+BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid)
+{
+	BOOL RetRes = FALSE;
+	SID_NAME_USE SidType;//переменная перечисляемого типа, сюда сохраним определенный тип SID
+
+	/*Переменные для определения имени и SID*/
+	LPWSTR RefDomainName = NULL;
+	PSID psid = NULL;
+	DWORD cbSID = 0, cchRefDomainName = 0;
+
+	LookupAccountNameW(NULL, AccountName, NULL, &cbSID, NULL, &cchRefDomainName, NULL);//определение размеров буфера под имена
+
+	if ((cbSID > 0) && (cchRefDomainName > 0))
+	{
+		psid = (PSID)LocalAlloc(LMEM_FIXED, cbSID); //выделение памяти из локальной кучи процесса
+		RefDomainName = (LPWSTR)LocalAlloc(LMEM_FIXED, cchRefDomainName * sizeof(WCHAR));// -||- для имени домена
+	}
+
+	if ((psid != NULL) && (RefDomainName != NULL))
+	{
+		RetRes = LookupAccountName(NULL, AccountName, psid, &cbSID, RefDomainName, &cchRefDomainName, &SidType);
+	}
+
+	if (RetRes != FALSE)
+	{
+		*ppsid = psid;
+	}
+	else
+	{
+		if (psid != NULL)
+		{
+			LocalFree(psid);//освобождаем память
+		}
+	}
+
+	if (RefDomainName != NULL)
+	{
+		LocalFree(RefDomainName);//освобождаем память
+	}
+
+	return RetRes;
+}
+
+
 /*Получение имени пользователя по дескриптору безопасности*/
 BOOL GetOwnerName_W(PSECURITY_DESCRIPTOR Sec_Descriptor, LPWSTR *OwnerName)
 {
@@ -831,8 +865,82 @@ BOOL GetOwnerName_W(PSECURITY_DESCRIPTOR Sec_Descriptor, LPWSTR *OwnerName)
 	if (FALSE != bRet)
 	{
 		// определяем имя учетной записи владельца
-		bRet = GetAccountName_W(psid, lpName);
+		bRet = GetAccountName_W(psid, OwnerName);
 	} // if
 
 	return bRet;
+}
+
+/*Изменение информации в дескрипторе безопасности*/
+BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries, PEXPLICIT_ACCESS pListOfEntries, BOOL bMergeEntries)
+{
+	SECURITY_DESCRIPTOR secur_desc;
+
+	/*Выделяем буферы для новых значений*/
+	PSID psid_Owner = NULL;
+	PACL pNewDacl = NULL;
+	
+	BOOL RetRes = FALSE;
+
+	RetRes = InitializeSecurityDescriptor(&secur_desc, SECURITY_DESCRIPTOR_REVISION);
+
+	if (RetRes != FALSE && NewOwner != NULL)
+	{
+		RetRes = GetAccountSID_W(NewOwner, &psid_Owner);//по имени владельца получим его SID
+		if (RetRes != FALSE)
+		{
+			RetRes = SetSecurityDescriptorOwner(&secur_desc, psid_Owner, FALSE);//для связи дескриптора с SID
+		}
+	}
+
+	//не удалось связать. не заходит сюда. Почему?
+	if (RetRes != FALSE && CountOfEntries > 0 && pListOfEntries != NULL)
+	{
+		PSECURITY_DESCRIPTOR OldSD = NULL;
+		PACL pOldDacl = NULL; // указатель на буфер для DACL
+
+		BOOL DaclDefaulted = FALSE;
+		BOOL DaclPresent;
+
+		if (bMergeEntries != FALSE)
+		{
+			RetRes = GetFileSecurityDescriptor(FileName, DACL_SECURITY_INFORMATION, &OldSD);
+			if (RetRes != FALSE)
+			{
+				GetSecurityDescriptorDacl(OldSD, &DaclPresent, &pOldDacl, &DaclDefaulted);
+			}
+		}
+
+		DWORD result = SetEntriesInAcl(CountOfEntries, pListOfEntries, pOldDacl, &pNewDacl);
+		RetRes = (ERROR_SUCCESS == result) ? TRUE:FALSE;
+		if (RetRes != FALSE)
+		{
+			RetRes = SetSecurityDescriptorDacl(&psid_Owner, TRUE, pNewDacl, DaclDefaulted);
+		}
+		if (OldSD != NULL)
+			LocalFree(OldSD);
+	}
+
+	/*Блок меняющий владельца???*/
+	if (RetRes != NULL)
+	{
+		SECURITY_INFORMATION si = 0;
+		if (psid_Owner != NULL) si |= OWNER_SECURITY_INFORMATION;
+		if (pNewDacl != NULL) si |= DACL_SECURITY_INFORMATION;
+
+		RetRes = SetFileSecurity(FileName, si, &secur_desc); //изменяем дескриптор безопасности для файла
+	}
+
+	/*Освобождение памяти*/
+	if (psid_Owner != NULL)
+	{
+		LocalFree(psid_Owner);
+	}
+	if (pNewDacl != NULL)
+	{
+		LocalFree(pNewDacl);
+	}
+
+	return RetRes;
+	
 }

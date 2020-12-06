@@ -26,12 +26,14 @@
 #define ID_DELETE_ACE                   40012
 #define ID_LOAD                         40014
 #define ID_CHANGE_OWNER                 40013
+
 #define ID_OPEN_FILE                    40002
 #define ID_OPEN_DIR                     40003
 
 /*Текстовые поля*/
 #define IDC_EDIT_TEXT					2001
 #define IDC_EDIT_OWNER			        2002
+#define	IDC_NEW_OWNER					2003
 
 
 
