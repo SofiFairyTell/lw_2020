@@ -41,19 +41,23 @@
 #define IDC_WRITE_DAC                   1037
 #define IDC_WRITE_OWNER                 1038
 #define IDC_CHECK_INHERIT_NO_PROPAGATE  1039
+
+/*Главное окно*/
 #define IDC_EDIT_TEXT                   2001
 #define IDC_NEW_OWNER                   2003
-#define IDC_EDIT_FILENAME               40001
 #define ID_OPEN_FILE                    40002
 #define ID_OPEN_DIR                     40003
+#define ID_ADD_ACE                      40011
+#define ID_DELETE_ACE                   40012
+
+#define IDC_EDIT_FILENAME               40001
 #define ID_RENAME                       40004
 #define ID_40005                        40005
 #define ID_CHANGE_ATR                   40006
 #define ID_SAVE_PARAM                   40007
 #define ID_EXIT                         40010
 #define IDC_ATTRIBUTE_READONLY          40011
-#define ID_ADD_ACE                      40011
-#define ID_DELETE_ACE                   40012
+
 #define IDC_ATTRIBUTE_HIDDEN            40012
 #define ID_CHANGE_OWNER                 40013
 #define IDC_ATTRIBUTE_ARCHIVE           40013

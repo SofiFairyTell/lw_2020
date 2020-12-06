@@ -13,6 +13,10 @@ HANDLE OpenUserToken(
 
 
 BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
+
+TCHAR szUserName[UNLEN + 1];
+TCHAR szPassword[51];
+
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
 
@@ -87,12 +91,19 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 
-BOOL CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM) 
+INT_PTR CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 {
 	switch (uMsg) {
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
+		{
+			/*TCHAR szUserName[UNLEN + 1];
+			TCHAR szPassword[51];*/
+			GetDlgItemText(hwnd, IDC_USER, szUserName, _countof(szUserName));//это имя и
+			GetDlgItemText(hwnd, IDC_PASSWORD, szPassword, _countof(szUserName));//это  пароль
+			LogonUserToLocalComputer();
+		}break;
 		case IDCANCEL:
 			EndDialog(hWnd, 0);
 			break;
@@ -103,7 +114,7 @@ BOOL CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 		break;
 	}
 
-	return false;
+	return FALSE;
 }
 
 
@@ -229,7 +240,7 @@ BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 		{
 			if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
 
-			CreateDirectory(szOutFileName, NULL);
+			CreateDirectoryEx(szOutFileName, NULL, NULL);//копирование со всеми атрибутами??
 			CopyDirectoryContent(szInFileName, szOutFileName);
 		}
 		else
@@ -253,7 +264,7 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	{
 		TCHAR FromName[260];
 		TCHAR ToName[260];
-		TCHAR NewName[MAX_PATH + 1];
+		//TCHAR NewName[MAX_PATH + 1];
 
 		GetDlgItemText(hwnd, IDC_EDIT_FROM, FromName, _countof(FromName));
 		GetDlgItemText(hwnd, IDC_EDIT_TO, ToName, _countof(ToName));//каталог куда копируем
@@ -282,10 +293,49 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		if ((FromAttributes& FILE_ATTRIBUTE_DIRECTORY) != 0)//является каталогом
 		{
-			lstrcat(ToName, L"\\");
+			/*lstrcat(ToName, L"\\");
 			lstrcat(ToName, FILE);
-			CreateDirectory(ToName, NULL);
-			BRET = CopyDirectoryContent(FromName, ToName);
+			CreateDirectory(ToName, NULL);*/
+			//BRET = CopyDirectoryContent(FromName, ToName);
+			for (int i = 0; i < 3; ++i) // максимальное число попыток = 3
+			{
+				// выполняем операцию с файлом/каталогом
+				lstrcat(ToName, L"\\");
+				lstrcat(ToName, FILE);
+				CreateDirectory(ToName, NULL);
+				BRET = CopyDirectoryContent(FromName, ToName);
+
+				// получим код последней ошибки
+				DWORD dwError = (FALSE == BRET) ? GetLastError() : ERROR_SUCCESS;
+
+				// завершаем олицитворение
+				RevertToSelf();
+
+				if (ERROR_ACCESS_DENIED == dwError) // (!) ошибка: отказано в доступе
+				{
+					//_tprintf(TEXT("> Отказано в доступе.\n\n"));
+					MessageBox(hwnd, L"Отказано в доступе", L" !", MB_OK);
+					// получаем маркер доступа пользователя
+					HANDLE hToken = LogonUserToLocalComputer();
+
+					if (NULL != hToken)
+					{
+						// начинаем олицитворение
+						ImpersonateLoggedOnUser(hToken);
+						// закрываем маркер доступа
+						CloseHandle(hToken);
+					} // if
+					else
+					{
+						break; // (!) выходим из цикла
+					} // else
+				} // if
+				else
+				{
+					SetLastError(dwError);
+					break; // (!) выходим из цикла
+				} // else
+			} // for
 		}
 		else
 		{
@@ -303,9 +353,7 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			MessageBox(hwnd, Message, L"Ошибка", MB_OK);
 			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
 			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-			/*If something wrong*/
-			HINSTANCE hInstance = GetWindowInstance(hwnd);
-			DialogBox(hInstance, MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
+
 		}
 		else
 		{
@@ -321,7 +369,9 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		/*HINSTANCE hInstance = GetWindowInstance(hwnd);
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);*/
 
-
+			/*If something wrong*/
+			HINSTANCE hInstance = GetWindowInstance(hwnd);
+			int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
 
 
 
@@ -341,26 +391,25 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	break;
 	}
 }
-/*
+
 HANDLE LogonUserToLocalComputer()
 {
-	TCHAR szUserName[UNLEN + 1]; // ГЁГ¬Гї ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї
-	TCHAR szPassword[51]; // ГЇГ Г°Г®Г«Гј
-
-	for (int j = 0; j < 3; ++j) // Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­Г®ГҐ Г·ГЁГ±Г«Г® ГЇГ®ГЇГ»ГІГ®ГЄ = 3
+	for (int j = 0; j < 3; ++j) 
 	{
-		_tprintf(TEXT("> ГЁГ¬Гї ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї: "));
-		if (!getline(szUserName, _countof(szUserName)))
-		{
-			break; // (!) ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
-		} // if
+		//_tprintf(TEXT("> ГЁГ¬Гї ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї: "));
+		//if (!getline(szUserName, _countof(szUserName)))
+		//{
+		//	break; // (!) ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
+		//} // if
 
-		_tprintf(TEXT("> ГЇГ Г°Г®Г«Гј: "));
-		getline(szPassword, _countof(szPassword), _T('*'));
+		//_tprintf(TEXT("> ГЇГ Г°Г®Г«Гј: "));
+		//getline(szPassword, _countof(szPassword), _T('*'));
 
-		_tprintf(TEXT("\n"));
+		//_tprintf(TEXT("\n"));
+		//HINSTANCE hInstance = GetWindowInstance(hwnd);
+		//int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
 
-		// ГЇГ®Г«ГіГ·Г ГҐГ¬ Г¬Г Г°ГЄГҐГ° Г¤Г®Г±ГІГіГЇГ  ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї
+		// получение маркера доступа пользователя
 		HANDLE hToken = OpenUserToken(szUserName, TEXT("."), szPassword,
 			LOGON32_LOGON_INTERACTIVE, 
 			TOKEN_QUERY | TOKEN_IMPERSONATE, //для получения информации о содержимом маркера доступа | разрешение замещать маркер доступа процесса
@@ -368,20 +417,17 @@ HANDLE LogonUserToLocalComputer()
 
 		if (NULL != hToken)
 		{
-			return hToken; // ГўГ®Г§ГўГ°Г Г№Г ГҐГ¬ Г¤ГҐГ±ГЄГ°ГЁГЇГІГ®Г° Г¬Г Г°ГЄГҐГ°Г  Г¤Г®Г±ГІГіГЇГ 
+			return hToken; 
 		} // if
 	} // for
 
 	return NULL;
-} 
-*/
+}
+
 HANDLE OpenUserToken(LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB, TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL)
 {
 	HANDLE TOKEN = NULL;
-	BOOL BRET = LogonUser(
-		lpUserName,lpDomain,lpPassword,LogonType,
-		LOGON32_PROVIDER_DEFAULT, 
-		&TOKEN);//получение маркера доступа указанного пользователя
+	BOOL BRET = LogonUser(lpUserName,lpDomain,lpPassword,LogonType,	LOGON32_PROVIDER_DEFAULT, &TOKEN);//получение маркера доступа указанного пользователя
 	if (FALSE != BRET)
 	{
 		HANDLE newTOKEN = NULL;

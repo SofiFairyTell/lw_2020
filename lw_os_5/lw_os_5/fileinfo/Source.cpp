@@ -106,7 +106,28 @@ LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
+// ----------------------------------------------------------------------------------------------
+INT_PTR CALLBACK DialogAceProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_INITDIALOG:
+	{
+		BOOL bRet = HANDLE_WM_INITDIALOG(hwndDlg, wParam, lParam, DialogAce_OnInitDialog);
+		return SetDlgMsgResult(hwndDlg, uMsg, bRet);
+	}
 
+	case WM_CLOSE:
+		EndDialog(hwndDlg, IDCLOSE);
+		return TRUE;
+
+	case WM_COMMAND:
+		HANDLE_WM_COMMAND(hwndDlg, wParam, lParam, DialogAce_OnCommand);
+		return TRUE;
+	} // switch
+
+	return FALSE;
+} // DialogAceProc
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCRStr)
 {
@@ -173,12 +194,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		bi.hwndOwner = NULL;
 		bi.pszDisplayName = FileName;
 		bi.lpszTitle = TEXT("Select file");
-		bi.ulFlags = BIF_BROWSEINCLUDEFILES; 
+		bi.ulFlags = BIF_BROWSEINCLUDEFILES;
 		pidl = SHBrowseForFolder(&bi);//open window for select
 		if (pidl)
 		{
 			SHGetPathFromIDList(pidl, FileName);//get path
-			//SetDlgItemText(hwnd, IDC_EDIT_FILENAME, FileName);
 			if (!(ListViewInit(FileName, hwnd)))
 			{
 				GetLastError();
@@ -213,62 +233,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	} break;
 	case ID_CHANGE_ATR://Изменение атрибутов
 	{
-		/*
-		TCHAR NewFileName[MAX_PATH]; // новое имя файла/каталога
-		GetDlgItemText(hwnd, IDC_EDIT_FILENAME, NewFileName, _countof(NewFileName));//это имя и его к указателю lpszFileName
-
-			// найдём имя в пути к файлу/каталогу
-		lpszFileName = PathFindFileName(FileName);
-
-		// вычисляем длину пути к файлу/каталогу
-		cchPath = (DWORD)(lpszFileName - FileName) - 1;
-		// разделяем нуль-символом путь и имя файла/каталога
-		FileName[cchPath] = _T('\0');
-
-		if (CompareString(LOCALE_USER_DEFAULT, 0, lpszFileName, -1, NewFileName, -1) != CSTR_EQUAL) // (!) изменилось имя файла/каталога
-		{
-			TCHAR ExistingFileName[MAX_PATH]; // старое имя файла/каталога
-			StringCchPrintf(ExistingFileName, _countof(ExistingFileName), TEXT("%s\\%s"), FileName, lpszFileName);
-
-			// формируем новый путь к файлу/каталогу
-			PathAppend(FileName, NewFileName);
-			// переименовываем файл/каталог
-			MoveFile(ExistingFileName, FileName);
-		} // if
-		else
-		{
-			// заменим нуль-символ, разделяющий путь и имя файла/каталога
-			FileName[cchPath] = _T('\\');
-		} // else
-
-		// массив атрибутов
-		constexpr DWORD attr[] = {
-			FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_ARCHIVE,
-			FILE_ATTRIBUTE_SYSTEM, FILE_ATTRIBUTE_TEMPORARY, FILE_ATTRIBUTE_COMPRESSED, FILE_ATTRIBUTE_ENCRYPTED
-		};
-
-		// массив идентификаторов флажков для атрибутов
-		constexpr DWORD ids[] = {
-			IDC_ATTRIBUTE_READONLY, IDC_ATTRIBUTE_HIDDEN, IDC_ATTRIBUTE_ARCHIVE,
-			IDC_ATTRIBUTE_SYSTEM, IDC_ATTRIBUTE_TEMPORARY, IDC_ATTRIBUTE_COMPRESSED, IDC_ATTRIBUTE_ENCRYPTED
-		};
-
-		DWORD dwFileAttributes = 0; // атрибуты файла/каталога
-
-		// определяем, какие атрибуты выбраны
-
-		for (int i = 0; i < _countof(attr); ++i)
-		{
-			if (IsDlgButtonChecked(hwnd, ids[i]) == BST_CHECKED) // флажок установлен
-			{
-				dwFileAttributes |= attr[i]; // добавим соответствующий атрибут
-			} // if
-		} // for
-
-		// зададим атрибуты
-		SetFileAttributes(FileName, dwFileAttributes);
-
-		ListViewInit(FileName, hwnd);*/
+		
 	}
 
 	case ID_CHANGE_OWNER://переименование без сохранения атрибутов
@@ -279,55 +244,93 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		/*да!*/
 
 		TCHAR NewOwner[UNLEN + 1]; // новое имя владельца
-		
+
 		GetDlgItemText(hwnd, IDC_NEW_OWNER, NewOwner, _countof(NewOwner));//это имя и его к указателю lpszFileName
-
-		BOOL RetRes = SetFileSecurityInfo(FileName,NewOwner,0,NULL, FALSE);//не меняет, почему???
-
-		if (RetRes != FALSE)
+		/*новый код*/
+		PSID psid;
+		BOOL bret = GetAccountSID_W(NewOwner, &psid);
+		if (bret != FALSE)
 		{
-			SetDlgItemText(hwnd, IDC_NEW_OWNER, NULL);
+			EXPLICIT_ACCESS ea;
+			ea.grfAccessPermissions = 0;
+			ea.grfAccessMode = GRANT_ACCESS;
+			ea.grfInheritance = NO_INHERITANCE;
+			ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+			ea.Trustee.ptstrName = (LPWSTR)psid;
+			if (SetFileSecurityInfo(FileName, NULL, 1, &ea, TRUE) == TRUE)
+			{
+				SetDlgItemText(hwnd, IDC_NEW_OWNER, NULL);
+			}
+			else
+			{
+				MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя."), NULL, MB_OK | MB_ICONERROR);
+			}
 		}
-		else
+		LocalFree(psid);
+		Edit_SetText(GetDlgItem(hwnd, IDC_NEW_OWNER), TEXT(""));
+		ListViewInit(FileName, hwnd);
+	}	
+	break;
+
+	case  ID_ADD_ACE:
+	{
+		int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_DIALOG_ACE), hwnd, DialogAceProc);// открытие диалоговое окно "Элемент разрешения"
+
+		if (IDOK == mdRes)
+		{	
+			ListViewInit(FileName, hwnd);// выведем список с разрешениями
+		} 
+	}
+	break;
+	case ID_DELETE_ACE:
+	{
+		// список просмотра DACL - список разграничиваемого контроля доступа
+		HWND hwndLV = GetDlgItem(hwnd, IDC_DACL);
+		BOOL RetRes = FALSE;
+		PACL pDacl;
+		BOOL bDaclPresent, bDaclDefaulted;
+		/*for (;;)
+		{*/
+			
+		int item = ListView_GetNextItem(hwndLV, -1, LVNI_SELECTED);// находим выделенный элемент в списке просмотра DACL
+
+		if (item == -1) // если нет выделенных элементов
 		{
-			MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя."), NULL, MB_OK | MB_ICONERROR);
-		}
-	}	break;
+			break; 
+		} 
+
+		// удаление ACE - элементы контроля доступа из дескриптора безопасности
+		//DeleteEntryFromDalc(Sec_Descriptor, iItem);
+
+		// получаем DACL
+		RetRes = GetSecurityDescriptorDacl(Sec_Descriptor, &bDaclPresent, &pDacl, &bDaclDefaulted);
+		if (FALSE != RetRes)
+		{
+			RetRes = DeleteAce(pDacl, item);// удаляем элемент из DACL
+		} 
+		
+		ListView_DeleteItem(hwndLV, item);// удаляем элемент из списка просмотра DACL
+		//} // for
+
+		SetFileSecurity(FileName, DACL_SECURITY_INFORMATION, Sec_Descriptor); 		// изменяем дескриптор безопасности в файле/каталоге
+	}
+		break;
+	case ID_LOAD:
+		ListViewInit(FileName, hwnd);
+		break;
 
 	case ID_EXIT:
 		SendMessage(hwnd, WM_CLOSE, 0, 0);
 		RegCloseKey(hKey);
 		break;
-
 	}
 }
 
 BOOL ListViewInit(LPTSTR path, HWND hwnd)
 {
-	// массив возможных значений поля grfInheritance
-	constexpr DWORD dwInherit[7] = {
-		NO_INHERITANCE,
-		SUB_CONTAINERS_AND_OBJECTS_INHERIT,
-		SUB_CONTAINERS_ONLY_INHERIT,
-		SUB_OBJECTS_ONLY_INHERIT,
-		INHERIT_ONLY | SUB_CONTAINERS_AND_OBJECTS_INHERIT,
-		INHERIT_ONLY | SUB_CONTAINERS_ONLY_INHERIT,
-		INHERIT_ONLY | SUB_OBJECTS_ONLY_INHERIT
-	};
-
-	// массив строк, содержащие описание для возможных значений поля grfInheritance
-	constexpr LPCTSTR szInheritText[7] = {
-		TEXT("Только для этого каталога"),
-		TEXT("Для этого каталога, его подкаталогов и файлов"),
-		TEXT("Для этого каталога и его подкаталогов"),
-		TEXT("Для этого каталога и его файлов"),
-		TEXT("Только для подкаталогов и файлов"),
-		TEXT("Только для подкаталогов"),
-		TEXT("Только для файлов")
-	};
-
 	WIN32_FILE_ATTRIBUTE_DATA bhfi;
-	TCHAR TimeBuffer[100], Buffer[100];
+	BOOL RetRes;
+
 	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &bhfi))
 	{
 		GetLastError();
@@ -341,24 +344,25 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 	ListView_DeleteAllItems(hwndLV); //очистка списка просмотра
 
 	// освобождаем выделенную память
-	if (NULL != Sec_Descriptor) LocalFree(Sec_Descriptor), Sec_Descriptor = NULL;
-	// получим дескриптор безопасности
-	BOOL RetRes = GetFileSecurityDescriptor(FileName, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, &Sec_Descriptor);
+	if (NULL != Sec_Descriptor) 
+		LocalFree(Sec_Descriptor), 
+		Sec_Descriptor = NULL;
+
+	
+	RetRes = GetFileSecurityDescriptor(FileName, OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, &Sec_Descriptor);// получение дескриптора безопасности
 
 	if (RetRes != FALSE)
 	{
 		LPWSTR Owner = NULL; 
-		RetRes = GetOwnerName_W(Sec_Descriptor, &Owner);
+		RetRes = GetOwnerName_W(Sec_Descriptor, &Owner);//полуение имени владельца
 		SetDlgItemText(hwnd, IDC_EDIT_OWNER, Owner);// копируем имя учетной записи владельца в поле "Текущий владелец"
-		// освобождаем выделенную память
-		LocalFree(Owner);
-		
+		LocalFree(Owner);	
 	}
 
 	ULONG uCount = 0; // количество элементов в массиве ACE
 	PEXPLICIT_ACCESS pEA = NULL; // массив ACE
 
-	RetRes = GetItemFromDACL(Sec_Descriptor, &uCount, &pEA);
+	RetRes = GetItemFromDACL(Sec_Descriptor, &uCount, &pEA);//узнаем количество элементов в DACL
 
 	if (RetRes != FALSE)
 	{
@@ -368,8 +372,7 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 
 			lvItem.iItem = (int)i;
 
-			// определим права доступа
-			lvItem.lParam = (LPARAM)pEA[i].grfAccessPermissions;
+			lvItem.lParam = (LPARAM)pEA[i].grfAccessPermissions;			// определим права доступа
 
 			// определим тип ACE
 			switch (pEA[i].grfAccessMode)
@@ -380,30 +383,30 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 			case DENY_ACCESS:
 				lvItem.pszText = (LPTSTR)TEXT("Запретить");
 				break;
-			} // switch
+			} 
 
 			// добавляем новый элемент в список просмотра DACL
 			int iItem = ListView_InsertItem(hwndLV, &lvItem);
-			if (iItem == -1) continue; // не удалось добавить новый элемент
+			if (iItem == -1) 
+				continue; // не удалось добавить новый элемент
 
 			 // определим имя учетной записи
 			if (TRUSTEE_IS_SID == pEA[i].Trustee.TrusteeForm)
 			{
 				LPTSTR lpszName = NULL; // имя учетной записи
-
-				// получим имя учетной записи
-				GetAccountName_W(pEA[i].Trustee.ptstrName, &lpszName);
+				
+				GetAccountName_W(pEA[i].Trustee.ptstrName, &lpszName);// получим имя учетной записи
 
 				if (NULL != lpszName)
 				{
-					// копируем имя учетной записи в ячейку списка просмотра DACL
-					ListView_SetItemText(hwndLV, iItem, 1, lpszName);
-					// освобождаем выделенную память
+					
+					ListView_SetItemText(hwndLV, iItem, 1, lpszName);// копируем имя учетной записи в ячейку списка просмотра DACL
+
 					LocalFree(lpszName);
-				} // if
-			} // if
-			// определим к каким объектам применяются права доступа
-			DWORD grfInheritance = pEA[i].grfInheritance & (~INHERIT_NO_PROPAGATE);
+				} 
+			} 
+			
+			DWORD grfInheritance = pEA[i].grfInheritance & (~INHERIT_NO_PROPAGATE);// определим к каким объектам применяются права доступа
 
 			for (int j = 0; j < _countof(dwInherit); ++j)
 			{
@@ -413,249 +416,63 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 					ListView_SetItemText(hwndLV, iItem, 2, (LPTSTR)szInheritText[j]);
 
 					break; // выходим из цикла
-				} // if
-			} // for
+				} 
+			} 
 		}
 	}
 
-	/*
-
-	// массив атрибутов
-	constexpr DWORD attr[] = {
-		FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_ARCHIVE,
-		FILE_ATTRIBUTE_SYSTEM, FILE_ATTRIBUTE_TEMPORARY, FILE_ATTRIBUTE_COMPRESSED, FILE_ATTRIBUTE_ENCRYPTED
-	};
-	// массив идентификаторов флажков для атрибутов
-	constexpr DWORD ids[] = {
-		IDC_ATTRIBUTE_READONLY, IDC_ATTRIBUTE_HIDDEN, IDC_ATTRIBUTE_ARCHIVE,
-		IDC_ATTRIBUTE_SYSTEM, IDC_ATTRIBUTE_TEMPORARY, IDC_ATTRIBUTE_COMPRESSED, IDC_ATTRIBUTE_ENCRYPTED
-	};
-
-	// раставим флажки соответственно с установленными атрибутами файла/каталога
-
-	for (int i = 0; i < _countof(attr); ++i)
-	{
-		UINT uCheck = (bhfi.dwFileAttributes & attr[i]) ? BST_CHECKED : BST_UNCHECKED;
-		CheckDlgButton(hwnd, ids[i], uCheck);
-	}
-
-	// закрываем дескриптор файла */
-	//CloseHandle(hFile);
 	return TRUE;
 }
 
-BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam)
-{
-	if (lpFileAttributeData->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	{
-		// продолжим поиск внутри каталога
-		return FileSearch(TEXT("*"), lpszFileName, CalculateSize, lpvParam);
-	} // if
-	return TRUE; // возвращаем TRUE, чтобы продолжить поиск
-}
-
-BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam)
-{
-	WIN32_FIND_DATA ffd;
-	LARGE_INTEGER filesize;
-	LARGE_INTEGER size;
-	TCHAR szDir[MAX_PATH];
-	size_t length_of_arg;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	StringCchCopy(szDir, MAX_PATH, path);
-	StringCchCat(szDir, MAX_PATH, TEXT("\\*"));
-	hFind = FindFirstFile(szDir, &ffd);
-
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
-		//error. terminator . later.
-	}
-	do
-	{
-		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-		{
-			filesize.LowPart = ffd.nFileSizeLow;
-			filesize.HighPart = ffd.nFileSizeHigh;
-			((ULARGE_INTEGER *)lpvParam)->QuadPart += filesize.QuadPart;
-		}
-	} while (FindNextFile(hFind, &ffd) != 0);
-
-	FindClose(hFind);
-	return TRUE;
-}
-
-BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime)
-{
-	SYSTEMTIME st;
-
-	// преобразуем дату и время из FILETIME в SYSTEMTIME
-	BOOL bRet = FileTimeToSystemTime(lpFileTime, &st);
-
-	// приведем дату и время к текущему часовому поясу
-	if (FALSE != bRet)
-		bRet = SystemTimeToTzSpecificLocalTime(NULL, &st, &st);
-
-	if (FALSE != bRet)
-	{
-		// скопируем дату в результирующую строку
-		GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, &st, NULL, lpszFileTime, cchFileTime);
-
-		// добавим время в результирующую строку
-
-		StringCchCat(lpszFileTime, cchFileTime, TEXT(", "));
-		DWORD len = _tcslen(lpszFileTime);
-
-		if (len < cchFileTime)
-			GetTimeFormat(LOCALE_USER_DEFAULT, TIME_FORCE24HOURFORMAT, &st, NULL, lpszFileTime + len, cchFileTime - len);
-	} // if
-
-	return bRet;
-}
-void ConvertFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size)
-{
-	if (size.QuadPart >= 0x40000000ULL)
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f ГБ"), (size.QuadPart / (float)0x40000000ULL));
-	} // if
-	else if (size.QuadPart >= 0x100000ULL)
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f МБ"), (size.QuadPart / (float)0x100000ULL));
-	} // if
-	else if (size.QuadPart >= 0x0400ULL)
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f КБ"), (size.QuadPart / (float)0x0400ULL));
-	} // if
-	else
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%u байт"), size.LowPart);
-	} // else
-
-	size_t len = _tcslen(lpszBuffer);
-
-	if (len < cch)
-	{
-		StringCchPrintf((lpszBuffer + len), (cch - len), TEXT(" (%llu байт)"), size.QuadPart);
-	} // if
-} // StringCchPrintFileSize
-
-void ConvertDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size)
-{
-	if (size.QuadPart >= 0x40000000ULL)
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f ГБ"), (size.QuadPart / (float)0x40000000ULL));
-	} // if
-	else if (size.QuadPart >= 0x100000ULL)
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f МБ"), (size.QuadPart / (float)0x100000ULL));
-	} // if
-	else if (size.QuadPart >= 0x0400ULL)
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%.1f КБ"), (size.QuadPart / (float)0x0400ULL));
-	} // if
-	else
-	{
-		StringCchPrintf(lpszBuffer, cch, TEXT("%u байт"), size.LowPart);
-	} // else
-
-	size_t len = _tcslen(lpszBuffer);
-
-	if (len < cch)
-	{
-		StringCchPrintf((lpszBuffer + len), (cch - len), TEXT(" (%llu байт)"), size.QuadPart);
-	} // if
-} // StringCchPrintFileSize
-
-
-//work wit regist
-LSTATUS RegGetValueSZ(HKEY hKey, LPCTSTR lpValueName, LPTSTR lpszData, DWORD cch, LPDWORD lpcchNeeded)
-{
-	// определяем тип получаемого значения параметра
-	DWORD RegType;
-	LSTATUS retCode = RegQueryValueEx(hKey, lpValueName, NULL, &RegType, NULL, NULL);
-	if (ERROR_SUCCESS == retCode && REG_SZ == RegType)
-	{
-		DWORD DataBuffer = cch * sizeof(TCHAR);
-		// получаем значение параметра
-		retCode = RegQueryValueEx(hKey, lpValueName, NULL, NULL, (LPBYTE)lpszData, &DataBuffer);
-	}
-	else if (ERROR_SUCCESS == retCode)
-	{
-		retCode = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
-	}
-
-	return retCode;
-}
-
-LSTATUS RegGetValueBinary(HKEY hKey, LPCTSTR lpValueName, LPBYTE lpData, DWORD cb, LPDWORD lpcbNeeded)
-{
-	DWORD dwType;
-	// определяем тип получаемого значения параметра
-	LSTATUS lStatus = RegQueryValueEx(hKey, lpValueName, NULL, &dwType, NULL, NULL);
-
-	if (ERROR_SUCCESS == lStatus && REG_BINARY == dwType)
-	{
-		// получаем значение параметра
-		lStatus = RegQueryValueEx(hKey, lpValueName, NULL, NULL, lpData, &cb);
-
-		if (NULL != lpcbNeeded) *lpcbNeeded = cb;
-	} // if
-	else if (ERROR_SUCCESS == lStatus)
-	{
-		lStatus = ERROR_UNSUPPORTED_TYPE; // неверный тип данных
-	} // if
-
-	return lStatus;
-} // RegGetValueBinary
 
 /*Дескрипторы*/
 BOOL GetFileSecurityDescriptor(LPCWSTR lpFileName, SECURITY_INFORMATION RequestedInformation, PSECURITY_DESCRIPTOR *ppSD)
 {
-	DWORD cb = 0;
+	DWORD lpnLengthNeeded = 0;
 
-	// определим размер дескриптора безопасности
-	GetFileSecurity(lpFileName, RequestedInformation, NULL, 0, &cb);
-
-	// выделим память для дескриптора безопасности
-	PSECURITY_DESCRIPTOR pSD = (PSECURITY_DESCRIPTOR)LocalAlloc(LMEM_FIXED, cb);
+	GetFileSecurity(lpFileName, RequestedInformation, NULL, 0, &lpnLengthNeeded);	// определим размер дескриптора безопасности
+	
+	PSECURITY_DESCRIPTOR pSD = (PSECURITY_DESCRIPTOR)LocalAlloc(LMEM_FIXED, lpnLengthNeeded);// выделение памяти для дескриптора безопасности
 	if (NULL == pSD) return FALSE;
+		
+	BOOL RetRes = GetFileSecurity(lpFileName, RequestedInformation, pSD, lpnLengthNeeded, &lpnLengthNeeded);// получим дескриптор безопасности
 
-	// получим дескриптор безопасности
-	BOOL bRet = GetFileSecurity(lpFileName, RequestedInformation, pSD, cb, &cb);
-
-	if (FALSE != bRet)
+	if (FALSE != RetRes)
 	{
 		*ppSD = pSD; // возвращаем полученный дескриптор безопасности
-	} // if
+	} 
 	else
 	{
-		//LocalFree(pSD); // освобождаем выделенную память
-	} // else
+		LocalFree(pSD); // освобождаем выделенную память
+	} 
 
-	return bRet;
-} // GetFileSecurityDescriptor
+	return RetRes;
+} 
 
-BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR Sec_Descriptor, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries)
+BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR pSecurityDescriptor, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries)
 {
 	PACL pDacl = NULL;
-	BOOL bDaclPresent = FALSE, bDaclDefaulted = FALSE;
-
+	BOOL lpbDaclPresent = FALSE,  //текущий
+		lpbDaclDefaulted = FALSE;//по умолчанию?
+	BOOL RetRes;
+	DWORD Result; //код результата извлечения элментов из DALC
+	
 	// получаем DACL
-	BOOL bRet = GetSecurityDescriptorDacl(Sec_Descriptor, &bDaclPresent, &pDacl, &bDaclDefaulted);
+	RetRes = GetSecurityDescriptorDacl(pSecurityDescriptor, &lpbDaclPresent, &pDacl, &lpbDaclDefaulted);
 
-	if (FALSE != bRet && FALSE != bDaclPresent)
+	if (RetRes != FALSE && lpbDaclPresent != FALSE)
 	{
 		// извлекаем элементы из DACL
-		DWORD dwResult = GetExplicitEntriesFromAcl(pDacl, pcCountOfEntries, pListOfEntries);
-		bRet = (ERROR_SUCCESS == dwResult) ? TRUE : FALSE;
-	} // if
+		Result = GetExplicitEntriesFromAcl(pDacl, pcCountOfEntries, pListOfEntries);
+		RetRes = (ERROR_SUCCESS == Result) ? TRUE : FALSE;
+	} 
 	else
 	{
 		*pcCountOfEntries = 0; // возвращаем 0 элементов
-	} // else
+	} 
 
-	return bRet;
+	return RetRes;
 }
-
 /*Получение имени аккаунта по его SID и по имени аккаунта*/
 BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName)
 {
@@ -761,29 +578,25 @@ BOOL GetOwnerName_W(PSECURITY_DESCRIPTOR Sec_Descriptor, LPWSTR *OwnerName)
 {
 	PSID psid;
 	BOOL bDefaulted;
-
-	// получаем SID владельца
-	BOOL bRet = GetSecurityDescriptorOwner(Sec_Descriptor, &psid, &bDefaulted);
+		
+	BOOL bRet = GetSecurityDescriptorOwner(Sec_Descriptor, &psid, &bDefaulted);// получаем SID владельца
 
 	if (FALSE != bRet)
 	{
-		// определяем имя учетной записи владельца
-		bRet = GetAccountName_W(psid, OwnerName);
-	} // if
-
+		bRet = GetAccountName_W(psid, OwnerName);// определяем имя учетной записи владельца
+	} 
 	return bRet;
 }
 
 /*Изменение информации в дескрипторе безопасности*/
 BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries, PEXPLICIT_ACCESS pListOfEntries, BOOL bMergeEntries)
 {
+	BOOL RetRes = FALSE;
 	SECURITY_DESCRIPTOR secur_desc;
-
+	
 	/*Выделяем буферы для новых значений*/
 	PSID psid_Owner = NULL;
 	PACL pNewDacl = NULL;
-	
-	BOOL RetRes = FALSE;
 
 	RetRes = InitializeSecurityDescriptor(&secur_desc, SECURITY_DESCRIPTOR_REVISION);
 
@@ -791,16 +604,14 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 	{
 		
 		RetRes = GetAccountSID_W(NewOwner, &psid_Owner);//по имени владельца получим его SID
-
-		LPWSTR CheckOwner;
-		BOOL check = GetAccountName_W(psid_Owner, &CheckOwner);
+			
 
 		if (RetRes != FALSE)
 		{
 			RetRes = SetSecurityDescriptorOwner(&secur_desc, psid_Owner, FALSE);//для связи дескриптора с SID
 		}
 	}
-	//не удалось связать. не заходит сюда. Почему?
+
 	if (RetRes != FALSE && CountOfEntries > 0 && pListOfEntries != NULL)
 	{
 		PSECURITY_DESCRIPTOR OldSD = NULL;
@@ -822,13 +633,12 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 		RetRes = (ERROR_SUCCESS == result) ? TRUE:FALSE;
 		if (RetRes != FALSE)
 		{
-			RetRes = SetSecurityDescriptorDacl(&psid_Owner, TRUE, pNewDacl, DaclDefaulted);
+			RetRes = SetSecurityDescriptorDacl(&secur_desc, TRUE, pNewDacl, DaclDefaulted);
 		}
 		if (OldSD != NULL)
 			LocalFree(OldSD);
 	}
 
-	/*Блок меняющий владельца???*/
 	if (RetRes != NULL)
 	{
 		SECURITY_INFORMATION si = 0;
@@ -851,3 +661,268 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 	return RetRes;
 	
 }
+
+
+BOOL DialogAce_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
+{
+	/*Variable*/
+	PEXPLICIT_ACCESS pEA = (PEXPLICIT_ACCESS)lParam; // элемент ACE
+	DWORD grfAccessMode;// для получения режима доступа
+	HWND hwndCtl;//дескриптор для списка
+
+	BOOL fEditable = (NULL == pEA) ? TRUE : FALSE; // флаг, определяющий возможность редактировать элемент ACE
+
+
+	grfAccessMode = (NULL != pEA) ? pEA->grfAccessMode : GRANT_ACCESS;
+
+	// заполняем выпадающий список "Тип": разрешить или запретить
+	hwndCtl = GetDlgItem(hwnd, IDC_ACCESS_MODE);
+	EnableWindow(hwndCtl, fEditable);
+
+	int iItem = ComboBox_AddString(hwndCtl, TEXT("Разрешить"));
+
+	if (iItem != -1)
+	{
+		ComboBox_SetItemData(hwndCtl, iItem, GRANT_ACCESS);
+		if (GRANT_ACCESS == grfAccessMode) ComboBox_SetCurSel(hwndCtl, iItem);
+	} // if
+
+	iItem = ComboBox_AddString(hwndCtl, TEXT("Запретить"));
+
+	if (iItem != -1)
+	{
+		ComboBox_SetItemData(hwndCtl, iItem, DENY_ACCESS);
+		if (DENY_ACCESS == grfAccessMode) ComboBox_SetCurSel(hwndCtl, iItem);
+	} 
+
+	hwndCtl = GetDlgItem(hwnd, IDC_EDIT_NAME);
+	Edit_SetText(hwndCtl, NULL);
+
+	if (pEA != NULL)
+	{
+		Edit_SetReadOnly(hwndCtl, TRUE);
+
+		LPTSTR AccountName = NULL; // имя учетной записи
+
+		GetAccountName_W(pEA->Trustee.ptstrName, &AccountName);	// получим имя учетной записи
+
+		if (AccountName != NULL)
+		{
+			// копируем имя учетной записи в поле "Имя"
+			Edit_SetText(hwndCtl, AccountName);
+
+			LocalFree(AccountName);
+		} 
+	}
+
+	EnableWindow(GetDlgItem(hwnd, IDC_BUTTON_NAME_TEST), fEditable);
+
+	if (NULL != pEA)
+	{
+		for (int i = 0; i < 13; ++i)
+		{
+			if (pEA->grfAccessPermissions & dwPermissions[i])
+			{
+				CheckDlgButton(hwnd, idcPermissions[i], BST_CHECKED);
+			} 
+
+			EnableWindow(GetDlgItem(hwnd, idcPermissions[i]), fEditable);
+		} 
+	} 
+
+
+	if (FALSE != fEditable) // разрешено редактировать элемент ACE
+	{
+		// получим атрибуты файла/каталога
+		DWORD dwFileAttributes = GetFileAttributes(FileName);
+
+		// опредtлим можно, ли редактировать элемент ACE (только для каталогов)
+		fEditable = ((INVALID_FILE_ATTRIBUTES != dwFileAttributes) && (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) ? TRUE : FALSE;
+	} 
+
+
+	// заполняем выпадающий список "Применять"
+
+	DWORD selInheritance = (NULL != pEA) ? (pEA->grfInheritance & (~INHERIT_NO_PROPAGATE)) : SUB_CONTAINERS_AND_OBJECTS_INHERIT;
+
+	hwndCtl = GetDlgItem(hwnd, IDC_INHERIT);
+	EnableWindow(hwndCtl, fEditable);
+
+	for (int i = 0; i < 7; ++i)
+	{
+		int iItem = ComboBox_AddString(hwndCtl, szInheritText[i]);
+
+		if (iItem != -1)
+		{
+			ComboBox_SetItemData(hwndCtl, iItem, dwInherit[i]);
+			if (selInheritance == dwInherit[i]) ComboBox_SetCurSel(hwndCtl, iItem);
+		} 
+	} 
+
+	if ((NULL != pEA) && (pEA->grfInheritance & INHERIT_NO_PROPAGATE))
+	{
+		CheckDlgButton(hwnd, IDC_CHECK_INHERIT_NO_PROPAGATE, BST_CHECKED);
+	} 
+
+	EnableWindow(GetDlgItem(hwnd, IDC_CHECK_INHERIT_NO_PROPAGATE), fEditable);
+
+	// /// //
+
+	return TRUE;
+} // DialogAce_OnInitDialog
+
+// ----------------------------------------------------------------------------------------------
+void DialogAce_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
+{
+	switch (id)
+	{
+	case IDOK:
+	{
+		HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_NAME);
+
+		if (IsWindowEnabled(hwndCtl) != FALSE) // добавить новый ACE
+		{
+			PSID pSid = NULL; // указатель на дескриптор безопасности
+
+			int cch = GetWindowTextLength(hwndCtl);
+
+			if (cch > 0)
+			{
+				LPTSTR lpszName = new TCHAR[cch + 1]; // имя учётной записи
+
+				// копируем имя учётной записи из поля ввода
+				GetDlgItemText(hwnd, IDC_EDIT_NAME, lpszName, cch + 1);
+				// получим SID учётной записи
+				GetAccountSID_W(lpszName, &pSid);
+
+				// освобождаем выделенную память
+				delete[] lpszName, lpszName = NULL;
+			} // if
+
+			if (NULL != pSid)
+			{
+				EXPLICIT_ACCESS ea;
+
+				ea.Trustee.TrusteeForm = TRUSTEE_IS_SID; // доверенный объект задается с помощью SID
+				ea.Trustee.ptstrName = (LPTSTR)pSid; // SID
+
+				// формируем разрешения
+
+				ea.grfAccessPermissions = 0;
+
+				for (int i = 0; i < 13; ++i)
+				{
+					if (IsDlgButtonChecked(hwnd, idcPermissions[i]) == BST_CHECKED)
+					{
+						ea.grfAccessPermissions |= dwPermissions[i];
+					} 
+				} 
+
+				// определим тип разрешения
+
+				hwndCtl = GetDlgItem(hwnd, IDC_ACCESS_MODE);
+				ea.grfAccessMode = (ACCESS_MODE)ComboBox_GetItemData(hwndCtl, ComboBox_GetCurSel(hwndCtl));
+
+				// /// //
+
+				hwndCtl = GetDlgItem(hwnd, IDC_INHERIT);
+				ea.grfInheritance = (DWORD)ComboBox_GetItemData(hwndCtl, ComboBox_GetCurSel(hwndCtl));
+
+				if (( ea.grfInheritance != NO_INHERITANCE) &&
+					(IsDlgButtonChecked(hwnd, IDC_CHECK_INHERIT_NO_PROPAGATE) == BST_CHECKED))
+				{
+					ea.grfInheritance |= INHERIT_NO_PROPAGATE;
+				} 
+
+				// /// //
+
+				if (0 != ea.grfAccessPermissions)
+				{
+					// изменяем информацию в дескрипторе безопасности
+					BOOL RetRes = SetFileSecurityInfo(FileName, NULL, 1, &ea, TRUE);
+
+					if (RetRes != FALSE)
+					{					
+						EndDialog(hwnd, IDOK);// закрываем диалоговое окно
+					} 
+				} 
+				LocalFree(pSid);
+			} 
+			else
+			{
+				MessageBox(hwnd, TEXT("Не удалось найти учетную запись. Проверьте правильность введенного имени."), NULL, MB_OK | MB_ICONERROR);
+			} 
+		} 
+		else
+		{
+			EndDialog(hwnd, IDOK);	// закрываем диалоговое окно
+		} 
+	}
+	break;
+
+	case IDCANCEL:
+		EndDialog(hwnd, IDCANCEL);
+		break;
+
+	case IDC_BUTTON_NAME_TEST: // Проверить
+	{
+		int cch = GetWindowTextLength(GetDlgItem(hwnd, IDC_EDIT_NAME));
+
+		if (cch > 0)
+		{
+			PSID pSid = NULL;
+
+			LPTSTR AccountName = new TCHAR[cch + 1]; // имя учётной записи
+			
+			GetDlgItemText(hwnd, IDC_EDIT_NAME, AccountName, cch + 1);// копируем имя учётной записи из поля ввода
+			
+			GetAccountSID_W(AccountName, &pSid);		// получим SID учётной записи
+
+			delete[] AccountName, AccountName = NULL;	// освобождаем выделенную память
+
+			if ( pSid != NULL)
+			{		
+				GetAccountName_W(pSid, &AccountName);	// получим имя учётной записи
+				
+				SetDlgItemText(hwnd, IDC_EDIT_NAME, AccountName);	// копируем имя учётной записи в поле ввода
+				
+				if (AccountName != NULL)
+					LocalFree(AccountName);// освобождаем выделенную память
+
+				LocalFree(pSid);
+
+				MessageBox(hwnd, TEXT("Учетная запись есть."), NULL, MB_OK | MB_ICONERROR);
+			} 
+			else
+			{
+				MessageBox(hwnd, TEXT("Не удалось найти учетную запись. Проверьте правильность введенного имени."), NULL, MB_OK | MB_ICONERROR);
+
+				// удаляем текст из поля "Имя"
+				SetDlgItemText(hwnd, IDC_EDIT_NAME, NULL);
+			} 
+		} 
+	}
+	break;
+	} 
+} // DialogAce_OnCommand
+
+
+
+
+//// ----------------------------------------------------------------------------------------------
+//BOOL DeleteEntryFromDalc(PSECURITY_DESCRIPTOR pSD, DWORD dwIndex)
+//{
+//	PACL pDacl;
+//	BOOL bDaclPresent, bDaclDefaulted;
+//
+//	// получаем DACL
+//	BOOL bRet = GetSecurityDescriptorDacl(pSD, &bDaclPresent, &pDacl, &bDaclDefaulted);
+//
+//	if (FALSE != bRet)
+//	{
+//		// удаляем элемент из DACL
+//		bRet = DeleteAce(pDacl, dwIndex);
+//	} // if
+//
+//	return bRet;
+//} // DeleteEntryFromDalc

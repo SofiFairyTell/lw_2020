@@ -26,22 +26,74 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #pragma comment(lib, "shlwapi.lib")
 // оконная процедура главного окна
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+/*Окно диалоговое*/
+BOOL DialogAce_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);
+void DialogAce_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
+INT_PTR CALLBACK DialogAceProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 /*Обработчики сообщений WM_CREATE WM_DESTROY WM_SIZE WM_COMMAND */
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
-/*Перевод времени*/
-BOOL GetFileTimeFormat(const LPFILETIME lpFileTime, LPTSTR lpszFileTime, DWORD cchFileTime);
+/*Константы*/
+// массив возможных значений поля grfInheritance
+constexpr DWORD dwInherit[7] = {
+	NO_INHERITANCE,
+	SUB_CONTAINERS_AND_OBJECTS_INHERIT,
+	SUB_CONTAINERS_ONLY_INHERIT,
+	SUB_OBJECTS_ONLY_INHERIT,
+	INHERIT_ONLY | SUB_CONTAINERS_AND_OBJECTS_INHERIT,
+	INHERIT_ONLY | SUB_CONTAINERS_ONLY_INHERIT,
+	INHERIT_ONLY | SUB_OBJECTS_ONLY_INHERIT
+};
 
-/*Перевод чисел*/
-void ConvertFileSize(LPTSTR lpszBuffer, DWORD cch, LARGE_INTEGER size);
-void ConvertDirectSize(LPTSTR lpszBuffer, DWORD cch, ULARGE_INTEGER size);
+// массив строк, содержащие описание для возможных значений поля grfInheritance
+constexpr LPCTSTR szInheritText[7] = {
+	TEXT("Только для этого каталога"),
+	TEXT("Для этого каталога, его подкаталогов и файлов"),
+	TEXT("Для этого каталога и его подкаталогов"),
+	TEXT("Для этого каталога и его файлов"),
+	TEXT("Только для подкаталогов и файлов"),
+	TEXT("Только для подкаталогов"),
+	TEXT("Только для файлов")
+};
 
-/*Считать размер папки*/
-BOOL __stdcall CalculateSize(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
+// массив разрешений для файла/каталога
+constexpr DWORD dwPermissions[13] = {
+	FILE_TRAVERSE,
+	FILE_LIST_DIRECTORY,
+	FILE_READ_ATTRIBUTES,
+	FILE_READ_EA,
+	FILE_ADD_FILE,
+	FILE_ADD_SUBDIRECTORY,
+	FILE_WRITE_ATTRIBUTES,
+	FILE_WRITE_EA,
+	FILE_DELETE_CHILD,
+	DELETE,
+	READ_CONTROL,
+	WRITE_DAC,
+	WRITE_OWNER
+};
+
+// массив идентификаторов флажков для разрешений
+constexpr WORD idcPermissions[13] = {
+	IDC_FILE_TRAVERSE,
+	IDC_FILE_LIST_DIRECTORY,
+	IDC_FILE_READ_ATTRIBUTES,
+	IDC_FILE_READ_EA,
+	IDC_FILE_ADD_FILE,
+	IDC_FILE_ADD_SUBDIRECTORY,
+	IDC_FILE_WRITE_ATTRIBUTES,
+	IDC_FILE_WRITE_EA,
+	IDC_FILE_DELETE_CHILD,
+	IDC_DELETE,
+	IDC_READ_CONTROL,
+	IDC_WRITE_DAC,
+	IDC_WRITE_OWNER
+};
+
 
 
 /*Перевод в ListView*/
@@ -65,3 +117,4 @@ BOOL GetAccountName_W(PSID psid, LPWSTR* AccountName);
 BOOL GetAccountSID_W(LPCWSTR AccountName, PSID *ppsid); //узнаем SID ПК ИЛИ USER
 BOOL GetOwnerName_W(PSECURITY_DESCRIPTOR Sec_Descriptor, LPWSTR *OwnerName);
 BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner, ULONG CountOfEntries, PEXPLICIT_ACCESS pListOfEntries, BOOL bMergeEntries);
+BOOL DeleteEntryFromDalc(PSECURITY_DESCRIPTOR pSD, DWORD dwIndex);
