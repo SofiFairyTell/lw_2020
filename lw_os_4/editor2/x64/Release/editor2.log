@@ -1,0 +1,7 @@
+﻿  editor2.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\editor2\editor2.cpp(139): warning C4244: инициализация: преобразование "ULONG_PTR" в "DWORD", возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\editor2\editor2.cpp(220): warning C4101: hDC: неиспользованная локальная переменная
+  Создание кода
+  All 25 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  editor2.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Release\editor2.exe

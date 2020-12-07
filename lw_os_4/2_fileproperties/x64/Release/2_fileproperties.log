@@ -4,6 +4,6 @@ c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(473):
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(471): warning C4101: size: неиспользованная локальная переменная
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_4\fileinfo\fileinfofunc.cpp(516): warning C4267: инициализация: преобразование из "size_t" в "DWORD"; возможна потеря данных
   Создание кода
-  Создание кода завершено
   All 23 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
   2_fileproperties.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_4\x64\Release\2_fileproperties.exe
