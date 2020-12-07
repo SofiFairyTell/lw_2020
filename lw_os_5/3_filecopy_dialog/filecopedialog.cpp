@@ -3,19 +3,15 @@
 
 /*Живут здесь пока не придумаю как переписать*/
 HANDLE LogonUserToLocalComputer();
-HANDLE OpenUserToken(
-	LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, 
+HANDLE OpenUserToken(LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, 
 	DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB,
 	TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL);
 
-#include "FileCopeDialogHeader.h"
-#include <string>
-
-
-BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 
 TCHAR szUserName[UNLEN + 1];
 TCHAR szPassword[51];
+
+HANDLE hToken;
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow)
 {
@@ -100,9 +96,10 @@ INT_PTR CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 		{
 			/*TCHAR szUserName[UNLEN + 1];
 			TCHAR szPassword[51];*/
-			GetDlgItemText(hwnd, IDC_USER, szUserName, _countof(szUserName));//это имя и
-			GetDlgItemText(hwnd, IDC_PASSWORD, szPassword, _countof(szUserName));//это  пароль
-			LogonUserToLocalComputer();
+			GetDlgItemText(hWnd, IDC_USER, szUserName, _countof(szUserName));//это имя и
+			GetDlgItemText(hWnd, IDC_PASSWORD, szPassword, _countof(szUserName));//это  пароль
+			hToken = LogonUserToLocalComputer();
+			EndDialog(hWnd, 0);
 		}break;
 		case IDCANCEL:
 			EndDialog(hWnd, 0);
@@ -116,6 +113,44 @@ INT_PTR CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 
 	return FALSE;
 }
+
+HANDLE LogonUserToLocalComputer()
+{
+	for (int j = 0; j < 3; ++j)
+	{
+		// получение маркера доступа пользователя
+		HANDLE hToken = OpenUserToken(szUserName, TEXT("."), szPassword,
+			LOGON32_LOGON_INTERACTIVE,
+			TOKEN_QUERY | TOKEN_IMPERSONATE, //для получения информации о содержимом маркера доступа | разрешение замещать маркер доступа процесса
+			NULL, TokenImpersonation, SecurityImpersonation);
+
+		if (NULL != hToken)
+		{
+			return hToken;
+		} // if
+	} // for
+
+	return NULL;
+}
+
+HANDLE OpenUserToken(LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB, TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL)
+{
+	HANDLE TOKEN = NULL;
+	BOOL BRET = LogonUser(lpUserName, lpDomain, lpPassword, LogonType, LOGON32_PROVIDER_DEFAULT, &TOKEN);//получение маркера доступа указанного пользователя
+	if (FALSE != BRET)
+	{
+		HANDLE newTOKEN = NULL;
+		BRET = DuplicateTokenEx(TOKEN, DesireAcces, PSECUR_ATTRIB, IMPERSONATION_LEVEL, TOKEN_TYP, &newTOKEN);//duble marker of acces
+		CloseHandle(TOKEN);//КАК ОН БУДЕТ РАБОТАТЬ ЕСЛИ МЫ ЕГО ЗАКРЫЛИ???
+		TOKEN = (FALSE != BRET) ? newTOKEN : NULL;
+	}
+	return TOKEN;
+}
+
+
+
+
+
 
 
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -219,7 +254,7 @@ BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 	lstrcat(szFind, L"\\*"); //ищем файлы с любым именем и расширением
 
 	hFind = FindFirstFile(szFind, &ffd);
-	if (hFind == NULL)
+	if (hFind == INVALID_HANDLE_VALUE)
 	{
 		return FALSE;
 	}
@@ -239,8 +274,7 @@ BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			if (lstrcmp(ffd.cFileName, L".") == 0 || lstrcmp(ffd.cFileName, L"..") == 0) continue;
-
-			CreateDirectoryEx(szOutFileName, NULL, NULL);//копирование со всеми атрибутами??
+			CreateDirectory(szOutFileName, NULL);//копирование со всеми атрибутами??
 			CopyDirectoryContent(szInFileName, szOutFileName);
 		}
 		else
@@ -254,6 +288,18 @@ BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 	FindClose(hFind);
 	return TRUE;
 }
+
+BOOL CopyDirectoryContent_Dir(LPCTSTR szInDirName, LPCTSTR szOutDirName)
+{
+	BOOL RetRes = CreateDirectory(szOutDirName, NULL);
+	if (RetRes != FALSE)
+	{
+		CopyDirectoryContent(szInDirName, szOutDirName);
+	}
+	return RetRes;
+
+}
+
 
 void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
@@ -273,7 +319,7 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		Если папка, то сформируем с ней маршрут и продолжим поиск*/
 		WIN32_FIND_DATA ffd;
 		HANDLE hFind;
-		BOOL BRET;
+		BOOL BRET = FALSE;
 		LPCTSTR FILE = PathFindFileNameW(FromName);
 
 
@@ -302,40 +348,45 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				// выполняем операцию с файлом/каталогом
 				lstrcat(ToName, L"\\");
 				lstrcat(ToName, FILE);
-				CreateDirectory(ToName, NULL);
-				BRET = CopyDirectoryContent(FromName, ToName);
-
+				//CreateDirectory(ToName, NULL);
+				BRET = CopyDirectoryContent_Dir(FromName, ToName);
 				// получим код последней ошибки
 				DWORD dwError = (FALSE == BRET) ? GetLastError() : ERROR_SUCCESS;
 
 				// завершаем олицитворение
 				RevertToSelf();
 
+
 				if (ERROR_ACCESS_DENIED == dwError) // (!) ошибка: отказано в доступе
 				{
-					//_tprintf(TEXT("> Отказано в доступе.\n\n"));
 					MessageBox(hwnd, L"Отказано в доступе", L" !", MB_OK);
 					// получаем маркер доступа пользователя
-					HANDLE hToken = LogonUserToLocalComputer();
 
-					if (NULL != hToken)
+					DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);//окно для запроса пароля и логина
+
+					//HANDLE hToken = LogonUserToLocalComputer();
+
+					if (NULL != hToken)//глобальный
 					{
 						// начинаем олицитворение
 						ImpersonateLoggedOnUser(hToken);
 						// закрываем маркер доступа
 						CloseHandle(hToken);
-					} // if
+
+						
+						//BRET = CopyDirectoryContent_Dir(FromName, ToName);
+					} 
 					else
 					{
 						break; // (!) выходим из цикла
-					} // else
-				} // if
+					} 
+				} 
 				else
 				{
 					SetLastError(dwError);
 					break; // (!) выходим из цикла
-				} // else
-			} // for
+				}
+			} 
 		}
 		else
 		{
@@ -344,43 +395,31 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			BRET = CopyFile(FromName, ToName, TRUE);
 		}
 
+			TCHAR Message[MAX_PATH];
+			if (BRET == 0)
+			{
+				lstrcpy(Message, L"Файлы не скопированы в папку: ");
+				lstrcat(Message, ToName);
+				MessageBox(hwnd, Message, L"Ошибка\0", MB_OK);
+				SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+				SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
 
-		TCHAR Message[MAX_PATH];
-		if (BRET == 0)
-		{
-			lstrcpy(Message, L"Файлы не скопированы в папку: ");
-			lstrcat(Message, ToName);
-			MessageBox(hwnd, Message, L"Ошибка", MB_OK);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
-			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-
-		}
-		else
-		{
-			lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
-			lstrcat(Message, ToName);
-			MessageBox(hwnd, Message, L" Успех!", MB_OK);
-			SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
-			SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-		}
-
-		
-		/*If something wrong*/
-		/*HINSTANCE hInstance = GetWindowInstance(hwnd);
-		DialogBox(hInstance, MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);*/
-
+			}
+			else
+			{
+				lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
+				lstrcat(Message, ToName);
+				MessageBox(hwnd, Message, L" Успех!", MB_OK);
+				SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+				SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+			}
+					   			
 			/*If something wrong*/
-			HINSTANCE hInstance = GetWindowInstance(hwnd);
-			int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
+		/*	HINSTANCE hInstance = GetWindowInstance(hwnd);*/
+			//int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
 
-
-
-
-
-
-
-
-	}	break;
+	}
+	break;
 
 	case IDCANCEL:
 	{
@@ -392,48 +431,4 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	}
 }
 
-HANDLE LogonUserToLocalComputer()
-{
-	for (int j = 0; j < 3; ++j) 
-	{
-		//_tprintf(TEXT("> ГЁГ¬Гї ГЇГ®Г«ГјГ§Г®ГўГ ГІГҐГ«Гї: "));
-		//if (!getline(szUserName, _countof(szUserName)))
-		//{
-		//	break; // (!) ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
-		//} // if
 
-		//_tprintf(TEXT("> ГЇГ Г°Г®Г«Гј: "));
-		//getline(szPassword, _countof(szPassword), _T('*'));
-
-		//_tprintf(TEXT("\n"));
-		//HINSTANCE hInstance = GetWindowInstance(hwnd);
-		//int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
-
-		// получение маркера доступа пользователя
-		HANDLE hToken = OpenUserToken(szUserName, TEXT("."), szPassword,
-			LOGON32_LOGON_INTERACTIVE, 
-			TOKEN_QUERY | TOKEN_IMPERSONATE, //для получения информации о содержимом маркера доступа | разрешение замещать маркер доступа процесса
-			NULL, TokenImpersonation, SecurityImpersonation);
-
-		if (NULL != hToken)
-		{
-			return hToken; 
-		} // if
-	} // for
-
-	return NULL;
-}
-
-HANDLE OpenUserToken(LPCTSTR lpUserName, LPCTSTR lpDomain, LPCTSTR lpPassword, DWORD LogonType, DWORD DesireAcces, PSECURITY_ATTRIBUTES PSECUR_ATTRIB, TOKEN_TYPE TOKEN_TYP, SECURITY_IMPERSONATION_LEVEL IMPERSONATION_LEVEL)
-{
-	HANDLE TOKEN = NULL;
-	BOOL BRET = LogonUser(lpUserName,lpDomain,lpPassword,LogonType,	LOGON32_PROVIDER_DEFAULT, &TOKEN);//получение маркера доступа указанного пользователя
-	if (FALSE != BRET)
-	{
-		HANDLE newTOKEN = NULL;
-		BRET = DuplicateTokenEx(TOKEN, DesireAcces, PSECUR_ATTRIB, IMPERSONATION_LEVEL, TOKEN_TYP, &newTOKEN);//duble marker of acces
-		CloseHandle(TOKEN);//КАК ОН БУДЕТ РАБОТАТЬ ЕСЛИ МЫ ЕГО ЗАКРЫЛИ???
-		TOKEN = (FALSE != BRET) ? newTOKEN : NULL;
-	}
-	return TOKEN;
-}

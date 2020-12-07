@@ -34,6 +34,8 @@ BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, L
 BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC lpFunc);
 BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 
+BOOL CopyDirectoryContent_Dir(LPCTSTR szInDirName, LPCTSTR szOutDirName);
+BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 // процедура диалогового окна 
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

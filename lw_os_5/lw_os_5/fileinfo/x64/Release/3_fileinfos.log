@@ -1,0 +1,6 @@
+﻿  Source.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\lw_os_5\fileinfo\source.cpp(277): warning C4244: инициализация: преобразование "INT_PTR" в "int", возможна потеря данных
+  Создание кода
+  All 17 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  3_fileinfos.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Release\3_fileinfo.exe

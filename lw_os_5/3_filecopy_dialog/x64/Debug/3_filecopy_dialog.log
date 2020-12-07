@@ -1,9 +1,8 @@
 ﻿  filecopedialog.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(141): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(160): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(125): warning C4101: hdc: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(132): warning C4101: nSize: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(133): warning C4101: szBuf: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(374): warning C4244: инициализация: преобразование "INT_PTR" в "int", возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(275): warning C4101: hFind: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(176): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(195): warning C4554: "&": проверьте приоритет операторов на ошибки; для уточнения приоритета используйте скобки
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(160): warning C4101: hdc: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(167): warning C4101: nSize: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(168): warning C4101: szBuf: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(321): warning C4101: hFind: неиспользованная локальная переменная
   3_filecopy_dialog.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Debug\3_filecopy_dialog.exe
