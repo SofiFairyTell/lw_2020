@@ -26,14 +26,6 @@ name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #pragma comment (lib, "shlwapi.lib")
 
-
-
-
-typedef BOOL(__stdcall *LPSEARCHFUNC)(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);BOOL Copy(LPCTSTR lpszFileName, const LPWIN32_FILE_ATTRIBUTE_DATA lpFileAttributeData, LPVOID lpvParam);
-BOOL FileSearch(LPCTSTR lpszFileName, LPCTSTR path, LPSEARCHFUNC lpSearchFunc, LPVOID lpvParam);
-BOOL FileOperation(LPCTSTR lpszFileName, LPCTSTR lpTargetDirectory, LPSEARCHFUNC lpFunc);
-BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName);
-
 BOOL CopyDirectoryContent_Dir(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 BOOL DirectoryExists(LPCTSTR szPath); //œ–Œ¬≈– ¿ —”Ÿ≈—“¬Œ¬¿Õ»ﬂ

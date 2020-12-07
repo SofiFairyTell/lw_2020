@@ -243,6 +243,10 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		ShowWindow(hHide, SW_HIDE);
 		/*да!*/
 
+		LPWSTR Owner = NULL;
+		//RetRes = GetOwnerName_W(Sec_Descriptor, &Owner);//полуение имени владельца
+		GetDlgItemText(hwnd, IDC_EDIT_OWNER, Owner, sizeof(Owner));// копируем имя учетной записи владельца в поле "Текущий владелец"
+
 		TCHAR NewOwner[UNLEN + 1]; // новое имя владельца
 
 		GetDlgItemText(hwnd, IDC_NEW_OWNER, NewOwner, _countof(NewOwner));//это имя и его к указателю lpszFileName
@@ -258,6 +262,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
 			ea.Trustee.ptstrName = (LPWSTR)psid;
 			if (SetFileSecurityInfo(FileName, NULL, 1, &ea, TRUE) == TRUE)
+			//if (SetFileSecurityInfo(FileName, NewOwner, 0, NULL, FALSE) == TRUE)
 			{
 				SetDlgItemText(hwnd, IDC_NEW_OWNER, NULL);
 			}
@@ -736,7 +741,7 @@ BOOL DialogAce_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 		// получим атрибуты файла/каталога
 		DWORD dwFileAttributes = GetFileAttributes(FileName);
 
-		// опредtлим можно, ли редактировать элемент ACE (только для каталогов)
+		// определим можно, ли редактировать элемент ACE (только для каталогов)
 		fEditable = ((INVALID_FILE_ATTRIBUTES != dwFileAttributes) && (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) ? TRUE : FALSE;
 	} 
 
@@ -766,10 +771,9 @@ BOOL DialogAce_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 
 	EnableWindow(GetDlgItem(hwnd, IDC_CHECK_INHERIT_NO_PROPAGATE), fEditable);
 
-	// /// //
 
 	return TRUE;
-} // DialogAce_OnInitDialog
+} 
 
 // ----------------------------------------------------------------------------------------------
 void DialogAce_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
