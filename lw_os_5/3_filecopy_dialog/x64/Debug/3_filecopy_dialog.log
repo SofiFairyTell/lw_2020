@@ -4,5 +4,7 @@ c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialo
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(160): warning C4101: hdc: неиспользованная локальная переменная
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(167): warning C4101: nSize: неиспользованная локальная переменная
 c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(168): warning C4101: szBuf: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(321): warning C4101: hFind: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(338): warning C4101: hFind: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(337): warning C4101: ffd: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_os_5\3_filecopy_dialog\filecopedialog.cpp(311): warning C4715: CopyDirectoryContent_Dir: значение возвращается не при всех путях выполнения
   3_filecopy_dialog.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_5\lw_os_5\x64\Debug\3_filecopy_dialog.exe

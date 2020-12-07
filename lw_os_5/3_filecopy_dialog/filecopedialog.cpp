@@ -291,15 +291,32 @@ BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 
 BOOL CopyDirectoryContent_Dir(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 {
-	BOOL RetRes = CreateDirectory(szOutDirName, NULL);
-	if (RetRes != FALSE)
+	if (!DirectoryExists(szOutDirName))
 	{
-		CopyDirectoryContent(szInDirName, szOutDirName);
+		BOOL RetRes = CreateDirectory(szOutDirName, NULL);
+		if ((GetLastError() != ERROR_ACCESS_DENIED))
+		{
+				CopyDirectoryContent(szInDirName, szOutDirName);	
+		}
+		else
+		{
+				return RetRes;
+		}
 	}
-	return RetRes;
-
+	else
+	{
+		MessageBox(hwnd, L"Папка уже существует", L" !", MB_OK);
+		return FALSE;
+	}
 }
 
+BOOL DirectoryExists(LPCTSTR szPath)
+{
+	DWORD dwAttrib = GetFileAttributes(szPath);
+
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
 void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
@@ -339,42 +356,32 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		if ((FromAttributes& FILE_ATTRIBUTE_DIRECTORY) != 0)//является каталогом
 		{
-			/*lstrcat(ToName, L"\\");
-			lstrcat(ToName, FILE);
-			CreateDirectory(ToName, NULL);*/
-			//BRET = CopyDirectoryContent(FromName, ToName);
-			for (int i = 0; i < 3; ++i) // максимальное число попыток = 3
-			{
+
+			//for (int i = 0; i < 3; ++i) // максимальное число попыток = 3
+			//{
 				// выполняем операцию с файлом/каталогом
 				lstrcat(ToName, L"\\");
 				lstrcat(ToName, FILE);
 				//CreateDirectory(ToName, NULL);
 				BRET = CopyDirectoryContent_Dir(FromName, ToName);
 				// получим код последней ошибки
-				DWORD dwError = (FALSE == BRET) ? GetLastError() : ERROR_SUCCESS;
 
+				/*Блок, где будет вызван ввод пароля в случае отказа в доступе*/
+				DWORD dwError = (FALSE == BRET) ? GetLastError() : ERROR_SUCCESS;
 				// завершаем олицитворение
 				RevertToSelf();
-
-
 				if (ERROR_ACCESS_DENIED == dwError) // (!) ошибка: отказано в доступе
 				{
 					MessageBox(hwnd, L"Отказано в доступе", L" !", MB_OK);
 					// получаем маркер доступа пользователя
-
 					DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);//окно для запроса пароля и логина
-
 					//HANDLE hToken = LogonUserToLocalComputer();
-
 					if (NULL != hToken)//глобальный
 					{
-						// начинаем олицитворение
-						ImpersonateLoggedOnUser(hToken);
-						// закрываем маркер доступа
-						CloseHandle(hToken);
-
 						
-						//BRET = CopyDirectoryContent_Dir(FromName, ToName);
+						ImpersonateLoggedOnUser(hToken);// начинаем олицитворение				
+						CloseHandle(hToken);// закрываем маркер доступа				
+						BRET = CopyDirectoryContent_Dir(FromName, ToName);
 					} 
 					else
 					{
@@ -386,13 +393,58 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 					SetLastError(dwError);
 					break; // (!) выходим из цикла
 				}
-			} 
+				/*------------------------------------------------------*/
+			//} 
 		}
 		else
 		{
 			lstrcat(ToName, L"\\");
-			lstrcat(ToName, ffd.cFileName);
-			BRET = CopyFile(FromName, ToName, TRUE);
+			LPCTSTR FILE = PathFindFileNameW(FromName);
+			lstrcat(ToName, FILE);
+			/*hFind = FindFirstFile(ToName, &ffd);
+			if (hFind == INVALID_HANDLE_VALUE)
+			{
+				BRET = FALSE;
+			}
+			else
+			{*/
+				BRET = CopyFile(FromName, ToName, TRUE);
+			//}
+
+
+			/*Блок, где будет вызван ввод пароля в случае отказа в доступе*/
+			DWORD dwError = (FALSE == BRET) ? GetLastError() : ERROR_SUCCESS;
+			// завершаем олицитворение
+			RevertToSelf();
+			if (ERROR_ACCESS_DENIED == dwError) // (!) ошибка: отказано в доступе
+			{
+				MessageBox(hwnd, L"Отказано в доступе", L" !", MB_OK);
+				// получаем маркер доступа пользователя
+
+				DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);//окно для запроса пароля и логина
+
+				//HANDLE hToken = LogonUserToLocalComputer();
+
+				if (NULL != hToken)//глобальный
+				{
+					// начинаем олицитворение
+					ImpersonateLoggedOnUser(hToken);
+					// закрываем маркер доступа
+					CloseHandle(hToken);
+					BRET = CopyFile(FromName, ToName, TRUE);
+
+				}
+				else
+				{
+					break; // (!) выходим из цикла
+				}
+			}
+			else
+			{
+				SetLastError(dwError);
+				break; // (!) выходим из цикла
+			}
+			/*------------------------------------------------------*/
 		}
 
 			TCHAR Message[MAX_PATH];
@@ -414,9 +466,6 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
 			}
 					   			
-			/*If something wrong*/
-		/*	HINSTANCE hInstance = GetWindowInstance(hwnd);*/
-			//int mdRes = DialogBox(GetWindowInstance(hwnd), MAKEINTRESOURCE(IDD_PASSWORD), hwnd, ChildDlgProc);
 
 	}
 	break;

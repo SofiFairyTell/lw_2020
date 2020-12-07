@@ -36,6 +36,7 @@ BOOL Copy(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 
 BOOL CopyDirectoryContent_Dir(LPCTSTR szInDirName, LPCTSTR szOutDirName);
 BOOL CopyDirectoryContent(LPCTSTR szInDirName, LPCTSTR szOutDirName);
+BOOL DirectoryExists(LPCTSTR szPath); //ПРОВЕРКА СУЩЕСТВОВАНИЯ
 // процедура диалогового окна 
 INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK MainWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
