@@ -254,25 +254,44 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		PSID psid;
 		BOOL bret = GetAccountSID_W(NewOwner, &psid);
 		if (bret != FALSE)
-		{
-			EXPLICIT_ACCESS ea;
-			ea.grfAccessPermissions = 0;
-			ea.grfAccessMode = GRANT_ACCESS;
-			ea.grfInheritance = NO_INHERITANCE;
-			ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-			ea.Trustee.ptstrName = (LPWSTR)psid;
-			if (SetFileSecurityInfo(FileName, NULL, 1, &ea, TRUE) == TRUE)
-			//if (SetFileSecurityInfo(FileName, NewOwner, 0, NULL, FALSE) == TRUE)
+		{			
+			if (SetFileSecurityInfo(FileName, NewOwner, 0, NULL, FALSE) == TRUE)
 			{
 				SetDlgItemText(hwnd, IDC_NEW_OWNER, NULL);
 			}
 			else
 			{
-				MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя."), NULL, MB_OK | MB_ICONERROR);
+				DWORD dwRetCode = GetLastError();
+
+				if (dwRetCode == ERROR_INVALID_OWNER)
+				{
+					MessageBox(hwnd, TEXT("Этот пользователь не может быть владельцем файла или каталога"), NULL, MB_OK | MB_ICONERROR);
+					//Тогда добавим этого пользователя в список DALC. Он будет без прав делать что либо
+					EXPLICIT_ACCESS ea;
+					ea.grfAccessPermissions = 0;
+					ea.grfAccessMode = GRANT_ACCESS;
+					ea.grfInheritance = NO_INHERITANCE;
+					ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+					ea.Trustee.ptstrName = (LPWSTR)psid;
+					if (SetFileSecurityInfo(FileName, NULL, 1, &ea, TRUE) == TRUE)
+					{
+						SetDlgItemText(hwnd, IDC_NEW_OWNER, NULL);
+					}
+					else
+					{
+						MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя."), NULL, MB_OK | MB_ICONERROR);
+					}
+				}
+				else
+				{
+					MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя."), NULL, MB_OK | MB_ICONERROR);
+				}
+				
 			}
+			LocalFree(psid);
+			Edit_SetText(GetDlgItem(hwnd, IDC_NEW_OWNER), TEXT(""));
+			//BOOL RetRes = SetFileSecurityInfo(FileName, NewOwner, 0, NULL, FALSE);
 		}
-		LocalFree(psid);
-		Edit_SetText(GetDlgItem(hwnd, IDC_NEW_OWNER), TEXT(""));
 		ListViewInit(FileName, hwnd);
 	}	
 	break;
@@ -292,8 +311,9 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		// список просмотра DACL - список разграничиваемого контроля доступа
 		HWND hwndLV = GetDlgItem(hwnd, IDC_DACL);
 		BOOL RetRes = FALSE;
-		PACL pDacl;
+		PACL lpDacl;
 		BOOL bDaclPresent, bDaclDefaulted;
+		DWORD dwRetCode;       // код возврата
 		/*for (;;)
 		{*/
 			
@@ -308,11 +328,26 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		//DeleteEntryFromDalc(Sec_Descriptor, iItem);
 
 		// получаем DACL
-		RetRes = GetSecurityDescriptorDacl(Sec_Descriptor, &bDaclPresent, &pDacl, &bDaclDefaulted);
-		if (FALSE != RetRes)
+		//RetRes = GetSecurityDescriptorDacl(Sec_Descriptor, &bDaclPresent, &lpDacl, &bDaclDefaulted);
+
+		// получаем список DACL из дескриптора безопасности
+		if (!GetSecurityDescriptorDacl(
+			Sec_Descriptor,              // адрес дескриптора безопасности
+			&bDaclPresent,     // признак присутствия списка DACL
+			&lpDacl,           // адрес указателя на DACL
+			&bDaclDefaulted))  // признак списка DACL по умолчанию
+				{
+					dwRetCode = GetLastError();
+					MessageBox(hwnd, TEXT("Не удалось сменить владельца. Проверьте правильность введенного имени пользователя.", dwRetCode), NULL, MB_OK | MB_ICONERROR);
+					//printf("Get security descriptor DACL failed.\n");
+					//printf("Error code: %d\n", dwRetCode);
+					break;
+				}
+		else
 		{
-			RetRes = DeleteAce(pDacl, item);// удаляем элемент из DACL
-		} 
+				RetRes = DeleteAce(lpDacl, item);// удаляем элемент из DACL
+		}
+
 		
 		ListView_DeleteItem(hwndLV, item);// удаляем элемент из списка просмотра DACL
 		//} // for
@@ -644,6 +679,15 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 			LocalFree(OldSD);
 	}
 
+	// проверяем структуру дескриптора безопасности
+	if (!IsValidSecurityDescriptor(&secur_desc))
+	{
+		DWORD dwRetCode = GetLastError();
+
+	}
+
+
+
 	if (RetRes != NULL)
 	{
 		SECURITY_INFORMATION si = 0;
@@ -801,7 +845,7 @@ void DialogAce_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 				// освобождаем выделенную память
 				delete[] lpszName, lpszName = NULL;
-			} // if
+			} 
 
 			if (NULL != pSid)
 			{
@@ -827,7 +871,6 @@ void DialogAce_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				hwndCtl = GetDlgItem(hwnd, IDC_ACCESS_MODE);
 				ea.grfAccessMode = (ACCESS_MODE)ComboBox_GetItemData(hwndCtl, ComboBox_GetCurSel(hwndCtl));
 
-				// /// //
 
 				hwndCtl = GetDlgItem(hwnd, IDC_INHERIT);
 				ea.grfInheritance = (DWORD)ComboBox_GetItemData(hwndCtl, ComboBox_GetCurSel(hwndCtl));
@@ -838,7 +881,6 @@ void DialogAce_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 					ea.grfInheritance |= INHERIT_NO_PROPAGATE;
 				} 
 
-				// /// //
 
 				if (0 != ea.grfAccessPermissions)
 				{
