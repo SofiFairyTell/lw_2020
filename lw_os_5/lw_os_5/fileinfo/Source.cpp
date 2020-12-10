@@ -694,6 +694,8 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 		if (psid_Owner != NULL) si |= OWNER_SECURITY_INFORMATION;
 		if (pNewDacl != NULL) si |= DACL_SECURITY_INFORMATION;
 
+		/*Если пользователь который не принадлежит группе администраторов пытается изменить себя на владельца
+		То это приведет к появлению ошикби INVALID_OWNER*/
 		RetRes = SetFileSecurity(FileName, si, &secur_desc); //изменяем дескриптор безопасности для файла
 	}
 
