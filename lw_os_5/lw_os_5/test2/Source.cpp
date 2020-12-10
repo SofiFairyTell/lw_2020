@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 
-#define SAFE_FREE(ptr) if (NULL != (ptr)) LocalFree(ptr)
+#define LOCAL_FREE(ptr) if (NULL != (ptr)) LocalFree(ptr)
 /*Функции и переменные*/
 LSA_HANDLE OpenLocalPolicy(ACCESS_MASK AccessType);//открытие дескриптора политики безопасности локального пк
 
@@ -106,7 +106,7 @@ int _tmain()
 	}
 
 	system("pause");
-	SAFE_FREE(sidDomain);
+	LOCAL_FREE(sidDomain);
 
 	LsaClose(PolicyHandle);
 
@@ -329,7 +329,7 @@ void CoutSID(PSID psid)
 		wprintf(TEXT("%s (%s)\n\n"), AccountName, lpSID);
 	}
 	/*Очистка памяти?*/
-	SAFE_FREE(lpSID);
-	SAFE_FREE(AccountName);
+	LOCAL_FREE(lpSID);
+	LOCAL_FREE(AccountName);
 }
 

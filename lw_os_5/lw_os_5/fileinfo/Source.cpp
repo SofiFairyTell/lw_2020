@@ -452,8 +452,8 @@ BOOL ListViewInit(LPTSTR path, HWND hwnd)
 			{
 				if (grfInheritance == dwInherit[j]) // найдено значение
 				{
-					// копируем в €чейку списка просмотра DACL описание дл€ значени€ пол€ grfInheritance
-					ListView_SetItemText(hwndLV, iItem, 2, (LPTSTR)szInheritText[j]);
+					
+					ListView_SetItemText(hwndLV, iItem, 2, (LPTSTR)szInheritText[j]);// копируем в €чейку списка просмотра DACL описание дл€ значени€ пол€ grfInheritance
 
 					break; // выходим из цикла
 				} 
@@ -491,19 +491,25 @@ BOOL GetFileSecurityDescriptor(LPCWSTR lpFileName, SECURITY_INFORMATION Requeste
 
 BOOL GetItemFromDACL(PSECURITY_DESCRIPTOR pSecurityDescriptor, PULONG pcCountOfEntries, PEXPLICIT_ACCESS *pListOfEntries)
 {
-	PACL pDacl = NULL;
-	BOOL lpbDaclPresent = FALSE,  //текущий
-		lpbDaclDefaulted = FALSE;//по умолчанию?
+	PACL pDacl = NULL;// указатель на список управлени€ доступом
+	BOOL lpbDaclPresent = FALSE; // признак присутстви€ списка DACL
+	BOOL lpbDaclDefaulted = FALSE; // признак списка DACL по умолчанию
 	BOOL RetRes;
 	DWORD Result; //код результата извлечени€ элментов из DALC
 	
+
+
 	// получаем DACL
 	RetRes = GetSecurityDescriptorDacl(pSecurityDescriptor, &lpbDaclPresent, &pDacl, &lpbDaclDefaulted);
 
 	if (RetRes != FALSE && lpbDaclPresent != FALSE)
 	{
-		// извлекаем элементы из DACL
-		Result = GetExplicitEntriesFromAcl(pDacl, pcCountOfEntries, pListOfEntries);
+		// читаем элементы из списка DACL
+		Result = GetExplicitEntriesFromAcl(
+			pDacl,				// адрес списка DACL
+			pcCountOfEntries,	// адрес дл€ количества элементов
+			pListOfEntries);	// адрес указател€ на буфер
+
 		RetRes = (ERROR_SUCCESS == Result) ? TRUE : FALSE;
 	} 
 	else
@@ -717,7 +723,8 @@ BOOL SetFileSecurityInfo(LPCTSTR FileName, LPWSTR NewOwner,ULONG CountOfEntries,
 BOOL DialogAce_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 {
 	/*Variable*/
-	PEXPLICIT_ACCESS pEA = (PEXPLICIT_ACCESS)lParam; // элемент ACE
+	PEXPLICIT_ACCESS pEA = (PEXPLICIT_ACCESS)lParam; // указатель на массив элементов типа
+													// EXPLICIT_ACCESS
 	DWORD grfAccessMode;// дл€ получени€ режима доступа
 	HWND hwndCtl;//дескриптор дл€ списка
 

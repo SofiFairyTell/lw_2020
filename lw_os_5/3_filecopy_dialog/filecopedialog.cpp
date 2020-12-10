@@ -99,7 +99,8 @@ INT_PTR CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 			GetDlgItemText(hWnd, IDC_USER, szUserName, _countof(szUserName));//это имя и
 			GetDlgItemText(hWnd, IDC_PASSWORD, szPassword, _countof(szUserName));//это  пароль
 			hToken = LogonUserToLocalComputer();
-			EndDialog(hWnd, 0);
+			EndDialog(hWnd, IDOK);
+			return TRUE;
 		}break;
 		case IDCANCEL:
 			EndDialog(hWnd, 0);
@@ -110,8 +111,8 @@ INT_PTR CALLBACK ChildDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 		EndDialog(hWnd, 0);
 		break;
 	}
-
-	return FALSE;
+	//return (int)uMsg.wParam;
+return FALSE;
 }
 
 HANDLE LogonUserToLocalComputer()
@@ -296,7 +297,7 @@ BOOL CopyDirectoryContent_Dir(LPCTSTR szInDirName, LPCTSTR szOutDirName)
 		BOOL RetRes = CreateDirectory(szOutDirName, NULL);
 		if ((GetLastError() != ERROR_ACCESS_DENIED))
 		{
-				CopyDirectoryContent(szInDirName, szOutDirName);	
+				return RetRes = CopyDirectoryContent(szInDirName, szOutDirName);	
 		}
 		else
 		{
@@ -382,6 +383,24 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 						ImpersonateLoggedOnUser(hToken);// начинаем олицитворение				
 						CloseHandle(hToken);// закрываем маркер доступа				
 						BRET = CopyDirectoryContent_Dir(FromName, ToName);
+						TCHAR Message[MAX_PATH];
+						if (BRET == 0)
+						{
+							lstrcpy(Message, L"Файлы не скопированы в папку: ");
+							lstrcat(Message, ToName);
+							MessageBox(hwnd, Message, L"Ошибка\0", MB_OK);
+							SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+							SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+						}
+						else
+						{
+							lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
+							lstrcat(Message, ToName);
+							MessageBox(hwnd, Message, L" Успех!", MB_OK);
+							SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+							SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+						}
+
 					} 
 					else
 					{
@@ -432,7 +451,24 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 					// закрываем маркер доступа
 					CloseHandle(hToken);
 					BRET = CopyFile(FromName, ToName, TRUE);
+					TCHAR Message[MAX_PATH];
+						if (BRET == 0)
+						{
+							lstrcpy(Message, L"Файлы не скопированы в папку: ");
+							lstrcat(Message, ToName);
+							MessageBox(hwnd, Message, L"Ошибка\0", MB_OK);
+							SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+							SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
 
+						}
+						else
+						{
+							lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
+							lstrcat(Message, ToName);
+							MessageBox(hwnd, Message, L" Успех!", MB_OK);
+							SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
+							SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
+						}
 				}
 				else
 				{
@@ -447,24 +483,7 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			/*------------------------------------------------------*/
 		}
 
-			TCHAR Message[MAX_PATH];
-			if (BRET == 0)
-			{
-				lstrcpy(Message, L"Файлы не скопированы в папку: ");
-				lstrcat(Message, ToName);
-				MessageBox(hwnd, Message, L"Ошибка\0", MB_OK);
-				SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
-				SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-
-			}
-			else
-			{
-				lstrcpy(Message, L"Файлы скопированы. Проверьте папку: ");
-				lstrcat(Message, ToName);
-				MessageBox(hwnd, Message, L" Успех!", MB_OK);
-				SetDlgItemText(hwnd, IDC_EDIT_FROM, L" ");
-				SetDlgItemText(hwnd, IDC_EDIT_TO, L" ");
-			}
+			
 					   			
 
 	}
