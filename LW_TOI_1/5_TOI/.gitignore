@@ -1,0 +1,4 @@
+*.suo
+ShilglesLab/bin/*
+ShilglesLab/obj/*
+/.vs/ShilglesLab/v15/Server/sqlite3

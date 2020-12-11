@@ -1,7 +1,0 @@
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\bin\Debug\stemmerporthersearch.exe.config
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\bin\Debug\stemmerporthersearch.exe
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\bin\Debug\stemmerporthersearch.pdb
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\obj\Debug\stemmerporthersearch.csprojAssemblyReference.cache
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\obj\Debug\stemmerporthersearch.csproj.CoreCompileInputs.cache
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\obj\Debug\stemmerporthersearch.exe
-C:\Users\Kurbatova\source\LW2020\lw_os_2\stemmerporthersearch\stemmerporthersearch\obj\Debug\stemmerporthersearch.pdb

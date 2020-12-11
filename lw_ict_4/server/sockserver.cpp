@@ -92,7 +92,7 @@
 
 #include <winsock2.h>
 #include <iostream>
-#pragma warning(disable: 4996)
+
 using namespace std;
 struct CLIENT_INFO
 {

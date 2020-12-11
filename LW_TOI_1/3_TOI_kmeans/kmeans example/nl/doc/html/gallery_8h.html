@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=Windows-1251">
+<title>NL: Файл gallery.h</title>
+<link href="nl.doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Создано системой Doxygen 1.4.7 -->
+<div class="tabs">
+  <ul>
+    <li><a href="index.html"><span>Титульная&nbsp;страница</span></a></li>
+    <li><a href="classes.html"><span>Классы</span></a></li>
+    <li id="current"><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="pages.html"><span>Описания</span></a></li>
+    <li><a href="examples.html"><span>Примеры</span></a></li>
+    <li>
+      <form action="search.php" method="get">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td><label>&nbsp;Поиск&nbsp;</label></td>
+            <td><input type="text" name="query" value="" size="20" accesskey="s"/></td>
+          </tr>
+        </table>
+      </form>
+    </li>
+  </ul></div>
+<div class="tabs">
+  <ul>
+    <li><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="globals.html"><span>Список&nbsp;членов&nbsp;всех&nbsp;файлов</span></a></li>
+  </ul></div>
+<h1>Файл gallery.h</h1>Различные матрицы. <a href="#_details">Подробнее...</a>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Функции</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="gallery_8h.html#2ad5d2c464feeb850d00367096968543">gall_rand_sym</a> (size_t n, size_t nz, size_t *IS, size_t *JS, size_t *M)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Случайная разреженная симметричная матрица S.  <a href="#2ad5d2c464feeb850d00367096968543"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="gallery_8h.html#cd8afd0406eafcb2b6aa4888b377c463">gall_laplace</a> (size_t m, size_t n, size_t *IA, size_t *JA, double *AN)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Матрица сеточной аппроксимации уравнения Пуассона.  <a href="#cd8afd0406eafcb2b6aa4888b377c463"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="gallery_8h.html#8d1aac071d96a97dd1772cf496a3da3e">gall_laplace_size</a> (size_t m, size_t n, size_t *N, size_t *nz)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Размеры представления матрицы сеточной аппроксимации уравнения Пуассона.  <a href="#8d1aac071d96a97dd1772cf496a3da3e"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="gallery_8h.html#f73d502339773ae61364afdd78a01f72">gall_laplace_sym</a> (size_t m, size_t n, size_t *IA, size_t *JA, double *AN, double *AD)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Матрица сеточной аппроксимации уравнения Пуассона.  <a href="#f73d502339773ae61364afdd78a01f72"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="gallery_8h.html#e6c9fbebc1121ac0836fa5242a24a01f">gall_laplace_sym_size</a> (size_t m, size_t n, size_t *N, size_t *nz)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Размеры представления матрицы сеточной аппроксимации уравнения Пуассона.  <a href="#e6c9fbebc1121ac0836fa5242a24a01f"></a><br></td></tr>
+</table>
+<hr><a name="_details"></a><h2>Подробное описание</h2>
+Различные матрицы. 
+<p>
+Файл содержит функции, генерирующие часто встречающиеся в приложениях матрицы. <hr><h2>Функции</h2>
+<a class="anchor" name="cd8afd0406eafcb2b6aa4888b377c463"></a><!-- doxytag: member="gallery.h::gall_laplace" ref="cd8afd0406eafcb2b6aa4888b377c463" args="(size_t m, size_t n, size_t *IA, size_t *JA, double *AN)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gall_laplace           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>IA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>JA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>AN</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Матрица сеточной аппроксимации уравнения Пуассона. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png"> - размер сетки</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$IA$" src="form_215.png">, <img class="formulaInl" alt="$JA$" src="form_216.png">, <img class="formulaInl" alt="$AN$" src="form_217.png"> - разреженное представление матрицы в RR(O)U-формате </li></ul>
+</li></ul>
+<dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xlaplace_8c-example.html#a71">xlaplace.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="8d1aac071d96a97dd1772cf496a3da3e"></a><!-- doxytag: member="gallery.h::gall_laplace_size" ref="8d1aac071d96a97dd1772cf496a3da3e" args="(size_t m, size_t n, size_t *N, size_t *nz)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gall_laplace_size           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>nz</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Размеры представления матрицы сеточной аппроксимации уравнения Пуассона. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png"> - размер сетки</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$N$" src="form_578.png"> - порядок матрицы</li><li><img class="formulaInl" alt="$nz$" src="form_302.png"> - число ненулевых элементов в RR(O)U-формате </li></ul>
+</li></ul>
+<dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xlaplace_8c-example.html#a69">xlaplace.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="f73d502339773ae61364afdd78a01f72"></a><!-- doxytag: member="gallery.h::gall_laplace_sym" ref="f73d502339773ae61364afdd78a01f72" args="(size_t m, size_t n, size_t *IA, size_t *JA, double *AN, double *AD)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gall_laplace_sym           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>IA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>JA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>AN</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>AD</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Матрица сеточной аппроксимации уравнения Пуассона. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png"> - размер сетки</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$IA$" src="form_215.png">, <img class="formulaInl" alt="$JA$" src="form_216.png">, <img class="formulaInl" alt="$AN$" src="form_217.png">, <img class="formulaInl" alt="$AD$" src="form_218.png"> - разреженное представление матрицы в RR(U)U-формате </li></ul>
+</li></ul>
+<dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xlaplace_8c-example.html#a79">xlaplace.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="e6c9fbebc1121ac0836fa5242a24a01f"></a><!-- doxytag: member="gallery.h::gall_laplace_sym_size" ref="e6c9fbebc1121ac0836fa5242a24a01f" args="(size_t m, size_t n, size_t *N, size_t *nz)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gall_laplace_sym_size           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>nz</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Размеры представления матрицы сеточной аппроксимации уравнения Пуассона. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$m$" src="form_36.png">, <img class="formulaInl" alt="$n$" src="form_37.png"> - размер сетки</li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$N$" src="form_578.png"> - порядок матрицы</li><li><img class="formulaInl" alt="$nz$" src="form_302.png"> - число ненулевых элементов в RR(U)U-формате </li></ul>
+</li></ul>
+<dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xlaplace_8c-example.html#a77">xlaplace.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="2ad5d2c464feeb850d00367096968543"></a><!-- doxytag: member="gallery.h::gall_rand_sym" ref="2ad5d2c464feeb850d00367096968543" args="(size_t n, size_t nz, size_t *IS, size_t *JS, size_t *M)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t gall_rand_sym           </td>
+          <td>(</td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>nz</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>IS</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>JS</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>M</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Случайная разреженная симметричная матрица S. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$n$" src="form_37.png"> - размер матрицы</li><li><img class="formulaInl" alt="$nz$" src="form_302.png"> - число ненулевых элементов</li><li><img class="formulaInl" alt="$M$" src="form_551.png"> - вспомогательный массив длины <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$IS$" src="form_304.png"> - массив длины <img class="formulaInl" alt="$n + 1$" src="form_553.png"></li><li><img class="formulaInl" alt="$JS$" src="form_305.png"> - массив длины <img class="formulaInl" alt="$nz$" src="form_302.png"></li></ul>
+</li><li>Выход:<ul>
+<li><img class="formulaInl" alt="$IS$" src="form_304.png">, <img class="formulaInl" alt="$JS$" src="form_305.png"> - разреженный портрет матрицы в формате RR(U)U </li></ul>
+</li></ul>
+
+</div>
+</div><p>
+<hr size="1"><address style="align: right;"><small>Документация по NL. Последние изменения: Mon Oct 9 12:25:54 2006. Создано системой&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
+</body>
+</html>

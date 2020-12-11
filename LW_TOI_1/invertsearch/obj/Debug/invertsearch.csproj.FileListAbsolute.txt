@@ -1,7 +1,0 @@
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\bin\Debug\ConsoleApp1.exe.config
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\bin\Debug\ConsoleApp1.exe
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\bin\Debug\ConsoleApp1.pdb
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\obj\Debug\invertsearch.csprojAssemblyReference.cache
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\obj\Debug\invertsearch.csproj.CoreCompileInputs.cache
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\obj\Debug\ConsoleApp1.exe
-C:\Users\Kurbatova\source\LW2020\lw_2020\ConsoleApp1\obj\Debug\ConsoleApp1.pdb

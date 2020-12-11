@@ -500,3 +500,12 @@ void Dialog_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 }
 
 
+#define SIZE 20;
+
+struct GeneralHeader
+{
+	DWORD countOfFiles;
+	BYTE adr[20];
+};
+
+

@@ -1,0 +1,181 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=Windows-1251">
+<title>NL: Файл conv.h</title>
+<link href="nl.doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Создано системой Doxygen 1.4.7 -->
+<div class="tabs">
+  <ul>
+    <li><a href="index.html"><span>Титульная&nbsp;страница</span></a></li>
+    <li><a href="classes.html"><span>Классы</span></a></li>
+    <li id="current"><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="pages.html"><span>Описания</span></a></li>
+    <li><a href="examples.html"><span>Примеры</span></a></li>
+    <li>
+      <form action="search.php" method="get">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td><label>&nbsp;Поиск&nbsp;</label></td>
+            <td><input type="text" name="query" value="" size="20" accesskey="s"/></td>
+          </tr>
+        </table>
+      </form>
+    </li>
+  </ul></div>
+<div class="tabs">
+  <ul>
+    <li><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="globals.html"><span>Список&nbsp;членов&nbsp;всех&nbsp;файлов</span></a></li>
+  </ul></div>
+<h1>Файл conv.h</h1>Построение выпуклой оболочки точек на плоскости. <a href="#_details">Подробнее...</a>
+<p>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Классы</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structconv__point.html">conv_point</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Точка на плоскости.  <a href="structconv__point.html#_details">Подробнее...</a><br></td></tr>
+<tr><td colspan="2"><br><h2>Функции</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="conv_8h.html#676365841ed331957eb121587065cb2b">conv_qhull</a> (double *x, double *y, size_t n, size_t *k, size_t *nk, size_t *stack)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Алгоритм QuickHull построения выпуклой оболочки точек на плоскости.  <a href="#676365841ed331957eb121587065cb2b"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="conv_8h.html#26d1e547ede1bff36a61f5aaefe89633">conv_andrew</a> (const double *x, const double *y, size_t n, <a class="el" href="structconv__point.html">conv_point</a> *p, size_t *nk)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Алгоритм Эндрю (модификация обхода Грэхема) построения выпуклой оболочки точек на плоскости.  <a href="#26d1e547ede1bff36a61f5aaefe89633"></a><br></td></tr>
+</table>
+<hr><a name="_details"></a><h2>Подробное описание</h2>
+Построение выпуклой оболочки точек на плоскости. 
+<p>
+<hr><h2>Функции</h2>
+<a class="anchor" name="26d1e547ede1bff36a61f5aaefe89633"></a><!-- doxytag: member="conv.h::conv_andrew" ref="26d1e547ede1bff36a61f5aaefe89633" args="(const double *x, const double *y, size_t n, conv_point *p, size_t *nk)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void conv_andrew           </td>
+          <td>(</td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&nbsp;</td>
+          <td class="paramname"> <em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structconv__point.html">conv_point</a> *&nbsp;</td>
+          <td class="paramname"> <em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>nk</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Алгоритм Эндрю (модификация обхода Грэхема) построения выпуклой оболочки точек на плоскости. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$x$" src="form_40.png">, <img class="formulaInl" alt="$y$" src="form_423.png"> - координаты точек</li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - количество точек</li><li><img class="formulaInl" alt="$p$" src="form_137.png"> - массив длины не менее <img class="formulaInl" alt="$n$" src="form_37.png"></li></ul>
+</li></ul>
+<p>
+<ul>
+<li>Выход:<ul>
+<li><img class="formulaInl" alt="$p$" src="form_137.png"> - точки, являющиеся вершинами выпуклой оболочки, в порядке положительного обхода (против часовой стрелки)</li><li><img class="formulaInl" alt="$nk$" src="form_731.png"> - число вершин выпуклой оболочки</li></ul>
+</li></ul>
+<p>
+Трудоемкость: <img class="formulaInl" alt="$O(n \log n)$" src="form_739.png"> <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xandrew_8c-example.html#a3">xandrew.c</a>.</dl>
+</div>
+</div><p>
+<a class="anchor" name="676365841ed331957eb121587065cb2b"></a><!-- doxytag: member="conv.h::conv_qhull" ref="676365841ed331957eb121587065cb2b" args="(double *x, double *y, size_t n, size_t *k, size_t *nk, size_t *stack)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void conv_qhull           </td>
+          <td>(</td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&nbsp;</td>
+          <td class="paramname"> <em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>k</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>nk</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&nbsp;</td>
+          <td class="paramname"> <em>stack</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td width="100%"></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Алгоритм QuickHull построения выпуклой оболочки точек на плоскости. 
+<p>
+<ul>
+<li>Вход:<ul>
+<li><img class="formulaInl" alt="$x$" src="form_40.png">, <img class="formulaInl" alt="$y$" src="form_423.png"> - координаты точек</li><li><img class="formulaInl" alt="$n$" src="form_37.png"> - количество точек</li><li><img class="formulaInl" alt="$k$" src="form_333.png"> - массив длины не менее <img class="formulaInl" alt="$n$" src="form_37.png"></li><li><img class="formulaInl" alt="$stack$" src="form_729.png"> - массив длины не менее <img class="formulaInl" alt="$4 \log n$" src="form_730.png"></li></ul>
+</li></ul>
+<p>
+<ul>
+<li>Выход:<ul>
+<li><img class="formulaInl" alt="$k$" src="form_333.png"> - номера точек, являющихся вершинами выпуклой оболочки, в порядке положительного обхода (против часовой стрелки)</li><li><img class="formulaInl" alt="$nk$" src="form_731.png"> - число вершин выпуклой оболочки</li></ul>
+</li></ul>
+<p>
+Трудоемкость: <img class="formulaInl" alt="$O(n \cdot nk)$" src="form_738.png"> <dl compact><dt><b>Примеры: </b></dt><dd>
+<a class="el" href="xqhull_8c-example.html#a123">xqhull.c</a>.</dl>
+</div>
+</div><p>
+<hr size="1"><address style="align: right;"><small>Документация по NL. Последние изменения: Mon Oct 9 12:25:54 2006. Создано системой&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
+</body>
+</html>

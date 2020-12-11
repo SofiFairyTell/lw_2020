@@ -1,7 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: промежуточный каталог (Debug\) содержит файлы, которые используются совместно с другим проектом (client.vcxproj).  Это может привести к ошибкам очистки и перестроения.
-  client.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\client\client.cpp(26): warning C4473: "scanf_s": передано недостаточно аргументов для строки формата
-  c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\client\client.cpp(26): note: заполнители и их параметры ожидают переменное число аргументов в количестве 2, но было предоставлено 1
-  c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\client\client.cpp(26): note: отсутствующий вариативный аргумент "2" требуется для строки форматирования "%c"
-  c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\client\client.cpp(26): note: этот аргумент используется в качестве размера буфера
-  clientC.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\client\Debug\clientC.exe

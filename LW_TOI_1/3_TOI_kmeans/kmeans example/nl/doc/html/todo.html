@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=Windows-1251">
+<title>NL: Список задач</title>
+<link href="nl.doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Создано системой Doxygen 1.4.7 -->
+<div class="tabs">
+  <ul>
+    <li><a href="index.html"><span>Титульная&nbsp;страница</span></a></li>
+    <li><a href="classes.html"><span>Классы</span></a></li>
+    <li><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="pages.html"><span>Описания</span></a></li>
+    <li><a href="examples.html"><span>Примеры</span></a></li>
+    <li>
+      <form action="search.php" method="get">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td><label>&nbsp;Поиск&nbsp;</label></td>
+            <td><input type="text" name="query" value="" size="20" accesskey="s"/></td>
+          </tr>
+        </table>
+      </form>
+    </li>
+  </ul></div>
+<h1><a class="anchor" name="todo">Список задач</a></h1><a class="anchor" name="_todo000001"></a> <dl>
+<dt>Файл <a class="el" href="iter_8h.html">iter.h</a>  </dt>
+<dd>Это новый файл. Необходимо перенести все функции этого типа из модуля sparse сюда, переписав их надлежащим образом </dd>
+</dl>
+<p>
+<a class="anchor" name="_todo000002"></a> <dl>
+<dt>Член <a class="el" href="iter_8h.html#30f2ba8dd9f406e6ea1b0787a4c4e759">iter_bicg</a>  </dt>
+<dd>Необходимо реализовать пп. 2, 3 вариантов использования предобсловливателя (т.е. действительно предоставить возможность с ним работать).<p>
+</dd>
+</dl>
+<p>
+<a class="anchor" name="_todo000003"></a> <dl>
+<dt>Файл <a class="el" href="mda_8h.html">mda.h</a>  </dt>
+<dd>(Более или менее в порядке снижения приоритетности)<ul>
+<li>Исправить ошибки в <a class="el" href="sparse_8h.html#e8108d689baaeb3f7f95f98f7d480f75">sp_order</a>. См. xmda</li><li>Переписать <a class="el" href="mda_8h.html#20b98084f782c11057dbc770ef70802c">mda_order</a>, чтобы она работала с форматом RR(U)O, а не RR(C)O</li><li>Ввиду предыдущего пункта убрать <a class="el" href="mda_8h.html#f0b7c6bf135a362c330f9cd2d9e1841f">mda_init</a> и <a class="el" href="mda_8h.html#2701ba5df6c3d07d54e6640ca6a16bd7">mda_convert</a>. Все предварительные вещи (их должно стать не так много) должны делаться в <a class="el" href="mda_8h.html#20b98084f782c11057dbc770ef70802c">mda_order</a></li><li>Исправить ошибки в <a class="el" href="mda_8h.html#8bcae16f67fb81f2f060985c18904b18">mda_chol_symb</a>. См. xmda__ Эта функция и функция <a class="el" href="mda_8h.html#46f0248d829eccd3dffec096a57b166b">mda_chol_num</a> должны войтив модуль sparse</li><li>Исправить ошибки в mda_chol_solve. Эта функция должна войти в модуль sparse После исправления этих ошибок к-во вызовов функций уменьшится:<ul>
+<li><a class="el" href="mda_8h.html#20b98084f782c11057dbc770ef70802c">mda_order</a></li><li><a class="el" href="mda_8h.html#8bcae16f67fb81f2f060985c18904b18">mda_chol_symb</a> - функция будет называться по-другому</li><li><a class="el" href="mda_8h.html#46f0248d829eccd3dffec096a57b166b">mda_chol_num</a> - функция будет называться по-другому</li><li>mda_chol_solve - функция будет называться по-другому </li></ul>
+</li></ul>
+</dd>
+</dl>
+<p>
+<a class="anchor" name="_todo000004"></a> <dl>
+<dt>Файл <a class="el" href="nl_8h.html">nl.h</a>  </dt>
+<dd>Во всех модулях минимизировать число вызовов malloc, create и т.п. Передавать в качестве параметров функций рабочие массивы.<p>
+</dd>
+</dl>
+<p>
+<a class="anchor" name="_todo000004"></a> <dl>
+<dt>Файл <a class="el" href="nl_8h.html">nl.h</a>  </dt>
+<dd>Во всех модулях в описаниях *a называть не массивом, а указателем, указывающим на область памяти нужной лины (входной параметр). </dd>
+</dl>
+<hr size="1"><address style="align: right;"><small>Документация по NL. Последние изменения: Mon Oct 9 12:25:55 2006. Создано системой&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
+</body>
+</html>
