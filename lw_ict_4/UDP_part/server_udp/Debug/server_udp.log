@@ -1,3 +1,3 @@
 ﻿  server_udp.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\udp_part\server_udp\server_udp.cpp(12): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\udp_part\server_udp\server_udp.cpp(21): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
   server_udp.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\Debug\server_udp.exe

@@ -4,9 +4,18 @@
 // Include the Winsock library (lib) file
 #pragma comment (lib, "ws2_32.lib")
 
+#pragma warning(disable: 4996)
 // Saves us from typing std::cout << etc. etc. etc.
 using namespace std;
-
+#pragma pack(1)
+struct SLP_msg
+{
+	int filelen;		 //длина сообщения
+	int numberfrag;		//номер фрагмента
+	WCHAR username[20]; //имя отправителя
+	WCHAR text[10];		//текст сообщения
+};
+#pragma pack()
 // Main entry point into the server
 void main()
 {
@@ -46,6 +55,9 @@ void main()
 	serverHint.sin_family = AF_INET; // Address format is IPv4
 	serverHint.sin_port = htons(54000); // Convert from little to big endian
 
+	WCHAR username[255] = L"";
+	WCHAR text[255] = L"";
+
 	// Try and bind the socket to the IP and port
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
@@ -61,8 +73,10 @@ void main()
 	int clientLength = sizeof(client); // The size of the client information
 
 	char buf[1024];
+	SLP_msg msgt = { 0 };
 
 	// Enter a loop
+/*
 	while (true)
 	{
 		ZeroMemory(&client, clientLength); // Clear the client structure
@@ -86,7 +100,72 @@ void main()
 		// Display the message / who sent it
 		cout << "Message recv from " << clientIp << " : " << buf << endl;
 	}
+	*/
+	
+	while (true)
+	{
+		ZeroMemory(&client, clientLength); // Clear the client structure
+		ZeroMemory(buf, 1024); // Clear the receive buffer
 
+		// Wait for message
+		int bytesIn = recvfrom(in, (char*)&msgt, sizeof(msgt), NULL, (sockaddr*)&client, &clientLength);
+		if (bytesIn == SOCKET_ERROR)
+		{
+			cout << "Error receiving from client " << WSAGetLastError() << endl;
+			continue;
+		}
+
+		// Display message and client info
+		char clientIp[256]; // Create enough space to convert the address byte array
+		ZeroMemory(clientIp, 256); // to string of characters
+
+		// Convert from byte array to chars
+		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
+
+		// Display the message / who sent it
+		//cout << "Message recv from " << clientIp << " : " << buf << endl;
+
+
+		int len = msgt.filelen / 2;
+		if (msgt.filelen % 2 == 0)
+		{
+			msgt.numberfrag--;
+		}
+		for (int i = 0; i < 255; i++)
+		{
+			if (i == msgt.numberfrag * 2)
+			{
+				for (int j = 0; j < 2; j++)
+				{
+					text[i + j] = msgt.text[j];
+				}
+			}
+		}
+		if (msgt.filelen % 5 == 0)
+		{
+			msgt.numberfrag++;
+		}
+		if (len == msgt.numberfrag)
+		{
+			wcscat(username, msgt.username);
+			wcscat(username, L": ");
+			wcscat(username, text);
+			wcout << "Message recv from " << clientIp << " : " << username << endl;
+			memset(username, NULL, 255);
+			memset(text,NULL,255);
+		}
+		else
+		{
+			wcscat(username, msgt.username);
+			wcscat(username, L": ");
+			wcscat(username, text);
+			wcout << "Message recv from " << clientIp << " : " << username << endl;
+			memset(username, NULL, 255);
+			memset(text, NULL, 255);
+		}
+	}
+	
+	
 	// Close socket
 	closesocket(in);
 

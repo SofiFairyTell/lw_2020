@@ -7,9 +7,12 @@
 #include <Psapi.h> 
 #include <strsafe.h> 
 #include <process.h>
+#include <string>
+#include <vector>
+#include <stdlib.h>
 // Include the Winsock library (lib) file
 #pragma comment (lib, "ws2_32.lib")
-
+#pragma warning(disable: 4996)
 // Saves us from typing std::cout << etc. etc. etc.
 using namespace std;
 #pragma pack(1)
@@ -22,7 +25,7 @@ struct SLP_msg
 };
 #pragma pack()
 
-void wmain(int argc, char* argv[]) // We can pass in a command line option!! 
+void wmain(int argc, wchar_t* argv[]) // We can pass in a command line option!! 
 {
 	////////////////////////////////////////////////////////////
 	// INITIALIZE WINSOCK
@@ -61,23 +64,42 @@ void wmain(int argc, char* argv[]) // We can pass in a command line option!!
 	SOCKET out = socket(AF_INET, SOCK_DGRAM, 0);
 
 	// Write out to that socket
-	string s(argv[1]); //username
-	string text(argv[2]); //сообщение
+	if (argv[0])
+	{
+		DWORD ERR = GetLastError();
+
+	}
+	else
+	{
+		DWORD ERR = GetLastError();
+	}
+	if (argc > 1)
+	{
+		wstring s = 
+	}
+	wstring s(argv[1]); //username
+	wstring text_s(argv[2]); //сообщение
+
 
 	WCHAR usernames[20] = L"";
-	WCHAR text[255] = L"";
+	//WCHAR text[255] = L"";
 	
+	wchar_t *text = new wchar_t[text_s.size()];
+	wchar_t *username = new wchar_t[s.size()];
+	
+	wcscpy(text, text_s.c_str());
+	wcscpy(username, s.c_str());
 
 	SLP_msg msg; //буфер для отправки сообщений
 	memset(msg.text, NULL, 10);
-	const CHAR * username = s.c_str();
-	const CHAR * text_c = text.c_str();
+	/*const CHAR * username = s.c_str();
+	const CHAR * text_c = text_s.c_str();*/
 
-	StringCchPrintf(msg.username, 20, (WCHAR*)username); //передача имени в структуру
-	StringCchPrintf(msg.text, 20,(WCHAR*)text_c); //передача текста в структуру
+	StringCchPrintf(msg.username, 20, text); //передача имени в структуру
+	StringCchPrintf(msg.text, 20,username); //передача текста в структуру
 
 	int n = 0;
-	int lentext = text.length;//вычисление длины текста 
+	int lentext = wcslen(text);//вычисление длины текста 
 	msg.filelen = lentext;
 	int num; //номер пакета?? количество??
 	int fragment = (lentext / 2); //длина 10 макс, значит по 5 байт?

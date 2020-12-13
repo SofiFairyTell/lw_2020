@@ -1,4 +1,3 @@
 ﻿  client_udp.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\udp_part\client_udp\client_udp.cpp(26): warning C4326: возвращаемый тип "wmain" должен быть "int", а не "void"
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\udp_part\client_udp\client_udp.cpp(68): error C2040: text: "WCHAR [255]" отличается по уровням косвенного обращения от "std::string"
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\udp_part\client_udp\client_udp.cpp(96): error C2088: [: недопустимо для class
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\udp_part\client_udp\client_udp.cpp(29): warning C4326: возвращаемый тип "wmain" должен быть "int", а не "void"
+  client_udp.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\Debug\client_udp.exe
