@@ -1,2 +1,6 @@
 ﻿  Server.cpp
+  Source.cpp
+  Theory.cpp
+  WinService_server.cpp
+  Создание кода...
   server.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_os_6\lw_os_6\Debug\server.exe

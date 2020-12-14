@@ -14,7 +14,7 @@ HANDLE hPipe = INVALID_HANDLE_VALUE; // дескриптор канала
 
 HANDLE hStopper = NULL; // событие дл€ завершени€ работы службы
 
-HANDLE hThreads[3]; // дескрипторы созданных потоков
+HANDLE hThreads; // дескрипторы созданных потоков
 
 // функции потока, где обрабатываютс€ запросы из канала
 unsigned __stdcall ThreadFuncPipe(void *lpParameter);
@@ -46,6 +46,7 @@ BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
 		if (INVALID_HANDLE_VALUE == hPipe)
 		{
 			// не удалось создать канал
+			_tprintf(TEXT("> Ќе удалось создать канал.\n"));
 			return FALSE;
 		} // if
 	
@@ -66,11 +67,11 @@ DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv)
 	hStopper = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
 
 	// создаЄм поток, в котором будем обрабатывать запросы из канала
-	hThreads[0] = (HANDLE)_beginthreadex(NULL, 0, ThreadFuncPipe, NULL, 0, NULL);
+	hThreads = (HANDLE)_beginthreadex(NULL, 0, ThreadFuncPipe, NULL, 0, NULL);
 
 
-	// ожидаем завершени€ созданных потоков
-	WaitForMultipleObjects(_countof(hThreads), hThreads, TRUE, INFINITE);
+	// ожидаем завершени€ созданныхпотоков
+	WaitForSingleObject(hThreads,INFINITE);
 
 	// закрываем дескриптор событи€
 	CloseHandle(hStopper);
@@ -134,7 +135,7 @@ unsigned __stdcall ThreadFuncPipe(void *lpParameter)
 	// создаЄм событие дл€ ассинхронных операций с каналом
 	HANDLE hPipeEvent = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
 
-	// массив собитий
+	// массив событий
 	HANDLE hEvents[2] = { hStopper, hPipeEvent };
 
 	for (;;)
@@ -142,11 +143,10 @@ unsigned __stdcall ThreadFuncPipe(void *lpParameter)
 		// инициализируем структуру OVERLAPPED ...
 		OVERLAPPED oConnect = { 0 };
 		oConnect.hEvent = hPipeEvent;
-		// ожидаем процесс-клиент и образуем с ним соединение
-		ConnectNamedPipe(hPipe, &oConnect);
-
-		// ожидаем одно из двух событий
-		DWORD dwResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		
+		ConnectNamedPipe(hPipe, &oConnect);// ожидаем процесс-клиент и образуем с ним соединение
+		
+		DWORD dwResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);// ожидаем одно из двух событий
 
 		if ((WAIT_OBJECT_0 == dwResult) || (ERROR_SUCCESS != oConnect.Internal))
 		{

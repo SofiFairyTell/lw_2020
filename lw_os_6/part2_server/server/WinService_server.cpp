@@ -12,12 +12,11 @@ SERVICE_STATUS_HANDLE gSvcStatusHandle; // дескриптор состояния службы
 
 // ------------------------------------------------------------------------------------------------
 
-// эта функция вызывается при запуске службы
-BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv);
-// эта функция вызывается для остановки службы
-void OnSvcStop(void);
-// в этой функции реализован основной функционал
-DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv);
+BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv);// эта функция вызывается при запуске службы
+
+void OnSvcStop(void);// эта функция вызывается для остановки службы
+
+DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv);// в этой функции реализован основной функционал
 
 // ------------------------------------------------------------------------------------------------
 DWORD WINAPI SvcHandler(DWORD fdwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext)
@@ -26,18 +25,16 @@ DWORD WINAPI SvcHandler(DWORD fdwControl, DWORD dwEventType, LPVOID lpEventData,
 	{
 		OnSvcStop(); // останавливаем службу
 		gSvcStatus.dwCurrentState = SERVICE_STOP_PENDING; // новое состояние службы
-	} // if
-
-	// изменяем текущее состояние службы
-	SetServiceStatus(gSvcStatusHandle, &gSvcStatus);
+	}
+	
+	SetServiceStatus(gSvcStatusHandle, &gSvcStatus);// изменяем текущее состояние службы
 	return NO_ERROR;
-} // ServiceControlHandler
+} 
 
 // ------------------------------------------------------------------------------------------------
 void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 {
-	// регистрируем функцию-обработчик
-	gSvcStatusHandle = RegisterServiceCtrlHandlerEx(gSvcName, SvcHandler, NULL);
+	gSvcStatusHandle = RegisterServiceCtrlHandlerEx(gSvcName, SvcHandler, NULL);// регистрируем функцию-обработчик
 
 	if (NULL != gSvcStatusHandle)
 	{
@@ -58,8 +55,8 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 		if (OnSvcInit(dwArgc, lpszArgv) != FALSE)
 		{
 			gSvcStatus.dwCurrentState = SERVICE_RUNNING; // новое состояние
-			// изменяем текущее состояние службы
-			SetServiceStatus(gSvcStatusHandle, &gSvcStatus);
+		
+			SetServiceStatus(gSvcStatusHandle, &gSvcStatus);// изменяем текущее состояние службы
 
 			DWORD dwExitCode = SvcMain(dwArgc, lpszArgv);
 
@@ -67,20 +64,17 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 			{
 				gSvcStatus.dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 				gSvcStatus.dwServiceSpecificExitCode = dwExitCode;
-			} // if
+			} 
 			else
 			{
 				gSvcStatus.dwWin32ExitCode = NO_ERROR;
-			} // else
-		} // if
-
-		// /// //
+			} 
+		} 
 
 		gSvcStatus.dwCurrentState = SERVICE_STOPPED; // новое состояние
-		// задаем конечное состояние службы
-		SetServiceStatus(gSvcStatusHandle, &gSvcStatus);
-	} // if
-} // ServiceMain
+		SetServiceStatus(gSvcStatusHandle, &gSvcStatus);// задаем конечное состояние службы
+	} 
+} 
 
 // ------------------------------------------------------------------------------------------------
 int _tmain(int argc, LPTSTR argv[])
@@ -93,7 +87,6 @@ int _tmain(int argc, LPTSTR argv[])
 		return 0; // завершаем работу приложения
 	} // if
 
-	// /// //
 
 	if (_tcscmp(argv[1], TEXT("/runservice")) == 0) // начало работы службы
 	{
@@ -103,11 +96,13 @@ int _tmain(int argc, LPTSTR argv[])
 			{NULL, NULL}
 		};
 
-		StartServiceCtrlDispatcher(svcDispatchTable);
+		BOOL RetRes = StartServiceCtrlDispatcher(svcDispatchTable);
+		if (RetRes = FALSE)
+		{
+			_tprintf(TEXT("> Ошибка: %d\n"), GetLastError());
+		}
 		return 0; // завершаем работу приложения
-	} // if
-
-	// /// //
+	} 
 
 	if (_tcscmp(argv[1], TEXT("/create")) == 0) // создание службы
 	{
@@ -147,8 +142,6 @@ int _tmain(int argc, LPTSTR argv[])
 		CloseServiceHandle(hSCM); // закрываем дескриптор
 		return 0; // завершаем работу приложения
 	} // if
-
-	// /// //
 
 	if (_tcscmp(argv[1], TEXT("/delete")) == 0) // удаление службы
 	{
