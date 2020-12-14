@@ -143,7 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="lw_os_6.cpp" />
+    <ClCompile Include="Theory.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
