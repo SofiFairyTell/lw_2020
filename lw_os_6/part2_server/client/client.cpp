@@ -9,8 +9,8 @@
 
 struct REQUEST
 {
-	DWORD dwProcessId;
-	DWORD dwIndex;
+	DWORD PID;
+	DWORD index;
 }; 
 
 #pragma pack(pop)
@@ -37,25 +37,25 @@ int _tmain(int argc, LPCTSTR argv[])
 		{
 			REQUEST Request; // запрос
 
-			Request.dwProcessId = GetCurrentProcessId();
-			Request.dwIndex = 0;
+			Request.PID = GetCurrentProcessId();
+			Request.index = 0;
 
 			DWORD nBytes;
-			TCHAR szResponse[100]; // ответ
+			TCHAR Response[100]; // ответ
 
 			for (;;)
 			{
 				// отправляем запрос и ожидаем ответ
 				BOOL bRet = CallNamedPipe(TEXT("\\\\.\\pipe\\test_pipe"),
-					&Request, sizeof(Request), szResponse, sizeof(szResponse), &nBytes, NMPWAIT_WAIT_FOREVER);
+					&Request, sizeof(Request), Response, sizeof(Response), &nBytes, NMPWAIT_WAIT_FOREVER);
 
 				if (FALSE != bRet)
 				{
-					if (_T('\0') == szResponse[0])
+					if (_T('\0') == Response[0])
 					{
 						break; // выходим из цикла
 					} 
-					_tprintf(TEXT("> %d %s\n"), (Request.dwIndex + 1), szResponse);
+					_tprintf(TEXT("> %d %s\n"), (Request.index + 1), Response);
 					Sleep(200);
 				} 
 				else
@@ -63,7 +63,7 @@ int _tmain(int argc, LPCTSTR argv[])
 					_tprintf(TEXT("> Ошибка: %d\n"), GetLastError());
 					break;
 				} 
-				++Request.dwIndex;
+				++Request.index;
 			} 
 		} 
 		

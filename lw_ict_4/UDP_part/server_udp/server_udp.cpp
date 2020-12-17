@@ -148,18 +148,22 @@ void main()
 		if (len == msgt.numberfrag)
 		{
 			wcscat(username, msgt.username);
+			wcout << "Message recv from " << username << " : " << text << endl;
+			
 			wcscat(username, L": ");
 			wcscat(username, text);
 			wcout << "Message recv from " << clientIp << " : " << username << endl;
+			
 			memset(username, NULL, 255);
 			memset(text,NULL,255);
 		}
 		else
 		{
 			wcscat(username, msgt.username);
-			wcscat(username, L": ");
-			wcscat(username, text);
-			wcout << "Message recv from " << clientIp << " : " << username << endl;
+			wcout << "Message recv from " << username << " : " << text << endl;
+			//wcscat(username, L": ");
+			//wcscat(username, text);
+			//wcout << "Message recv from " << clientIp << " : " << username << endl;
 			memset(username, NULL, 255);
 			memset(text, NULL, 255);
 		}

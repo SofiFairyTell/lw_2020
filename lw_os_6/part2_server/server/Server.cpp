@@ -3,10 +3,10 @@
 #include <strsafe.h>
 #include <process.h>
 
-// задаем имя службы
-LPCTSTR gSvcName = TEXT("SampleWinService");
-// задаем отображаемое имя службы
-LPCTSTR gSvcDisplayName = TEXT("Пример службы Windows");
+
+//LPCTSTR service_name = TEXT("DemoService"); //// внутреннее имя сервиса, используемое SCM
+
+//LPCTSTR SvcDisplayName = TEXT("DemoService");// внешнее имя сервиса в панели управления
 
 
 HANDLE hPipe = INVALID_HANDLE_VALUE; // дескриптор канала
@@ -25,12 +25,12 @@ BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
 	SECURITY_DESCRIPTOR sd; // дескриптор безопасности
 
 	// инициализируем дескриптор безопасности
-	BOOL bRet = InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+	BOOL RetRes = InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
 
-	if (FALSE != bRet)
-		bRet = SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
+	if (FALSE != RetRes)
+		RetRes = SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
 
-	if (FALSE != bRet)
+	if (FALSE != RetRes)
 	{
 		SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES) };
 		sa.lpSecurityDescriptor = &sd;
@@ -38,28 +38,27 @@ BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
 		// /// //
 
 		// создаём канал
-		hPipe = CreateNamedPipe(TEXT("\\\\.\\pipe\\SamplePipe"),
+		hPipe = CreateNamedPipe(TEXT("\\\\.\\pipe\\test_pipe"),
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, // указываем, что канал доступен для чтения и записи данных
 			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, // указываем режим работы канала
 			PIPE_UNLIMITED_INSTANCES, 0, 0, 0, &sa);
 
 		if (INVALID_HANDLE_VALUE == hPipe)
 		{
-			// не удалось создать канал
 			_tprintf(TEXT("> Не удалось создать канал.\n"));
 			return FALSE;
-		} // if
+		} 
 	
-	} // if
+	} 
 
-	return bRet;
-} // OnSvcInit
+	return RetRes;
+} 
 
 void OnSvcStop(void)
 {
-	// завершаем работу остальных потоков
+	// завершаем работу  потока
 	SetEvent(hStopper);
-} // OnSvcStop
+} 
 // ------------------------------------------------------------------------------------------------
 DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv)
 {
@@ -82,48 +81,24 @@ DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv)
 // ------------------------------------------------------------------------------------------------
 
 // список студентов
-constexpr LPCTSTR szStudents[] = {
-	TEXT("Адонин Николай Николаевич ПИ-31"),
-	TEXT("Аладьина Анастасия Сергеевна ИТ-31"),
-	TEXT("Аникеев Денис Владимирович ИТ-31"),
-	TEXT("Арцханов Адам Борисович ИТ-31"),
-	TEXT("Бабакина Юлия Александровна ИТ-31"),
-	TEXT("Баженов Владислав Владимирович ИТ-31"),
-	TEXT("Болотов Александр Олегович ПИ-31"),
-	TEXT("Галеев Вячеслав Анатольевич ПИ-31"),
-	TEXT("Ершов Антон Юрьевич ПИ-31"),
-	TEXT("Зеленин Евгений Павлович ИТ-31"),
-	TEXT("Иванищева Яна Викторовна ПИ-31"),
-	TEXT("Ильченко Владислав Андреевич ИТ-31"),
-	TEXT("Исламшина Екатерина Сергеевна ПИ-31"),
-	TEXT("Кириенко Наталья Владимировна ИТ-31"),
-	TEXT("Клыч Артем Арманович ИТ-31"),
-	TEXT("Коршунов Артем Геннадьевич ИТ-31"),
-	TEXT("Лофицкая Алина Владимировна ПИ-31"),
-	TEXT("Мавлянов Руслан Джалилович ИТ-31"),
-	TEXT("Пацуков Михаил Романович ПИ-31"),
-	TEXT("Победа Михаил Романович ПИ-31"),
-	TEXT("Поляков Валентин Евгеньевич ИТ-31"),
-	TEXT("Романенко Дарья Александровна ПИ-31"),
-	TEXT("Ромащенко Николай Андреевич ИТ-31"),
-	TEXT("Симонова Мария Петровна ИТ-31"),
-	TEXT("Сирогитан Иван Игоревич ПИ-31"),
-	TEXT("Станкевич Ангелина Дмитриевна ИТ-31"),
-	TEXT("Стрельников Антон Павлович ИТ-31"),
-	TEXT("Сыровацкий Евгений Юрьевич ИТ-31"),
-	TEXT("Талалаев Андрей Витальевич ПИ-31"),
-	TEXT("Ткаченко Софья Александровна ПИ-31"),
-	TEXT("Шаповалов Дмитрий Иванович ИТ-31"),
-	TEXT("Шестаков Вадим Вячеславович ПИ-31"),
-	TEXT("Эймонт Сергей Вячеславович ИТ-31")
+constexpr LPCTSTR Students[] = 
+{
+	L"Абаньшин Виктор Андреевич",
+	L"Агафонов Данил Сергеевич",
+	L"Анистратов Дмитрий Владимирович",
+	L"Анистратов Евгений Владимирович",
+	L"Бендриков Александр Сергеевич",
+	L"Богунов Артем Александрович",
+	L"Курбатова Софья Андреевна",
+	L"Мануков Давид Альбертович"
 };
 
 #pragma pack(push, 1)
 
 struct REQUEST
 {
-	DWORD dwProcessId;
-	DWORD dwIndex;
+	DWORD PID;
+	DWORD index;
 }; // struct REQUEST
 
 #pragma pack(pop)
@@ -142,6 +117,7 @@ unsigned __stdcall ThreadFuncPipe(void *lpParameter)
 	{
 		// инициализируем структуру OVERLAPPED ...
 		OVERLAPPED oConnect = { 0 };
+
 		oConnect.hEvent = hPipeEvent;
 		
 		ConnectNamedPipe(hPipe, &oConnect);// ожидаем процесс-клиент и образуем с ним соединение
@@ -162,15 +138,15 @@ unsigned __stdcall ThreadFuncPipe(void *lpParameter)
 			BOOL bRet = ReadFile(hPipe, &Request, sizeof(Request), &nBytes, NULL);
 			if (FALSE == bRet) break; // (!) ошибка: выходим из цикла
 
-			TCHAR szResponse[100] = TEXT(""); // ответ
+			TCHAR Response[100] = TEXT(""); // ответ
 
-			if (Request.dwIndex < _countof(szStudents))
+			if (Request.index < _countof(Students))
 			{
-				StringCchCopy(szResponse, _countof(szResponse), szStudents[Request.dwIndex]);
+				StringCchCopy(Response, _countof(Response), Students[Request.index]);
 			} // if
 
 			// запись данных в почтовый канал
-			WriteFile(hPipe, szResponse, sizeof(szResponse), &nBytes, NULL);
+			WriteFile(hPipe, Response, sizeof(Response), &nBytes, NULL);
 		} // for
 
 		DisconnectNamedPipe(hPipe); // разрываем соединение

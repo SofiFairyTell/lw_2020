@@ -142,12 +142,6 @@
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Stop-and-Wait-Protocol-Implemented-in-UDP-C\server.c" />
-    <ClCompile Include="server2.cpp" />
-    <ClCompile Include="sockserver.cpp" />
-    <ClCompile Include="Source.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

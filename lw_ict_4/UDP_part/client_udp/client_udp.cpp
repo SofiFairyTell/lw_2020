@@ -73,10 +73,7 @@ void wmain(int argc, wchar_t* argv[]) // We can pass in a command line option!!
 	{
 		DWORD ERR = GetLastError();
 	}
-	if (argc > 1)
-	{
-		wstring s = 
-	}
+
 	wstring s(argv[1]); //username
 	wstring text_s(argv[2]); //сообщение
 
@@ -102,25 +99,25 @@ void wmain(int argc, wchar_t* argv[]) // We can pass in a command line option!!
 	int lentext = wcslen(text);//вычисление длины текста 
 	msg.filelen = lentext;
 	int num; //номер пакета?? количество??
-	int fragment = (lentext / 2); //длина 10 макс, значит по 5 байт?
+	int fragment = (lentext / 5); //длина 10 макс, значит по 5 байт?
 
-	if (lentext % 2 == 0)
+	if (lentext % 5 == 0)
 	{
 		num = 1;
 	}
 	else num = 0;
 	int sendOk;
-	for (int i = 0; i < lentext; i += 2)
+	for (int i = 0; i < lentext; i += 5)
 	{
-		WCHAR frag[2] = L"";
-		for (int j = 0; j < 2; j++)
+		WCHAR frag[5] = L"";
+		for (int j = 0; j < 5; j++)
 		{
 			frag[j] = text[j + i];
 		}
 		msg.numberfrag = num;
 		num++;
 		StringCchPrintf(msg.text, 6, frag);
-		sendOk = sendto(out, (const char*)&msg, sizeof(msg), NULL, (sockaddr*)&server, sizeof(server));
+		sendOk = sendto(out, (const char*)&msg, sizeof(msg),NULL, (struct sockaddr*)&server, sizeof(server));
 		ZeroMemory(msg.text, 10);
 	}
 
