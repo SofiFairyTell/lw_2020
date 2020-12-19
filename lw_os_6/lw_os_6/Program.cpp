@@ -173,7 +173,8 @@ BOOL PreTranslateMessage(LPMSG Msg)
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
 	// создаём событие для уведомления потока ThreadFuncClipboard о завершения приложения
-	hStopper = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
+	
+	//hStopper = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
 	  
 
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL;

@@ -142,6 +142,7 @@ unsigned __stdcall ThreadFuncPipe(void *lpParameter)
 
 			if (Request.index < _countof(Students))
 			{
+				/*Как сделать вывод определенного человека из списка?? */
 				StringCchCopy(Response, _countof(Response), Students[Request.index]);
 			} // if
 
