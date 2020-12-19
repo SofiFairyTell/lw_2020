@@ -22,7 +22,7 @@ TCHAR Response[100]; // ответ
 
 TCHAR data[8][255] = { L"" };
 
-void getData();
+int getData();
 // ------------------------------------------------------------------------------------------------
 int _tmain(int argc, LPCTSTR argv[])
 {
@@ -44,10 +44,13 @@ int _tmain(int argc, LPCTSTR argv[])
 	{
 		if (_tcsicmp(argv[1], TEXT("/get_data_list")) == 0) // именованные каналы
 		{
-			getData();	
-			for (int i = 0; i < sizeof(data); i++)
+			int count = getData();	
+			//int count = sizeof(data);
+			//for (int i = 0; i < sizeof(data); i++)
+			for (int i = 0; i < count; i++)
 			{
-				_tprintf(TEXT(">%d %s\n"), i++, data[i]);
+				int num = i + 1;
+				_tprintf(TEXT(">%d %s\n"),num , data[i]);
 			}
 		} 
 	} 
@@ -55,11 +58,11 @@ int _tmain(int argc, LPCTSTR argv[])
 	{
 		if (_tcsicmp(argv[1], TEXT("/get_by_number")) == 0)
 				{
-					getData();
+					int count = getData();
 						if (argv[2])
 						{
 							int input = _ttoi(argv[2]) - 1;//страшная глупость. но, а как иначе? Пользователь ввел 2, но для массива с 0 это 3-й элемент
-							for (int i = 0; i < sizeof(data); i++)
+							for (int i = 0; i < count; i++)
 							{
 								if (input == i)
 									{
@@ -73,7 +76,7 @@ int _tmain(int argc, LPCTSTR argv[])
 	
 } 
 
-void getData()
+int getData()
 {
 	int count = 0;
 	for (;;)
@@ -87,7 +90,8 @@ void getData()
 		{
 			if (_T('\0') == Response[0])
 			{
-				break; // выходим из цикла
+				return count;
+				//break; // выходим из цикла
 			}
 			StringCchCat(data[count++], _countof(data[count++]), Response);//заполним список данными полученными от сервера
 
@@ -101,6 +105,6 @@ void getData()
 			break;
 		}
 		++Request.index;
-
 	}
+	return count; 
 }
