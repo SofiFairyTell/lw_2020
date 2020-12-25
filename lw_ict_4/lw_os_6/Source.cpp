@@ -178,6 +178,14 @@ BOOL PreTranslateMessage(LPMSG Msg)
 
 					//StringCchCat(UserMessage, _countof(UserMessage), Message);
 
+					BOOL optval = TRUE;
+					int optlen = sizeof(optval);
+					int err = setsockopt(sockets, SOL_SOCKET, SO_BROADCAST, (char*)&optval, optlen);
+					sockSin.sin_family = AF_INET;
+					sockSin.sin_port = htons(7581);
+					sockSin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+
+
 					SendText(msg, Message, _tcslen(Message), FALSE);
 
 				}
