@@ -1,363 +1,347 @@
-//#include <Windows.h>
-//#include <WindowsX.h>
-//#include <CommCtrl.h>
-//#include <tchar.h>
-//#include <strsafe.h>
-//#include <process.h>
-//
-//#define IDC_EDIT_MESSAGES           2001
-//#define IDC_EDIT_TEXT               2002
-//#define IDC_RBUTTON_WM_SETTEXT      2003
-//#define IDC_RBUTTON_WM_COPYDATA     2004
-//#define IDC_RBUTTON_CLIPBOARD       2005
-//#define IDC_RBUTTON_PIPE            2006
-//#define MAX_TEXT                    1024
-//
-///*Дескрипторы*/
-//HWND hwnd = NULL; // дескриптор главного окна
-//HKEY hKey = NULL; // дескриптор ключа реестра для запущенных экзм
-//HANDLE hStopper = NULL; // событие для уведомления потока ThreadFuncClipboard о завершения приложения
-//HANDLE hThreads[2]; // дескрипторы созданных потоков
-//
-///*Оконные процедуры*/
-//LRESULT CALLBACK MainWindowProcess(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-//
-//// функция, которая вызывается в цикле обработки сообщений
-//// перед тем, как сообщение будет передано в оконную процедуру
-//BOOL PreTranslateMessage(LPMSG lpMsg);
-///*Обработчики WM_CREATE, WM_DESTROY, WM_SIZE*/
-//
-//BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
-//void OnDestroy(HWND hwnd);
-//void OnSize(HWND hwnd, UINT state, int cx, int cy);
-//
-//
-///*---------Работа с реестром---------------*/
-//BOOL RegisterApplication();// регистрация каждого нового экземпляра приложения
-//void UregisterApplication();// удаление информации о каждом созданном экземпляре
-///*---------------------------------------*/
-//
-///*-----Отправка оконных сообщений-------*/
-//void SendText(LPCTSTR lpText, DWORD cchText, BOOL fCopyData);// отправка с помощью оконных сообщений
-//void OnSetText(HWND hwnd, LPCTSTR lpszText);// обработчик события WM_SETTEXT
-//
-//BOOL OnCopyData(HWND hwnd, HWND hwndFrom, PCOPYDATASTRUCT pcds);// обработчик события WM_COPYDATA
-//
-//
-//
-//int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR CmdLine, int CmdShow)
-//{
-//
-//	/*Регистрация оконного класса и обработка ошибки*/
-//	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
-//
-//	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-//	wcex.lpfnWndProc = MainWindowProcess; // оконная процедура
-//	wcex.hInstance = hInstance;
-//	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-//	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-//	wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
-//	wcex.lpszClassName = TEXT("MainWindowProcess"); // имя класса
-//	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-//
-//	if (0 == RegisterClassEx(&wcex))
-//	{
-//		return -1;
-//	}
-//	/*---------------------------------------------*/
-//	LoadLibrary(TEXT("ComCtl32.dll"));//
-//
-//	/*Создание главного файла и обработка ошибки */
-//	hwnd = CreateWindowEx(0, TEXT("MainWindowProcess"), TEXT("Chat"),
-//		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, 900, 500, NULL, NULL, hInstance, NULL);
-//
-//	if (hwnd == NULL)
-//	{
-//		return -1;
-//	}
-//	/*--------------------------------------------------*/
-//	/*Регистрация в системном реестре и обработка ошибки*/
-//	BOOL RetRes = RegisterApplication();// регистрируем приложение в системном реестре
-//	if (RetRes == FALSE)
-//	{
-//		return -1;
-//	}
-//	/*-----------------------------------------------*/
-//
-//	ShowWindow(hwnd, CmdShow); // отображаем главное окно
-//
-//	/*Цикл обработки сообщений*/
-//	MSG  msg;
-//
-//	while ((RetRes = GetMessage(&msg, NULL, 0, 0)) != FALSE)
-//	{
-//		if (RetRes == -1)
-//		{
-//			//Error editing
-//		}
-//		else if (!PreTranslateMessage(&msg))
-//		{
-//			TranslateMessage(&msg);
-//			DispatchMessage(&msg);
-//		}
-//	}
-//
-//	UregisterApplication();// удаляем информацию о приложении из системного реестра
-//	return (int)msg.wParam;
-//}
-//
-//
-///*Процедура главного окна*/
-//LRESULT CALLBACK MainWindowProcess(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-//{
-//	switch (msg)
-//	{
-//		HANDLE_MSG(hWnd, WM_CREATE, OnCreate);
-//		HANDLE_MSG(hWnd, WM_DESTROY, OnDestroy);
-//		HANDLE_MSG(hWnd, WM_SIZE, OnSize);
-//		HANDLE_MSG(hWnd, WM_SETTEXT, OnSetText);
-//	case WM_COPYDATA:
-//		return HANDLE_WM_COPYDATA(hWnd, wParam, lParam, OnCopyData);
-//	}
-//	return DefWindowProc(hWnd, msg, wParam, lParam);
-//}
-//
-///*Обработчик сообщений*/
-//BOOL PreTranslateMessage(LPMSG Msg)
-//{
-//	if ((WM_KEYDOWN == Msg->message) && (VK_RETURN == Msg->wParam)) // нажата клавиша Enter
-//	{
-//		HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
-//
-//		if (GetFocus() == hwndCtl) // поле ввода обладает фокусом клавиатуры
-//		{
-//			/*Чтобы можно было отправить многострочный текст*/
-//			/*CTRL+ENTER*/
-//			if (GetKeyState(VK_CONTROL) < 0) // нажата клавиша Ctrl
-//			{
-//				Edit_ReplaceSel(hwndCtl, TEXT("\r\n"));
-//			}
-//			else
-//			{
-//				TCHAR szText[MAX_TEXT];
-//
-//				DWORD cch = Edit_GetText(hwndCtl, szText, _countof(szText));// копируем текст из поля ввода
-//
-//				if (cch > 0)
-//				{
-//					// очищаем поле ввода
-//					Edit_SetText(hwndCtl, NULL);
-//					// отправим текст
-//					/*if (IsDlgButtonChecked(hwnd, IDC_RBUTTON_WM_SETTEXT) == BST_CHECKED)
-//					{*/
-//					StringCchCat(szText, _countof(szText), TEXT("\nWN_SETTEXT\n"));
-//
-//					SendText(szText, _tcslen(szText), FALSE);
-//					//} 
-//					//вернуть если надо отправлять через WM_COPYDATA
-//				/*else
-//						if (IsDlgButtonChecked(hwnd, IDC_RBUTTON_WM_COPYDATA) == BST_CHECKED)
-//							{
-//								StringCchCat(szText, _countof(szText),TEXT("\nОтправлен через WM_COPYDATA\n"));
-//
-//								SendText(szText, _tcslen(szText), TRUE);
-//							} */
-//				}
-//			}
-//			return TRUE;
-//		}
-//	}
-//	return FALSE;
-//}
-//
-//BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
-//{
-//	// создаём событие для уведомления потока ThreadFuncClipboard о завершения приложения
-//	hStopper = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
-//
-//	// создаём групповую рамку
-//	CreateWindowEx(0, TEXT("Button"), TEXT("Межпроцессное взаимодействие"), WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-//		10, 10, 300, 130, hwnd, (HMENU)0, lpCreateStruct->hInstance, NULL);
-//
-//	// создаём переключатели
-//
-//	CreateWindowEx(0, TEXT("Button"), TEXT("Оконное сообщение WM_SETTEXT"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-//		20, 30, 280, 25, hwnd, (HMENU)IDC_RBUTTON_WM_SETTEXT, lpCreateStruct->hInstance, NULL);
-//
-//	CreateWindowEx(0, TEXT("Button"), TEXT("Оконное сообщение WM_COPYDATA"), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-//		20, 55, 280, 25, hwnd, (HMENU)IDC_RBUTTON_WM_COPYDATA, lpCreateStruct->hInstance, NULL);
-//
-//	CheckRadioButton(hwnd, IDC_RBUTTON_WM_SETTEXT, IDC_RBUTTON_PIPE, IDC_RBUTTON_WM_SETTEXT);
-//
-//
-//	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL;
-//
-//	// создаём поле вывода сообщений
-//	CreateWindowEx(WS_EX_STATICEDGE, TEXT("Edit"), TEXT(""), dwStyle | ES_READONLY,
-//		320, 10, 400, 400, hwnd, (HMENU)IDC_EDIT_MESSAGES, lpCreateStruct->hInstance, NULL);
-//
-//	// создаём поле ввода
-//	HWND hwndCtl = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Edit"), TEXT(""), dwStyle,
-//		320, 420, 400, 100, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
-//	// задаём ограничение на ввод текста
-//	Edit_LimitText(hwndCtl, MAX_TEXT);
-//	// передаём фокус полю ввода
-//	SetFocus(hwndCtl);
-//
-//	return TRUE;
-//}
-//
-//void OnDestroy(HWND hwnd)
-//{
-//	// уведомляем о завершении приложения,
-//	SetEvent(hStopper);// чтобы завершить поток ThreadFuncClipboard
-//
-//	WaitForMultipleObjects(_countof(hThreads), hThreads, TRUE, INFINITE);// ожидаем завершения созданных потоков
-//
-//	CloseHandle(hStopper);// закрываем дескриптор события для завершении приложения
-//
-//	PostQuitMessage(0); // отправляем сообщение WM_QUIT
-//}
-//
-//void OnSize(HWND hwnd, UINT state, int cx, int cy)
-//{
-//	if (state != SIZE_MINIMIZED)
-//	{
-//		MoveWindow(GetDlgItem(hwnd, IDC_EDIT_MESSAGES), 320, 10, cx - 320, cy - 130, TRUE);// изменяем размеры поля вывода сообщений
-//		MoveWindow(GetDlgItem(hwnd, IDC_EDIT_TEXT), 320, cy - 110, cx - 330, 100, TRUE);// изменяем размеры поля ввода
-//	}
-//}
-//
-//void OnSetText(HWND hwnd, LPCTSTR lpszText)
-//{
-//	HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);
-//	Edit_SetSel(hwndCtl, Edit_GetTextLength(hwndCtl), -1);// устанавливаем курсор в конец поля вывода
-//
-//	Edit_ReplaceSel(hwndCtl, lpszText);// вставляем текст в поле вывода
-//}
-//
-//// ----------------------------------------------------------------------------------------------
-//BOOL OnCopyData(HWND hwnd, HWND hwndFrom, PCOPYDATASTRUCT pcds)
-//{
-//	OnSetText(hwnd, (LPCTSTR)pcds->lpData);
-//	return TRUE;
-//} // OnCopyData
-//
-//BOOL RegisterApplication()
-//{
-//	// создаём и открываем ключ реестра HKEY_CURRENT_USER\Software\\IT-311
-//
-//	DWORD dwDisposition;
-//
-//	LONG lStatus = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\IT-311"),
-//		0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisposition);
-//
-//	if (ERROR_SUCCESS == lStatus)
-//	{
-//		DWORD dwProcessId = GetCurrentProcessId();// получим идентификатор текущего процесса
-//
-//		HKEY  hSubKey = NULL; // дескриптор вложенного ключа реестра, который будет содержать данные текущего приложения
-//
-//		TCHAR szSubKey[20]; // имя вложенного ключа реестра
-//
-//		StringCchPrintf(szSubKey, _countof(szSubKey), TEXT("%d"), dwProcessId);// формируем имя вложенного ключа реестра
-//
-//		lStatus = RegCreateKey(hKey, szSubKey, &hSubKey);// создаём вложенный ключ реестра
-//
-//		if (ERROR_SUCCESS == lStatus)
-//		{
-//			// сохраняем идентификатор текущего процесса
-//			RegSetValueEx(hSubKey, NULL, 0, REG_DWORD, (LPBYTE)&dwProcessId, sizeof(DWORD));
-//			// сохраняем значение дескриптор главного окна
-//			RegSetValueEx(hSubKey, TEXT("hwnd"), 0, REG_BINARY, (LPBYTE)&hwnd, sizeof(HWND));
-//			// закрываем вложенный ключ реестра
-//			RegCloseKey(hSubKey), hSubKey = NULL;
-//			return TRUE;
-//		}
-//		// закрываем ключ реестра
-//		RegCloseKey(hKey), hKey = NULL;
-//	}
-//	return FALSE;
-//}
-//
-//void UregisterApplication()
-//{
-//	if (NULL != hKey)
-//	{
-//		DWORD cSubKeys = 0; // количество вложенных ключей	
-//		LSTATUS lStatus = RegQueryInfoKey(hKey, NULL, NULL, NULL, &cSubKeys, NULL, NULL, NULL, NULL, NULL, NULL, NULL);// определяем количество вложенных ключей
-//
-//		if ((ERROR_SUCCESS == lStatus) && (cSubKeys < 2))
-//		{
-//			RegDeleteTree(hKey, NULL);// удаляем всю ветку		
-//			RegDeleteKey(HKEY_CURRENT_USER, TEXT("Software\\IT-311"));// удаляем ключ
-//		}
-//		else
-//		{
-//			TCHAR szSubKey[20]; // имя вложенного ключа реестра, который содержит данные текущего приложения	
-//
-//			// формируем имя вложенного ключа реестра
-//			StringCchPrintf(szSubKey, _countof(szSubKey), TEXT("%d"), GetCurrentProcessId());
-//			RegDeleteKey(hKey, szSubKey);// удаляем вложенный ключ
-//		}
-//		RegCloseKey(hKey), hKey = NULL;// закрываем ключ реестра
-//	}
-//}
-//
-//// ----------------------------------------------------------------------------------------------
-//void SendText(LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
-//{
-//	/*Переменнные*/
-//	HKEY  hSubKey = NULL; // дескриптор вложенного ключа реестра
-//	TCHAR szSubKey[20]; // имя вложенного ключа реестра
-//	DWORD cSubKeys = 0; // количество вложенных ключей
-//	LSTATUS lStatus; //для результатов с вложенными ключами
-//
-//	if ((lpData != NULL) && (cbData > 0))
-//	{
-//		lStatus = RegQueryInfoKey(hKey, NULL, NULL, NULL, &cSubKeys, NULL, NULL, NULL, NULL, NULL, NULL, NULL);// определяем количество вложенных ключей
-//
-//		if ((ERROR_SUCCESS == lStatus) && (cSubKeys > 0))
-//		{
-//			for (DWORD dwIndex = 0; dwIndex < cSubKeys; ++dwIndex)// перечисляем вложенные ключи ...
-//			{
-//				// получим имя вложенного ключа с индексом dwIndex
-//				DWORD cchSubKey = _countof(szSubKey);
-//				lStatus = RegEnumKeyEx(hKey, dwIndex, szSubKey, &cchSubKey, NULL, NULL, NULL, NULL);
-//
-//				if (lStatus == ERROR_SUCCESS)
-//				{
-//					lStatus = RegOpenKeyEx(hKey, szSubKey, 0, KEY_QUERY_VALUE, &hSubKey);// открываем вложенный ключ
-//				}
-//
-//				if (ERROR_SUCCESS == lStatus)
-//				{
-//					HWND hRecvWnd; // дескриптор окна получателя
-//					DWORD cb = sizeof(HWND);
-//
-//					lStatus = RegQueryValueEx(hSubKey, TEXT("hwnd"), NULL, NULL, (LPBYTE)&hRecvWnd, &cb);// получаем дескриптор окна получателя
-//
-//					if (lStatus == ERROR_SUCCESS)
-//					{
-//						if (DataCopy != FALSE)
-//						{
-//							// инициализируем структуру
-//							COPYDATASTRUCT cds;
-//							cds.lpData = (PVOID)lpData;
-//							cds.cbData = (cbData + 1) * sizeof(TCHAR);
-//							cds.dwData = 0;
-//							SendMessage(hRecvWnd, WM_COPYDATA, (WPARAM)hwnd, (LPARAM)&cds);// отправляем сообщение WM_COPYDATA
-//						}
-//						else
-//						{
-//							SendMessage(hRecvWnd, WM_SETTEXT, 0, (LPARAM)lpData);// отправляем сообщение WM_SETTEXT
-//						}
-//					}
-//					RegCloseKey(hSubKey), hSubKey = NULL;// закрываем вложенный ключ реестра
-//				}
-//			}
-//		}
-//	}
-//}
-//
-//
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"user32.lib")
+#include <Winsock2.h>
+#include <Windows.h> 
+#include <Windowsx.h>
+#include <CommCtrl.h> 
+#include <tchar.h> 
+#include <Psapi.h> 
+#include <strsafe.h> 
+#include <process.h>
+
+
+#define IDC_EDIT_MESSAGES           2001
+#define IDC_EDIT_TEXT               2002
+#define IDC_EDIT_USERNAME			2003
+
+#define IDC_RBUTTON_WM_SETTEXT      2004
+
+#define IDC_RBUTTON_CLIPBOARD       2006
+
+#define IDC_RBUTTON_PIPE            2006
+#define MAX_TEXT                    1024
+
+//СЂР°Р·РјРµСЂС‹ С‚РµРєСЃС‚Р° СЃ СЃРѕРѕР±С‰РµРЅРёРµРј
+#define MAX_MESSAGE_SIZE            10
+#define MAX_USERNAME_SIZE			20
+/*Р”РµСЃРєСЂРёРїС‚РѕСЂС‹*/
+HWND hwnd = NULL; // РґРµСЃРєСЂРёРїС‚РѕСЂ РіР»Р°РІРЅРѕРіРѕ РѕРєРЅР°
+
+
+/*РћРєРѕРЅРЅС‹Рµ РїСЂРѕС†РµРґСѓСЂС‹*/
+LRESULT CALLBACK MainWindowProcess(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+// С„СѓРЅРєС†РёСЏ, РєРѕС‚РѕСЂР°СЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ РІ С†РёРєР»Рµ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№
+// РїРµСЂРµРґ С‚РµРј, РєР°Рє СЃРѕРѕР±С‰РµРЅРёРµ Р±СѓРґРµС‚ РїРµСЂРµРґР°РЅРѕ РІ РѕРєРѕРЅРЅСѓСЋ РїСЂРѕС†РµРґСѓСЂСѓ
+BOOL PreTranslateMessage(LPMSG lpMsg);
+
+/*РћР±СЂР°Р±РѕС‚С‡РёРєРё WM_CREATE, WM_DESTROY, WM_SIZE*/
+
+BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
+void OnDestroy(HWND hwnd);
+
+//РїРѕС‚РѕРє РґР»СЏ РїСЂРёРµРјР° СЃРѕРѕР±С‰РµРЅРёР№ РѕС‚ СЌРєР·РµРјРїР»СЏСЂРѕРІ РїСЂРёР»РѕР¶РµРЅРёСЏ
+HANDLE hThread;
+
+unsigned _stdcall ThreadFunc(LPVOID lParam);
+
+//РїР°РєРµС‚ РґР»СЏ РїРµСЂРµРґР°С‡Рё
+#pragma pack(1)
+struct SLP_msg
+{
+	int filelen;		 //РґР»РёРЅР° СЃРѕРѕР±С‰РµРЅРёВ¤
+	int numberfrag;		//РЅРѕРјРµСЂ С„СЂР°РіРјРµРЅС‚Р°
+	WCHAR username[20]; //РёРјВ¤ РѕС‚РїСЂР°РІРёС‚РµР»В¤
+	WCHAR text[10];		//С‚РµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёВ¤
+};
+#pragma pack()
+
+//СЂР°Р±РѕС‚Р° СЃ СЃРѕРєРµС‚Р°РјРё
+SOCKET sockets;
+sockaddr_in sockSin = { 0 };
+sockaddr_in sockSout = { 0 };
+sockaddr_in sockSoin = { 0 };
+void SendText(SLP_msg msg, LPCTSTR lpData, DWORD cbData, BOOL DataCopy);
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR CmdLine, int CmdShow)
+{
+
+	/*Р РµРіРёСЃС‚СЂР°С†РёСЏ РѕРєРѕРЅРЅРѕРіРѕ РєР»Р°СЃСЃР° Рё РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё*/
+	WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
+
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+	wcex.lpfnWndProc = MainWindowProcess; // РѕРєРѕРЅРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР°
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 100, 256));
+	wcex.lpszClassName = TEXT("MainWindowProcess"); // РёРјСЏ РєР»Р°СЃСЃР°
+	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+
+	if (0 == RegisterClassEx(&wcex))
+	{
+		return -1;
+	}
+	/*---------------------------------------------*/
+
+	LoadLibrary(TEXT("ComCtl32.dll"));
+	LoadLibrary(TEXT("Ws2_32.dll"));//for sockets
+
+	/*РЎРѕР·РґР°РЅРёРµ РіР»Р°РІРЅРѕРіРѕ С„Р°Р№Р»Р° Рё РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё */
+	hwnd = CreateWindowEx(0, TEXT("MainWindowProcess"), TEXT("Chat"),
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, 900, 500, NULL, NULL, hInstance, NULL);
+
+	if (hwnd == NULL)
+	{
+		return -1;
+	}
+	/*--------------------------------------------------*/
+	
+	ShowWindow(hwnd, CmdShow); // РѕС‚РѕР±СЂР°Р¶Р°РµРј РіР»Р°РІРЅРѕРµ РѕРєРЅРѕ
+
+	/*Р¦РёРєР» РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№*/
+	MSG  msg;
+	BOOL RetRes;
+	while ((RetRes = GetMessage(&msg, NULL, 0, 0)) != FALSE)
+	{
+		if (RetRes == -1)
+		{
+			//Error editing
+		}
+		else if (!PreTranslateMessage(&msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	return (int)msg.wParam;
+}
+
+
+/*РџСЂРѕС†РµРґСѓСЂР° РіР»Р°РІРЅРѕРіРѕ РѕРєРЅР°*/
+LRESULT CALLBACK MainWindowProcess(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+		HANDLE_MSG(hWnd, WM_CREATE, OnCreate);
+		HANDLE_MSG(hWnd, WM_DESTROY, OnDestroy);
+		//HANDLE_MSG(hWnd, WM_COMMAND, OnCommand);
+	}
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+/*РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕРѕР±С‰РµРЅРёР№*/
+BOOL PreTranslateMessage(LPMSG Msg)
+{
+	/*РџРµСЂРµРјРµРЅРЅС‹Рµ*/
+	WCHAR Message[MAX_MESSAGE_SIZE]; //СЃРѕРѕР±С‰РµРЅРёРµ
+	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");//РёРјСЏ РѕС‚РїСЂР°РІРёС‚РµР»СЏ
+	WCHAR UserMessage[532] = _T("");
+
+	//РѕР±СЉСЏРІРёРј СЃС‚СЂСѓРєС‚СѓСЂСѓ СЃ РїР°РєРµС‚РѕРј
+	SLP_msg msg;
+	memset(msg.text, NULL, 10);
+	DWORD symbols, symb_user;  //РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРёРјРІРѕР»РѕРІ РІ СЃРѕРѕР±С‰РµРЅРёРё
+
+	if ((WM_KEYDOWN == Msg->message) && (VK_RETURN == Msg->wParam)) // РЅР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р° Enter
+	{
+		HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_TEXT);
+		HWND hwndUser = GetDlgItem(hwnd, IDC_EDIT_USERNAME);
+
+		if (GetFocus() == hwndCtl) // РїРѕР»Рµ РІРІРѕРґР° РѕР±Р»Р°РґР°РµС‚ С„РѕРєСѓСЃРѕРј РєР»Р°РІРёР°С‚СѓСЂС‹
+		{
+			/*Р§С‚РѕР±С‹ РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РѕС‚РїСЂР°РІРёС‚СЊ РјРЅРѕРіРѕСЃС‚СЂРѕС‡РЅС‹Р№ С‚РµРєСЃС‚*/
+			/*CTRL+ENTER*/
+			if (GetKeyState(VK_SHIFT) < 0) // РЅР°Р¶Р°С‚Р° РєР»Р°РІРёС€Р° SHIFT
+			{
+				Edit_ReplaceSel(hwndCtl, _T("\r\n"));
+			}
+			else
+			{
+				symbols = Edit_GetText(hwndCtl, Message, _countof(Message));// РєРѕРїРёСЂСѓРµРј С‚РµРєСЃС‚ РёР· РїРѕР»СЏ РІРІРѕРґР°
+				symb_user = Edit_GetText(hwndUser, UserName, _countof(UserName));// РєРѕРїРёСЂСѓРµРј С‚РµРєСЃС‚ РёР· РїРѕР»СЏ РІРІРѕРґР°
+
+				if (symbols > 0)
+				{
+					// РѕС‡РёС‰Р°РµРј РїРѕР»Рµ РІРІРѕРґР°
+					Edit_SetText(hwndCtl, NULL);
+					//СЃРєРѕРїРёСЂСѓРµРј РІРІРµРґРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РІ СЃС‚СЂСѓРєС‚СѓСЂСѓ
+					StringCchCat(msg.username,20, UserName);
+
+					MessageBox(hwnd, L"thread", L"tr", MB_OK);
+					//StringCchCat(UserName, _countof(UserName), _T(":"));
+					//StringCchCat(Message, _countof(Message), _T("\n\n"));
+
+					//StringCchCat(UserMessage, _countof(UserMessage), UserName);
+
+					//StringCchCat(UserMessage, _countof(UserMessage), Message);
+
+					SendText(msg, Message, _tcslen(Message), FALSE);
+
+				}
+			}
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
+{
+
+	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL;
+
+	// СЃРѕР·РґР°С‘Рј РїРѕР»Рµ РІС‹РІРѕРґР° СЃРѕРѕР±С‰РµРЅРёР№
+	CreateWindowEx(WS_EX_STATICEDGE, TEXT("Edit"), TEXT(""), dwStyle | ES_READONLY,
+		10, 10, 490, 250, hwnd, (HMENU)IDC_EDIT_MESSAGES, lpCreateStruct->hInstance, NULL);
+
+	//Р”Р»СЏ username
+	CreateWindowEx(0, TEXT("Static"), _T("РРјСЏ: "), WS_CHILD | WS_VISIBLE | SS_SIMPLE,
+		10, 270, 40, 40, hwnd, NULL, lpCreateStruct->hInstance, NULL);
+
+	CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Edit"), TEXT(""), WS_CHILD | WS_VISIBLE,
+		50, 270, 450, 40, hwnd, (HMENU)IDC_EDIT_USERNAME, lpCreateStruct->hInstance, NULL);
+
+	// СЃРѕР·РґР°С‘Рј РїРѕР»Рµ РІРІРѕРґР°
+	HWND hwndCtl = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Edit"), TEXT(""), dwStyle,
+		10, 320, 490, 140, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
+
+	// Р·Р°РґР°С‘Рј РѕРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РІРІРѕРґ С‚РµРєСЃС‚Р°
+	Edit_LimitText(hwndCtl, MAX_MESSAGE_SIZE);
+
+
+	//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р±РёР±Р»РёРѕС‚РµРєРё WinSock
+	WSADATA WsaData;
+	int err = WSAStartup(MAKEWORD(2,2),&WsaData);
+	
+	// РћС‚РєСЂС‹С‚РёРµ СЃРѕРєРµС‚Р°
+	sockets = socket(AF_INET, SOCK_DGRAM,NULL);
+
+	//Р·Р°РїРѕР»РЅРёРј СЃС‚СЂСѓРєС‚СѓСЂ, С‡С‚РѕР±С‹ С‡РµСЂРµР· РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РїРѕР»СѓС‡Р°С‚СЊ РґР°РЅРЅС‹Рµ
+	sockSout.sin_family = AF_INET; // AF_INET = IPv4 addresses
+	sockSout.sin_port = htons(7581); // Little to big endian conversion
+	sockSout.sin_addr.s_addr = htonl(INADDR_ANY);//0.0.0.0
+
+	//РІС‹РїРѕР»РЅРё Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРёРµ СЃРѕРєРµС‚Р°	
+	err = bind(sockets, (sockaddr*)&sockSout, sizeof(sockSout));
+
+	if (err != SOCKET_ERROR)
+	{
+		hThread = (HANDLE)_beginthreadex(NULL, 0, ThreadFunc, NULL, 0, NULL);
+	}
+	return TRUE;
+}
+
+void OnDestroy(HWND hwnd)
+{
+	// СѓРІРµРґРѕРјР»СЏРµРј Рѕ Р·Р°РІРµСЂС€РµРЅРёРё РїСЂРёР»РѕР¶РµРЅРёСЏ,
+	closesocket(sockets);
+	WSACleanup();
+	PostQuitMessage(0); // РѕС‚РїСЂР°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ WM_QUIT
+}
+
+
+
+
+// ----------------------------------------------------------------------------------------------
+void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
+{
+	
+	if ((lpData != NULL) && (cbData > 0))
+	{
+		//cbData - СЂР°Р·РјРµСЂ РѕС‚РїСЂР°РІР»СЏРµРјРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ
+		msg.filelen = (int)cbData;
+		int packnum;
+		int fragment = (int)(cbData/5);
+		if((int)cbData % 5 == 0)
+			packnum = 1;
+		else packnum = 0;
+		for (int i = 0; i<(int)cbData; i+=5)
+		{
+			WCHAR frag_pack[5] = L"";
+			for (int j = 0; j < 5; j++)
+			{
+				frag_pack[j] = lpData[j+i]; //Р·Р°РїРѕР»РЅРёРј РїР°РєРµС‚ РґР°РЅРЅС‹РјРё 
+			}
+			msg.numberfrag = packnum;//СѓРєР°Р¶РµРј РЅРѕРјРµСЂ РїР°РєРµС‚Р°
+			packnum++;
+			StringCchCat(msg.text, 6, frag_pack);
+			int result = sendto(sockets,(const char*)&msg, sizeof(msg), NULL,(struct sockaddr*)&sockSin, sizeof(sockSin));
+			ZeroMemory(msg.text,10);
+		}
+	}
+}
+				
+void StartChat(HWND hwnd, LPCTSTR Message)
+{
+	MessageBox(hwnd, L"CHAT", L"tr", MB_OK);
+	HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);
+	Edit_SetSel(hwndCtl, Edit_GetTextLength(hwndCtl), -1);// СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РєСѓСЂСЃРѕСЂ РІ РєРѕРЅРµС† РїРѕР»СЏ РІС‹РІРѕРґР°
+	Edit_ReplaceSel(hwndCtl, Message);// РІСЃС‚Р°РІР»СЏРµРј С‚РµРєСЃС‚ РІ РїРѕР»Рµ РІС‹РІРѕРґР°
+} 
+
+unsigned __stdcall ThreadFunc(void* lParam)
+{
+	/*РџРµСЂРµРјРµРЅРЅС‹Рµ*/
+	WCHAR Message[MAX_MESSAGE_SIZE]; //СЃРѕРѕР±С‰РµРЅРёРµ
+	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");//РёРјСЏ РѕС‚РїСЂР°РІРёС‚РµР»СЏ
+	WCHAR UserMessage[532] = _T("");
+
+	SLP_msg recived_msg = {0};
+	int socket_len  = sizeof(sockSout);
+	//WCHAR text[255] = L"";
+	//WCHAR show_text[255] = L"";
+	for (;;)
+	{
+		//РќР°С‡РЅРµРј РїСЂРёРµРј СЃРѕРѕР±С‰РµРЅРёР№ С‡РµСЂРµР· СЃРѕРєРµС‚
+		int result = recvfrom(sockets,(char*)&recived_msg,sizeof(recived_msg),NULL,(struct sockaddr*)&sockSout, &socket_len);
+		
+		MessageBox(hwnd, L"thread", L"tr", MB_OK);
+		if(result != SOCKET_ERROR)
+		{
+			int reseived_size = recived_msg.filelen/5;
+			if (recived_msg.filelen %5 == 0)
+			{
+				recived_msg.numberfrag--;
+			}
+			for (int i = 0; i < 255; i++)
+			{
+				if (i==recived_msg.numberfrag*5)
+				{
+					for (int j = 0; j < 5; j++)
+					{
+						
+						Message[i+j] = recived_msg.text[j];
+					}
+				}
+			}	
+				if (recived_msg.filelen%5 == 0)
+				{
+					recived_msg.numberfrag++;
+				}
+
+				if (reseived_size == recived_msg.numberfrag)
+				{
+					StringCchCat(UserName, 20, recived_msg.username);
+
+					StringCchCat(UserName, _countof(UserName), _T(":"));
+
+					StringCchCat(Message, _countof(Message), _T("\n\n"));
+
+					StringCchCat(UserMessage, _countof(UserMessage), UserName);
+
+					StringCchCat(UserMessage, _countof(UserMessage), Message);
+
+					MessageBox(hwnd, L"!!!!!", L"tr", MB_OK);
+
+					StartChat(hwnd, Message);
+
+					memset(Message, NULL, 255);
+					memset(Message, NULL, 255);
+				}
+			}
+		}
+		return(0);
+	}

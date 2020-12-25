@@ -10,12 +10,14 @@
 #include <string>
 #include <vector>
 #include <stdlib.h>
-// Include the Winsock library (lib) file
-#pragma comment (lib, "ws2_32.lib")
+
+#pragma comment (lib, "ws2_32.lib")// Include the Winsock library (lib) file
 #pragma warning(disable: 4996)
 // Saves us from typing std::cout << etc. etc. etc.
 using namespace std;
-#pragma pack(1)
+
+SOCKET out = NULL;
+#pragma pack(push, 1)
 struct SLP_msg
 {
 	int filelen;		 //длина сообщени€
@@ -23,51 +25,38 @@ struct SLP_msg
 	WCHAR username[20]; //им€ отправител€
 	WCHAR text[10];		//текст сообщени€
 };
-#pragma pack()
+#pragma pack(pop)
 
 void wmain(int argc, wchar_t* argv[]) // We can pass in a command line option!! 
 {
-	////////////////////////////////////////////////////////////
-	// INITIALIZE WINSOCK
-	////////////////////////////////////////////////////////////
-
-	// Structure to store the WinSock version. This is filled in
-	// on the call to WSAStartup()
-	WSADATA data;
-
-	// To start WinSock, the required version must be passed to
-	// WSAStartup(). This server is going to use WinSock version
-	// 2 so I create a word that will store 2 and 2 in hex i.e.
-	// 0x0202
-	WORD version = MAKEWORD(2, 2);
-
-	// Start WinSock
-	int wsOk = WSAStartup(version, &data);
-	if (wsOk != 0)
-	{
-		// Not ok! Get out quickly
-		cout << "Can't start Winsock! " << wsOk;
-		return;
-	}
-
-	////////////////////////////////////////////////////////////
-	// CONNECT TO THE SERVER
-	////////////////////////////////////////////////////////////
-
+	
+	#pragma region Start Socket
+		WSADATA data;
+		WORD version = MAKEWORD(2, 2);
+		// Start WinSock
+		int wsOk = WSAStartup(version, &data);
+		if (wsOk != 0)
+		{
+			cout << "Can't start Winsock! " << wsOk;
+			return;
+		}
+	#pragma endregion 
 	// Create a hint structure for the server
-	sockaddr_in server;
+	sockaddr_in server = { 0 };
 	server.sin_family = AF_INET; // AF_INET = IPv4 addresses
-	server.sin_port = htons(54000); // Little to big endian conversion
-	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr); // Convert from string to byte array
+	server.sin_port = htons(7581); // Little to big endian conversion
+	server.sin_addr = htonl(INADDR_ANY);//0.0.0.0
+
+	err = bind()
+	//inet_pton(AF_INET, "127.0.0.1", &server.sin_addr); // Convert from string to byte array
 
 	// Socket creation, note that the socket type is datagram
-	SOCKET out = socket(AF_INET, SOCK_DGRAM, 0);
+	out = socket(AF_INET, SOCK_DGRAM, 0);
 
 	// Write out to that socket
 	if (argv[0])
 	{
 		DWORD ERR = GetLastError();
-
 	}
 	else
 	{
