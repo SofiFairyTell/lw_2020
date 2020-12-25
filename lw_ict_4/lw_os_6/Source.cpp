@@ -11,16 +11,20 @@
 #include <strsafe.h> 
 #include <process.h>
 
-
+//данные для отправки 
 #define IDC_EDIT_MESSAGES           2001
 #define IDC_EDIT_TEXT               2002
 #define IDC_EDIT_USERNAME			2003
+#define IDC_CLEAR_ALL				2004 //кнопка чтобы удалить весь отправленный текст
 
-#define IDC_IPADDR					2004 //чтобы ввести целевой IP 
+//переключение адреса
+#define IDC_IPADDR					2005 //чтобы ввести целевой IP 
+#define IDC_CONNECT					2006
+#define IDC_DISCONNECT				2007
 
-#define IDC_CLEAR_ALL				2006 //кнопка чтобы удалить весь отправленный текст
 
-#define IDC_RBUTTON_PIPE            2006
+
+
 #define MAX_TEXT                    1024
 
 //размеры текста с сообщением
@@ -215,7 +219,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 		50, 270, 450, 40, hwnd, (HMENU)IDC_EDIT_USERNAME, lpCreateStruct->hInstance, NULL);
 
 	CreateWindowEx(0, TEXT("Button"), TEXT("Clear History"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 
-		530, 10, 200, 30, hwnd, (HMENU)IDC_CLEAR_ALL, lpCreateStruct->hInstance, NULL);
+		520, 10, 200, 30, hwnd, (HMENU)IDC_CLEAR_ALL, lpCreateStruct->hInstance, NULL);
 
 	// создаём поле ввода
 	HWND hwndCtl = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Edit"), TEXT(""), dwStyle,
@@ -224,7 +228,15 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	//Для работы с адресами
 		// создаём поле ввода IP-адреса
 	CreateWindowEx(0, TEXT("SysIPAddress32"), NULL, WS_CHILD | WS_VISIBLE,
-		530, 50, 200, 30, hwnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
+		520, 50, 200, 30, hwnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
+
+	//кнопка для переключения
+	CreateWindowEx(0, TEXT("Button"), TEXT("Connect"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		730, 50, 100, 30, hwnd, (HMENU)IDC_CONNECT, lpCreateStruct->hInstance, NULL);
+
+	//кнопка для переключения
+	CreateWindowEx(0, TEXT("Button"), TEXT("Disconnect"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		730, 90, 100, 30, hwnd, (HMENU)IDC_DISCONNECT, lpCreateStruct->hInstance, NULL);
 
 	// задаём ограничение на ввод текста
 	Edit_LimitText(hwndCtl, MAX_MESSAGE_SIZE);
@@ -271,6 +283,27 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		{
 			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);		
 			Edit_SetText(hwndCtl, NULL);// очищаем поле ввода
+		}
+		break;
+		case IDC_CONNECT:
+		{
+			DWORD addr = 0; // IP-адрес
+
+			// получим IP-адрес из поля ввода
+			SendDlgItemMessage(hwnd, IDC_IPADDR, IPM_GETADDRESS, 0, (LPARAM)&addr);
+
+			if (0 != addr)
+			{
+				CHAR Buf[128] = "";
+				struct in_addr paddr;
+				paddr.S_un.S_addr = addr;
+				char *str = inet_ntoa(paddr);
+				sockSin.sin_family = AF_INET;
+				sockSin.sin_port = htons(7581);
+				/*GetDlgItemTextA(hwnd, IDC_EDIT4, Buf, 128);*/
+				//MessageBox(hwnd, (LPCWSTR)str, L"tr", MB_OK);
+				sockSin.sin_addr.s_addr = inet_addr(str);//а он  должен быть в обратном порядке???
+			}
 		}
 		break;
 		}
