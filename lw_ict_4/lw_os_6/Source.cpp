@@ -16,9 +16,9 @@
 #define IDC_EDIT_TEXT               2002
 #define IDC_EDIT_USERNAME			2003
 
-#define IDC_RBUTTON_WM_SETTEXT      2004
+#define IDC_IPADDR					2004 //чтобы ввести целевой IP 
 
-#define IDC_CLEAR_ALL					2006 //кнопка чтобы удалить весь отправленный текст
+#define IDC_CLEAR_ALL				2006 //кнопка чтобы удалить весь отправленный текст
 
 #define IDC_RBUTTON_PIPE            2006
 #define MAX_TEXT                    1024
@@ -41,6 +41,7 @@ BOOL PreTranslateMessage(LPMSG lpMsg);
 
 BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct);
 void OnDestroy(HWND hwnd);
+void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
 
 //поток для приема сообщений от экземпляров приложения
 HANDLE hThread;
@@ -219,6 +220,11 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 	// создаём поле ввода
 	HWND hwndCtl = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Edit"), TEXT(""), dwStyle,
 		10, 320, 490, 140, hwnd, (HMENU)IDC_EDIT_TEXT, lpCreateStruct->hInstance, NULL);
+
+	//Для работы с адресами
+		// создаём поле ввода IP-адреса
+	CreateWindowEx(0, TEXT("SysIPAddress32"), NULL, WS_CHILD | WS_VISIBLE,
+		530, 50, 200, 30, hwnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
 
 	// задаём ограничение на ввод текста
 	Edit_LimitText(hwndCtl, MAX_MESSAGE_SIZE);
