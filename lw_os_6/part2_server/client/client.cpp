@@ -67,8 +67,10 @@ int _tmain(int argc, LPCTSTR argv[])
 								if (input == i)
 									{
 										_tprintf(TEXT("> %s\n"), data[i]);
+										break;
 									}
 							}
+							//_tprintf(TEXT("> такого номера нет в базе данных\n"));
 						}
 				}
 	}
@@ -83,6 +85,7 @@ int getData()
 	{
 		// соединение с именованным каналом
 		//pipe - это  менять нельзя.
+		//объединяет в себе выполнение операций WaitNamedPipe, CreateFile, WeiteFile, ReadFile, CloseHandle
 		BOOL bRet = CallNamedPipe(TEXT("\\\\.\\pipe\\test_pipe"),
 			&Request, sizeof(Request), Response, sizeof(Response), &nBytes, NMPWAIT_WAIT_FOREVER);
 

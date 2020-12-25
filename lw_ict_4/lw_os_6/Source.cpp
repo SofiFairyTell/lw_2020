@@ -182,15 +182,6 @@ BOOL PreTranslateMessage(LPMSG Msg)
 					MessageBox(hwnd, L"thread", L"tr", MB_OK);
 
 					StartChat(hwnd,Message);//отобрзим отправляемый текст у себя
-					
-					BOOL optval = TRUE;
-					int optlen = sizeof(optval);
-					int err = setsockopt(sockets, SOL_SOCKET, SO_BROADCAST, (char*)&optval, optlen);
-					sockSin.sin_family = AF_INET;
-					sockSin.sin_port = htons(7581);
-					sockSin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
-
-					
 
 					SendText(msg, Message, _tcslen(Message), FALSE);
 
@@ -294,16 +285,28 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			if (0 != addr)
 			{
-				CHAR Buf[128] = "";
 				struct in_addr paddr;
 				paddr.S_un.S_addr = addr;
 				char *str = inet_ntoa(paddr);
 				sockSin.sin_family = AF_INET;
 				sockSin.sin_port = htons(7581);
-				/*GetDlgItemTextA(hwnd, IDC_EDIT4, Buf, 128);*/
-				//MessageBox(hwnd, (LPCWSTR)str, L"tr", MB_OK);
-				sockSin.sin_addr.s_addr = inet_addr(str);//а он  должен быть в обратном порядке???
+				//sockSin.sin_addr.s_addr = inet_addr("192.168.56.104");//а он  должен быть в обратном порядке??? нет. надо в прямом. от старших к младшему
+				sockSin.sin_addr.s_addr = inet_addr(str);
 			}
+		}
+		break;
+		case IDC_DISCONNECT:
+		{
+			// очистим поле ввода IP-адреса
+			SendDlgItemMessage(hwnd, IDC_IPADDR, IPM_CLEARADDRESS,0,0);
+			
+			BOOL optval = TRUE;
+			int optlen = sizeof(optval);
+			int err = setsockopt(sockets, SOL_SOCKET, SO_BROADCAST, (char*)&optval, optlen);
+			sockSin.sin_family = AF_INET;
+			sockSin.sin_port = htons(7581);
+			sockSin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+			MessageBox(hwnd, L"BroadCast", L"Details", MB_OK);
 		}
 		break;
 		}
@@ -318,9 +321,14 @@ void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
 	
 	if ((lpData != NULL) && (cbData > 0))
 	{
+		
 		//cbData - размер отправляемого сообщения
-		msg.filelen = (int)cbData;
 		int packnum;
+		int size_ctrl = (int)cbData; //контроль отправки
+		int Sent = 0;//т.к. sento возращает количество отправленных байт, на это число и будем уменьшать для передачи следующей
+
+		msg.filelen = (int)cbData;
+	
 		int fragment = (int)(cbData/5);
 		if((int)cbData % 5 == 0)
 			packnum = 1;
@@ -328,10 +336,11 @@ void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
 		for (int i = 0; i<(int)cbData; i+=5)
 		{
 			WCHAR frag_pack[5] = L"";
-			for (int j = 0; j < 5; j++)
-			{
-				frag_pack[j] = lpData[j+i]; //заполним пакет данными 
-			}
+			memcpy(frag_pack, &lpData[i], sizeof(frag_pack));
+			//for (int j = 0; j < 5; j++)
+			//{
+			//	frag_pack[j] = lpData[j+i]; //заполним пакет данными 
+			//}
 			msg.numberfrag = packnum;//укажем номер пакета
 			packnum++;
 			StringCchCat(msg.text, 6, frag_pack);
@@ -344,11 +353,17 @@ void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
 void StartChat(HWND hwnd, LPCTSTR Message)
 {
 	MessageBox(hwnd, L"LET'S GO CHAT", L"tr", MB_OK);
+	
+	WCHAR UserMessage[532] = _T("");
 
 	HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);
+
+	StringCchCat(UserMessage, _countof(UserMessage), _T("\n\n"));
+	StringCchCat(UserMessage, _countof(UserMessage), Message);
+
 	Edit_SetSel(hwndCtl, Edit_GetTextLength(hwndCtl), -1);// устанавливаем курсор в конец поля вывода
-	Edit_ReplaceSel(hwndCtl, Message);// вставляем текст в поле вывода
-} 
+	Edit_ReplaceSel(hwndCtl, UserMessage);// вставляем текст в поле вывода
+	} 
 
 unsigned __stdcall ThreadFunc(void* lParam)
 {
@@ -365,7 +380,6 @@ unsigned __stdcall ThreadFunc(void* lParam)
 		//Начнем прием сообщений через сокет
 		int result = recvfrom(sockets,(char*)&recived_msg,sizeof(recived_msg),NULL,(struct sockaddr*)&sockSout, &socket_len);
 		
-		//MessageBox(hwnd, L"START RECEVIENG MSG", L"tr", MB_OK);
 		if(result != SOCKET_ERROR)
 		{
 			int reseived_size = recived_msg.filelen/5;
@@ -373,6 +387,7 @@ unsigned __stdcall ThreadFunc(void* lParam)
 			{
 				recived_msg.numberfrag--;
 			}
+
 			for (int i = 0; i < 255; i++)
 			{
 				if (i==recived_msg.numberfrag*5)
@@ -390,6 +405,8 @@ unsigned __stdcall ThreadFunc(void* lParam)
 
 				if (reseived_size == recived_msg.numberfrag)
 				{
+					StringCchCat(UserMessage, _countof(UserMessage), _T("\n\n"));
+
 					StringCchCat(UserName, 20, recived_msg.username);
 
 					StringCchCat(UserName, _countof(UserName), _T(":"));
@@ -402,7 +419,8 @@ unsigned __stdcall ThreadFunc(void* lParam)
 
 					StartChat(hwnd, UserMessage);
 
-					memset(Message, NULL, 255);
+					memset(UserName, NULL, 255);
+					memset(UserMessage, NULL, 255);
 					memset(Message, NULL, 255);
 				}
 			}

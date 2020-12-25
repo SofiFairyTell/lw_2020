@@ -218,8 +218,10 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			memset(msg.text, NULL, 10);
 			GetDlgItemText(hwnd, IDC_EDIT2, usernames, 20);
 			StringCchPrintf(msg.username, 20, usernames);
+
 			GetDlgItemText(hwnd, IDC_EDIT1, text, 255);
 			StringCchPrintf(textt, 255, L"я:   %s", text);
+			
 			ListBox_AddString(hList, textt);
 			int n = 0;
 			int lentext = wcslen(text); //длина текста
@@ -305,6 +307,7 @@ unsigned __stdcall ThreadFunc(void* lpParameter)
 			}
 			if (msgt.filelen % 5 == 0)
 				msgt.numberfrag++;
+			
 			if (a == msgt.numberfrag)
 			{
 				wcscat(text1, msgt.username);
