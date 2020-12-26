@@ -306,7 +306,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			sockSin.sin_family = AF_INET;
 			sockSin.sin_port = htons(7581);
 			sockSin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
-			MessageBox(hwnd, L"BroadCast", L"Details", MB_OK);
+			MessageBox(hwnd, L"BroadCast Enable", L"Details", MB_OK);
 		}
 		break;
 		}
@@ -324,28 +324,20 @@ void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
 		
 		//cbData - размер отправляемого сообщения
 		int packnum;
-		int size_ctrl = (int)cbData; //контроль отправки
-		int Sent = 0;//т.к. sento возращает количество отправленных байт, на это число и будем уменьшать для передачи следующей
-
+		
 		msg.filelen = (int)cbData;
-	
-		int fragment = (int)(cbData/5);
-		if((int)cbData % 5 == 0)
-			packnum = 1;
-		else packnum = 0;
-		for (int i = 0; i<(int)cbData; i+=5)
+		packnum = 0;
+		for (int i = 0; i<(int)cbData; i+=10)
 		{
 			WCHAR frag_pack[5] = L"";
 			memcpy(frag_pack, &lpData[i], sizeof(frag_pack));
-			//for (int j = 0; j < 5; j++)
-			//{
-			//	frag_pack[j] = lpData[j+i]; //заполним пакет данными 
-			//}
 			msg.numberfrag = packnum;//укажем номер пакета
 			packnum++;
-			StringCchCat(msg.text, 6, frag_pack);
+			StringCchCat(msg.text,sizeof(msg.text), frag_pack);
+
 			int result = sendto(sockets,(const char*)&msg, sizeof(msg), NULL,(struct sockaddr*)&sockSin, sizeof(sockSin));
-			ZeroMemory(msg.text,10);
+
+			ZeroMemory(msg.text,sizeof(msg.text));
 		}
 	}
 }
@@ -363,7 +355,7 @@ void StartChat(HWND hwnd, LPCTSTR Message)
 
 	Edit_SetSel(hwndCtl, Edit_GetTextLength(hwndCtl), -1);// устанавливаем курсор в конец поля вывода
 	Edit_ReplaceSel(hwndCtl, UserMessage);// вставляем текст в поле вывода
-	} 
+} 
 
 unsigned __stdcall ThreadFunc(void* lParam)
 {
@@ -382,26 +374,41 @@ unsigned __stdcall ThreadFunc(void* lParam)
 		
 		if(result != SOCKET_ERROR)
 		{
-			int reseived_size = recived_msg.filelen/5;
-			if (recived_msg.filelen %5 == 0)
+			int struct_size = sizeof(recived_msg);//узнаем размер структуры
+			 
+			int reseived_size = recived_msg.filelen/10; //количество пакетов
+
+			//for (int i = 0; i < reseived_size; i++)
+			//{
+			//	/*if (i == recived_msg.numberfrag)
+			//	{
+
+			//	}*/
+			//	//else we lost packet???
+
+			//}
+
+			if (recived_msg.filelen %10 == 0)
 			{
 				recived_msg.numberfrag--;
 			}
 
-			for (int i = 0; i < 255; i++)
+			for (int i = 0; i < MAX_MESSAGE_SIZE; i++)
 			{
-				if (i==recived_msg.numberfrag*5)
+				if (i == recived_msg.numberfrag*10)
 				{
-					for (int j = 0; j < 5; j++)
+					for (int j = 0; j < 10 ; j++)
 					{
+						//StringCchCat(Message, sizeof(Message), recived_msg.text);
 						Message[i+j] = recived_msg.text[j];
 					}
 				}
 			}	
-				if (recived_msg.filelen%5 == 0)
+				if (recived_msg.filelen%10 == 0)
 				{
 					recived_msg.numberfrag++;
 				}
+
 
 				if (reseived_size == recived_msg.numberfrag)
 				{

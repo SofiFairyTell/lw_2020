@@ -1,5 +1,9 @@
 // Сервер.cpp: определяет точку входа для консольного приложения.
 //
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"user32.lib")
 #include "winsock2.h"
 #include <iostream>
 #include <fstream>
@@ -77,7 +81,7 @@ int main(int argc, char* argv[])
 				f.seekg(0, ios::end);//указатель в файле на конец
 				int length=f.tellg();//столько прочитаем из файла и передадим(размер файла узнаем)
 				f.seekg(0, ios::beg);//указатель на начало файла
-				char *buffer=new char[length];//создаем буфер
+				char *buffer = new char[length];//создаем буфер
 				f.read(buffer,length);//читаем в него
 				send(tempsock, buffer, length, 0);//и наконец передаем
 				f.close();

@@ -1,7 +1,11 @@
 // Клиент.cpp: определяет точку входа для консольного приложения.
 //
 /*"localhost"*///   <<----------------  в ком.строку!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#include "stdafx.h"
+//#include "stdafx.h"
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"user32.lib")
 #include "winsock2.h"
 #include "string.h"
 #include <iostream>

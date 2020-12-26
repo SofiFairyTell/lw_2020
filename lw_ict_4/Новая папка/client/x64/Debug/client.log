@@ -1,0 +1,8 @@
+﻿  Source.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\новая папка\client\source.cpp(219): warning C4267: инициализация: преобразование из "size_t" в "char"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\новая папка\client\source.cpp(195): warning C4101: msg: неиспользованная локальная переменная
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\новая папка\client\source.cpp(313): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\новая папка\client\source.cpp(322): warning C4267: return: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\новая папка\client\source.cpp(327): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\новая папка\client\source.cpp(336): warning C4267: return: преобразование из "size_t" в "int"; возможна потеря данных
+  client.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\client.exe

@@ -1,0 +1,4 @@
+﻿  Сервер.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\сервер.cpp(78): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\сервер.cpp(82): warning C4244: инициализация: преобразование "std::streamoff" в "int", возможна потеря данных
+  tcp_server.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\tcp_server.exe
