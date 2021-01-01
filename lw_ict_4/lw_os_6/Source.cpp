@@ -329,7 +329,7 @@ void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
 		packnum = 0;
 		for (int i = 0; i<(int)cbData; i+=10)
 		{
-			WCHAR frag_pack[5] = L"";
+			WCHAR frag_pack[10] = L"";
 			memcpy(frag_pack, &lpData[i], sizeof(frag_pack));
 			msg.numberfrag = packnum;//укажем номер пакета
 			packnum++;
