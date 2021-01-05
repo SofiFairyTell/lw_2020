@@ -8,7 +8,7 @@
 #include <strsafe.h>
 #include <process.h>
 #include <string>
-
+#include <iostream>
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
@@ -60,7 +60,7 @@ TCHAR fullFileName[260];
 TCHAR fileName[260] = L"";
 TCHAR bufferNameIP[25];
 
-
+BOOL FileSending(wchar_t* NameOfFiles);//функция для отправки файлов, передаем их имена
 
 DWORD result;
 
@@ -96,7 +96,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	HWND hWnd = CreateWindowEx(NULL, TEXT("WindowClass"), TEXT("Client"),
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 550, 240, NULL, NULL, hInstance, NULL);
 
-	if (NULL == hWnd) {
+	if (NULL == hWnd) 
+	{
 		return -1;
 	}
 
@@ -129,6 +130,52 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	}
 
 	return (int)msg.wParam;
+}
+
+BOOL FileSending(wchar_t* NamesOfFile)
+{
+	while (*NamesOfFile)
+	{
+		wstring filename = NamesOfFile;
+		FILE *file; //переменная для файла
+		
+		file = _wfopen(NamesOfFile, L"rb");
+
+		//byteBuffer = fread()
+		//std::fstream os(filename, ios::binary);
+
+		while (fgets)
+		{
+
+		}
+
+		HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+		if (INVALID_HANDLE_VALUE != hFile)
+		{
+			OVERLAPPED ReadOL;
+
+
+			LARGE_INTEGER li;
+			GetFileSizeEx(hFile, &li);
+			DWORD sizeBuffer = li.LowPart;
+			byteBuffer = new BYTE[sizeBuffer];
+
+			ReadFile(hFile, byteBuffer, sizeBuffer, NULL, NULL);
+
+			MainHeader msgH;
+			StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
+			msgH.filesize = sizeBuffer;
+			sendfile(s, (const char*)&msgH, sizeof(msgH));
+			sendfile(s, (const char*)byteBuffer, sizeBuffer);
+
+			delete[] byteBuffer;
+
+		}
+		CloseHandle(hFile);
+
+		NamesOfFile += (filename.length() + 1);
+	}
+	return 0;
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -187,8 +234,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			sockaddr_in sin = { 0 };
 			sin.sin_family = AF_INET;
 			sin.sin_port = htons(7581);
-			//sin.sin_addr.s_addr = inet_addr("192.168.56.104");
-			sin.sin_addr.s_addr = inet_addr("192.168.56.1");
+			//sin.sin_addr.s_addr = inet_addr("192.168.56.104");//адрес виртуальной машины
+			sin.sin_addr.s_addr = inet_addr("192.168.56.1");//адрес ПК
 			//sin.sin_addr.s_addr = inet_addr((const char*)bufferNameIP);
 			int err = connect(s, (sockaddr*)&sin, sizeof(sin));
 		}
@@ -249,37 +296,8 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			NamesOfFile = fullFileName;
 			wstring directory = NamesOfFile;
 			NamesOfFile += (directory.length() + 1);
-
-			while (*NamesOfFile)
-			{
-				wstring filename = NamesOfFile;
-
-				HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-				if (INVALID_HANDLE_VALUE != hFile) 
-				{
-					OVERLAPPED ReadOL;
-
-
-					LARGE_INTEGER li;
-					GetFileSizeEx(hFile, &li);
-					DWORD sizeBuffer = li.LowPart;
-					byteBuffer = new BYTE[sizeBuffer];
-					ReadFile(hFile, byteBuffer, sizeBuffer, NULL, NULL);
-							
-							MainHeader msgH;
-							StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
-							msgH.filesize = sizeBuffer;
-							sendfile(s, (const char*)&msgH, sizeof(msgH));
-							sendfile(s, (const char*)byteBuffer, sizeBuffer);
-
-							delete[] byteBuffer;
-
-				}
-				CloseHandle(hFile);
-
-				NamesOfFile += (filename.length() + 1);
-			}
-
+			FileSending(NamesOfFile);
+			
 		}
 		break;
 
