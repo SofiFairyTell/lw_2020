@@ -8,6 +8,7 @@
 #include <strsafe.h>
 #include <process.h>
 #include <string>
+#include <fstream>
 #include <iostream>
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -136,20 +137,40 @@ BOOL FileSending(wchar_t* NamesOfFile)
 {
 	while (*NamesOfFile)
 	{
-		wstring filename = NamesOfFile;
-		FILE *file; //переменная для файла
+		std::wstring filename = NamesOfFile;
+		//FILE *file; //переменная для файла
 		
-		file = _wfopen(NamesOfFile, L"rb");
+		//file = _wfopen(NamesOfFile, L"rb");
 
 		//byteBuffer = fread()
-		//std::fstream os(filename, ios::binary);
+		std::wifstream file_open(filename, ios::in|ios::binary); // создание входного потока
 
+		//узнаем размер файла
+		file_open.seekg(0,wifstream::end);//перейдем в конец файла
+		long size = file_open.tellg();//определим размер файла
+		file_open.seekg(0);//вернемся в начало файла
+
+		wchar_t* buffer = new wchar_t[size];
+
+		file_open.read(buffer, size);
+
+		MainHeader msgH;
+
+		StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
+		msgH.filesize = size;
+		sendfile(s, (const char*)&msgH, sizeof(msgH));
+		
+		sendfile(s, (const char*)buffer, size);
+
+		delete[] buffer;
+
+		file_open.close();
 		//while (fgets)
 		//{
 
 		//}
 
-		HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+		/*HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 		if (INVALID_HANDLE_VALUE != hFile)
 		{
 			OVERLAPPED ReadOL;
@@ -171,7 +192,7 @@ BOOL FileSending(wchar_t* NamesOfFile)
 			delete[] byteBuffer;
 
 		}
-		CloseHandle(hFile);
+		CloseHandle(hFile);*/
 
 		NamesOfFile += (filename.length() + 1);
 	}
