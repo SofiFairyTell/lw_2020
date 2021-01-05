@@ -255,7 +255,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			ofn.hInstance = GetModuleHandle(NULL);
 			ofn.lpstrFile = fullFileName;//полный путь
 			ofn.nMaxFile = MAX_PATH;
-			ofn.lpstrFilter = TEXT("Text files\0*.txt");
+			ofn.lpstrFilter = TEXT("Text files\0*.*");
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = fileName;//название файла
 			ofn.nMaxFileTitle = MAX_PATH;
@@ -288,9 +288,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		{
 			TCHAR Buf[100] = L"";
 			//GetDlgItemTextA(hwnd, IDC_USERNAME, (LPSTR)Buf, 128);
-			GetDlgItemTextA(hwnd, IDC_USERNAME, (LPSTR)msgA.adr, sizeof(msgA.adr));
-			
-			//StringCchCopy(msgA.adr, sizeof(msgA.adr), Buf);//записываем имя отправителя в структуру
+			GetDlgItemTextA(hwnd, IDC_USERNAME, (LPSTR)msgA.adr, sizeof(msgA.adr));//Запись имени отправителя в структуру
 
 			sendfile(s, (const char*)&msgA, sizeof(msgA));//отправим имя серверу
 

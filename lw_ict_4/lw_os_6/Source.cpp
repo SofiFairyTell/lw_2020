@@ -331,7 +331,9 @@ void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
 		{
 			WCHAR frag_pack[10] = L"";
 			memcpy(frag_pack, &lpData[i], sizeof(frag_pack));
+
 			msg.numberfrag = packnum;//укажем номер пакета
+
 			packnum++;
 			StringCchCat(msg.text,sizeof(msg.text), frag_pack);
 
@@ -378,17 +380,7 @@ unsigned __stdcall ThreadFunc(void* lParam)
 			 
 			int reseived_size = recived_msg.filelen/10; //количество пакетов
 
-			//for (int i = 0; i < reseived_size; i++)
-			//{
-			//	/*if (i == recived_msg.numberfrag)
-			//	{
-
-			//	}*/
-			//	//else we lost packet???
-
-			//}
-
-			if (recived_msg.filelen %10 == 0)
+			if (recived_msg.filelen % 10 == 0)
 			{
 				recived_msg.numberfrag--;
 			}
@@ -399,7 +391,6 @@ unsigned __stdcall ThreadFunc(void* lParam)
 				{
 					for (int j = 0; j < 10 ; j++)
 					{
-						//StringCchCat(Message, sizeof(Message), recived_msg.text);
 						Message[i+j] = recived_msg.text[j];
 					}
 				}
