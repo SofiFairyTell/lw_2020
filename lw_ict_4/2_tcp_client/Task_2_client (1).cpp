@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <codecvt>//для фассетов 
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
@@ -138,19 +139,18 @@ BOOL FileSending(wchar_t* NamesOfFile)
 	while (*NamesOfFile)
 	{
 		std::wstring filename = NamesOfFile;
-		//FILE *file; //переменная для файла
-		
-		//file = _wfopen(NamesOfFile, L"rb");
+		std::ifstream file_open(filename, ios::in|ios::binary); // создание входного потока
 
-		//byteBuffer = fread()
-		std::wifstream file_open(filename, ios::in|ios::binary); // создание входного потока
+		//чтобы русский язык нормально определялся в буфере wchar_t
+		std::locale loc(std::locale(), new std::codecvt_utf8<__int32>);
+		file_open.imbue(loc);
 
 		//узнаем размер файла
 		file_open.seekg(0,wifstream::end);//перейдем в конец файла
 		long size = file_open.tellg();//определим размер файла
 		file_open.seekg(0);//вернемся в начало файла
 
-		wchar_t* buffer = new wchar_t[size];
+		char* buffer = new char[size+1];
 
 		file_open.read(buffer, size);
 
@@ -165,10 +165,6 @@ BOOL FileSending(wchar_t* NamesOfFile)
 		delete[] buffer;
 
 		file_open.close();
-		//while (fgets)
-		//{
-
-		//}
 
 		/*HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 		if (INVALID_HANDLE_VALUE != hFile)
