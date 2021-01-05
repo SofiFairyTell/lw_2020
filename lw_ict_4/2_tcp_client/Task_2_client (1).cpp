@@ -56,9 +56,9 @@ sockaddr_in soin;
 
 wchar_t* NamesOfFile;
 
-TCHAR fullFileName[260];
-TCHAR fileName[260] = L"";
-TCHAR bufferNameIP[25];
+TCHAR FileNameTitles[260] = L"";//хранит указатель на папку, если выбрано более одного файла
+TCHAR FileNameTitle[260] = L"";//использовать если выбран один файл
+TCHAR bufferNameIP[25] = L"";
 
 BOOL FileSending(wchar_t* NameOfFiles);//функция для отправки файлов, передаем их имена
 
@@ -249,27 +249,24 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		case IDC_BUTTONOpen:
 		{
 			OPENFILENAME ofn = {sizeof(OPENFILENAME)};
-			//ZeroMemory(&ofn, sizeof(ofn));
-			//ofn.lStructSize = sizeof(ofn);
-			//ofn.hwndOwner = hwnd;
+
 			ofn.hInstance = GetModuleHandle(NULL);
-			ofn.lpstrFile = fullFileName;//полный путь
+			ofn.lpstrFile = FileNameTitles;//полный путь
 			ofn.nMaxFile = MAX_PATH;
-			ofn.lpstrFilter = TEXT("Text files\0*.*");
+			ofn.lpstrFilter = TEXT("Files\0*.*");
 			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = fileName;//название файла
+			ofn.lpstrFileTitle = FileNameTitle;//название файла
 			ofn.nMaxFileTitle = MAX_PATH;
 			ofn.lpstrInitialDir = NULL;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXPLORER | OFN_ALLOWMULTISELECT;
+
 			if (GetOpenFileName(&ofn) == TRUE) 
 			{
 				MessageBox(NULL, TEXT("Файлы успешно выбраны"), TEXT("Client"), MB_OK | MB_ICONINFORMATION);
-
 				int nOffset = ofn.nFileOffset;
 
 				if (nOffset > lstrlen(ofn.lpstrFile))
 				{
-
 					while (ofn.lpstrFile[nOffset])
 					{
 						nOffset = nOffset + wcslen(ofn.lpstrFile + nOffset) + 1;
@@ -286,16 +283,17 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		case IDC_BUTTONSend:
 		{
-			TCHAR Buf[100] = L"";
-			//GetDlgItemTextA(hwnd, IDC_USERNAME, (LPSTR)Buf, 128);
-			GetDlgItemTextA(hwnd, IDC_USERNAME, (LPSTR)msgA.adr, sizeof(msgA.adr));//Запись имени отправителя в структуру
+			GetDlgItemTextW(hwnd, IDC_USERNAME, (LPWSTR)msgA.adr, sizeof(msgA.adr));//Запись имени отправителя в структуру
 
 			sendfile(s, (const char*)&msgA, sizeof(msgA));//отправим имя серверу
-
-			NamesOfFile = fullFileName;//массив полных путей
-			wstring directory = NamesOfFile;
-			NamesOfFile += (directory.length() + 1);
-			FileSending(NamesOfFile);
+			if (msgA.CountOfFiles > 1)
+			{
+				FileSending(FileNameTitles);
+			}
+			else
+			{
+				FileSending(FileNameTitle);//единственный экземпляр файла
+			}
 			msgA.CountOfFiles = 0; //обнуление счетчика файлов
 		}
 		break;

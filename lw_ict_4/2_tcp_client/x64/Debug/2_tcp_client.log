@@ -1,4 +1,4 @@
 ﻿  Task_2_client (1).cpp
 c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(155): warning C4101: ReadOL: неиспользованная локальная переменная
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(275): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(271): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
   2_tcp_client.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\2_tcp_client.exe
