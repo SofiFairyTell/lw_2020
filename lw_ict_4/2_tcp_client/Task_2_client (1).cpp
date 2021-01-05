@@ -144,10 +144,10 @@ BOOL FileSending(wchar_t* NamesOfFile)
 		//byteBuffer = fread()
 		//std::fstream os(filename, ios::binary);
 
-		while (fgets)
-		{
+		//while (fgets)
+		//{
 
-		}
+		//}
 
 		HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 		if (INVALID_HANDLE_VALUE != hFile)
@@ -175,6 +175,7 @@ BOOL FileSending(wchar_t* NamesOfFile)
 
 		NamesOfFile += (filename.length() + 1);
 	}
+
 	return 0;
 }
 
@@ -247,16 +248,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		break;
 		case IDC_BUTTONOpen:
 		{
-			OPENFILENAME ofn;
-			ZeroMemory(&ofn, sizeof(ofn));
-			ofn.lStructSize = sizeof(ofn);
-			ofn.hwndOwner = hwnd;
+			OPENFILENAME ofn = {sizeof(OPENFILENAME)};
+			//ZeroMemory(&ofn, sizeof(ofn));
+			//ofn.lStructSize = sizeof(ofn);
+			//ofn.hwndOwner = hwnd;
 			ofn.hInstance = GetModuleHandle(NULL);
-			ofn.lpstrFile = fullFileName;
+			ofn.lpstrFile = fullFileName;//полный путь
 			ofn.nMaxFile = MAX_PATH;
 			ofn.lpstrFilter = TEXT("Text files\0*.txt");
 			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = fileName;
+			ofn.lpstrFileTitle = fileName;//название файла
 			ofn.nMaxFileTitle = MAX_PATH;
 			ofn.lpstrInitialDir = NULL;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXPLORER | OFN_ALLOWMULTISELECT;
@@ -293,11 +294,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 			sendfile(s, (const char*)&msgA, sizeof(msgA));//отправим имя серверу
 
-			NamesOfFile = fullFileName;
+			NamesOfFile = fullFileName;//массив полных путей
 			wstring directory = NamesOfFile;
 			NamesOfFile += (directory.length() + 1);
 			FileSending(NamesOfFile);
-			
+			msgA.CountOfFiles = 0; //обнуление счетчика файлов
 		}
 		break;
 

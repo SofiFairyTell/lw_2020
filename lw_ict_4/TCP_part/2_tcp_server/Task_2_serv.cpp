@@ -138,7 +138,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			MessageBox(NULL, adr, TEXT("Server"), MB_OK | MB_ICONINFORMATION);
 			for (int i = 0; i < msgA.CountOfFiles; i++)
 			{
-				MainHeader msgH;
+				MainHeader msgH = {0};
 
 				recvfile2((char*)&msgH, sizeof(msgH));
 				byteBuffer = new BYTE[msgH.filesize];
@@ -157,7 +157,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					WriteFile(hFile, byteBuffer, msgH.filesize, NULL, &oWrite);
 					WaitForSingleObject(oWrite.hEvent, INFINITE);
 					CloseHandle(oWrite.hEvent);
-
 				}
 				CloseHandle(hFile);
 			}
@@ -185,7 +184,8 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct) {
 	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (0 == err) {
 		ss = socket(AF_INET, SOCK_STREAM, 0);
-		if (ss != INVALID_SOCKET) {
+		if (ss != INVALID_SOCKET) 
+		{
 			sOut = { AF_INET, htons(7581), INADDR_ANY };
 			bind(ss, (sockaddr*)&sOut, sizeof(sOut));
 			_beginthreadex(NULL, 0, ListenThread, NULL, 0, NULL);
