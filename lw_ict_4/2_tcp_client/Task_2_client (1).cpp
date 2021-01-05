@@ -136,11 +136,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 
 BOOL FileSending(wchar_t* NamesOfFile)
 {
+	std::wstring filename = NamesOfFile;
+	NamesOfFile += (filename.length() + 1);
+	
 	while (*NamesOfFile)
 	{
-		std::wstring filename = NamesOfFile;
+		
+		//std::wstring filename = NamesOfFile;
+				
 		std::ifstream file_open(filename, ios::in|ios::binary); // создание входного потока
 
+		//filename.
+		/*не влияет???*/
 		//чтобы русский язык нормально определялся в буфере wchar_t
 		std::locale loc(std::locale(), new std::codecvt_utf8<__int32>);
 		file_open.imbue(loc);
@@ -150,10 +157,37 @@ BOOL FileSending(wchar_t* NamesOfFile)
 		long size = file_open.tellg();//определим размер файла
 		file_open.seekg(0);//вернемся в начало файла
 
-		char* buffer = new char[size+1];
+		char* buffer = new char[size+1];//инициализация буфера 
 
 		file_open.read(buffer, size);
 
+		if (file_open)
+		{
+			MainHeader msgH;
+
+			StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
+			msgH.filesize = size;
+			sendfile(s, (const char*)&msgH, sizeof(msgH));
+			sendfile(s, (const char*)buffer, size);
+			
+			/*освобождение ресурсов т.д. */
+			delete[] buffer;
+			file_open.close();
+
+			NamesOfFile += (filename.length() + 1);
+		}
+		
+		else
+		{
+
+			delete[] buffer;
+			file_open.close();
+			return 0;
+			//обработка ошибки чтения файла
+				//std::cout << "error: only " << is.gcount() << " could be read";
+		}
+			
+		/*
 		MainHeader msgH;
 
 		StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
@@ -190,7 +224,7 @@ BOOL FileSending(wchar_t* NamesOfFile)
 		}
 		CloseHandle(hFile);*/
 
-		NamesOfFile += (filename.length() + 1);
+		NamesOfFile += (filename.length() + 1);*/
 	}
 
 	return 0;
@@ -305,6 +339,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			sendfile(s, (const char*)&msgA, sizeof(msgA));//отправим имя серверу
 			if (msgA.CountOfFiles > 1)
 			{
+				
 				FileSending(FileNameTitles);
 			}
 			else
