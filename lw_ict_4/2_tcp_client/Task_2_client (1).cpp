@@ -47,7 +47,7 @@ struct MainHeader
 
 SOCKET sender_socket;//сокет для передачи данных 
 
-volatile bool stoped = false;
+//volatile bool stoped = false;
 
 AdressHeader msgA;
 

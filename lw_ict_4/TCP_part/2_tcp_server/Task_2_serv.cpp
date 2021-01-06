@@ -7,12 +7,18 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include <process.h>
+#include <string>
+#include <fstream>
+#include <iostream>
+
 
 #pragma comment(lib, "Ws2_32.lib")
 
-#define IDC_BUTTON1 2001
-#define IDC_BUTTON2 2002
-#define IDC_BUTTON3 2003
+//#define IDC_BUTTON1			2001
+#define BUTTON_DISCONNECT		2001
+#define BUTTON_RECEIVE			2002
+
+#define MAX_MESSAGE_SIZE	255
 
 #pragma pack(1)
 struct AdressHeader
@@ -34,8 +40,8 @@ struct MainHeader
 HWND hListBox = NULL;
 volatile bool stoped = false;
 
-SOCKET s;//сокет с данными от клиента
-SOCKET ss;//сокет дл€ прослушивани€ потока
+SOCKET data_socket;//сокет с данными от клиента
+SOCKET listen_socket;//сокет дл€ прослушивани€ потока
 
 BYTE* byteBuffer;
 sockaddr_in sOut;
@@ -43,11 +49,11 @@ sockaddr_in sOut;
 AdressHeader msgA;
 
 
-char bufferNameIP[15];
+//char bufferNameIP[15];
 
 HANDLE hFile = NULL;
 
-void recvfile2(char* buf, int len);
+void recv_file(char* Data, int Size);
 
 unsigned __stdcall ListenThread(LPVOID lpParameter);
 unsigned __stdcall RecvData(LPVOID lpParameter);
@@ -81,7 +87,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	HWND hWnd = CreateWindowEx(NULL, TEXT("WindowClass"), TEXT("Server"),
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 550, 200, NULL, NULL, hInstance, NULL);
 
-	if (NULL == hWnd) {
+	if (NULL == hWnd) 
+	{
 		return -1;
 	}
 
@@ -124,29 +131,43 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) 
 		{
 
-		case IDC_BUTTON2:
+		case BUTTON_DISCONNECT:
 		{
-			int err = shutdown(ss, SD_BOTH);
+			int err = shutdown(listen_socket, SD_BOTH);
 		}
 		break;
-		case IDC_BUTTON3:
+		case BUTTON_RECEIVE:
 		{
-			recvfile2((char*)&msgA, sizeof(msgA));
-			TCHAR adr[100];
+			recv_file((char*)&msgA, sizeof(msgA));
+
 			CHAR name[MAX_PATH] = "";
-			StringCchPrintf(adr, 100, TEXT("‘айл получен от %s"), msgA.adr);
-			MessageBox(NULL, adr, TEXT("Server"), MB_OK | MB_ICONINFORMATION);
+			TCHAR Message[MAX_MESSAGE_SIZE] = _T(""); //сообщение
+
+			StringCchCat(Message, _countof(Message), _T("ќтправитель:"));
+			StringCchCat(Message, _countof(msgA.adr), msgA.adr);
+			
+			MessageBox(NULL, Message, TEXT("Server"), MB_OK | MB_ICONINFORMATION);
+		
 			for (int i = 0; i < msgA.CountOfFiles; i++)
 			{
 				MainHeader msgH = {0};
 
-				recvfile2((char*)&msgH, sizeof(msgH));
+				recv_file((char*)&msgH, sizeof(msgH));
+
 				byteBuffer = new BYTE[msgH.filesize];
-				recvfile2((char*)byteBuffer, msgH.filesize);
+
+				recv_file((char*)byteBuffer, msgH.filesize);
 
 				//LPWSTR DIR = NULL;
 				//GetCurrentDirectory(MAX_PATH, DIR);
 
+				std::ofstream file_receive(msgH.filename, std::ios::out | std::ios::binary); // создание выходного потока
+				
+				file_receive.write((char*)byteBuffer, msgH.filesize + 1);
+
+				file_receive.close();
+
+				/*
 				hFile = CreateFile((LPCWSTR)msgH.filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
 				OVERLAPPED oWrite = { 0 };
 				oWrite.Offset = 0;
@@ -159,6 +180,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					CloseHandle(oWrite.hEvent);
 				}
 				CloseHandle(hFile);
+				*/
 			}
 		}
 		break;
@@ -174,62 +196,68 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct) {
 
 	CreateWindowEx(0, WC_BUTTON, TEXT("«авершить соединение"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 20, 240, 30, hWnd, (HMENU)IDC_BUTTON2, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 20, 240, 30, hWnd, (HMENU)BUTTON_DISCONNECT, lpCreateStruct->hInstance, NULL);
+	
 	CreateWindowEx(0, WC_BUTTON, TEXT("ѕолучить файлы"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 60, 240, 30, hWnd, (HMENU)IDC_BUTTON3, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 60, 240, 30, hWnd, (HMENU)BUTTON_RECEIVE, lpCreateStruct->hInstance, NULL);
 
 	WSADATA wsaData;
 	u_long argp = 1;
-	int err = ioctlsocket(s, FIONBIO, &argp);// перевода сокета в не блокируемое состо€ние (nonblocking mode) используетс€ команда FIONBIO
-	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	int result = ioctlsocket(data_socket, FIONBIO, &argp);// перевода сокета в не блокируемое состо€ние (nonblocking mode) используетс€ команда FIONBIO
 	
-	if (0 == err)
+	result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	
+	if (result == 0)
 	{
-		ss = socket(AF_INET, SOCK_STREAM, 0);
+		listen_socket = socket(AF_INET, SOCK_STREAM, 0);
 		
-		if (ss != INVALID_SOCKET) 
+		if (listen_socket != INVALID_SOCKET)
 		{
 			sOut = { AF_INET, htons(7581), INADDR_ANY };
-			bind(ss, (sockaddr*)&sOut, sizeof(sOut));
+			bind(listen_socket, (sockaddr*)&sOut, sizeof(sOut));
 			_beginthreadex(NULL, 0, ListenThread, NULL, 0, NULL);
-
 		}
 	}
 	return TRUE;
 }
 
-void OnDestroy(HWND hWnd) {
+void OnDestroy(HWND hWnd) 
+{
 	stoped = true;
-	closesocket(ss);
+	closesocket(listen_socket);
 	WSACleanup();
 	PostQuitMessage(0);
 }
 
 
-void recvfile2(char* buf, int len) 
+void recv_file(char* Data, int Size)
+{
+	if (Data == nullptr || Size == 0)
 	{
-		int n;
-		while (len > 0 && stoped == false) 
-		{
-			n = recv(s, buf, len, 0);
-			if (n > 0) 
+		return;
+	}
+	int _return;
+	while (Size > 0 && stoped == false)
+	{
+		_return = recv(data_socket, Data, Size, 0);
+			if (_return > 0)
 			{
-				buf += n;
-				len -= n;
+				Data += _return;
+				Size -= _return;
 			}
 		}
-	}
+}
 
 unsigned __stdcall ListenThread(LPVOID lpParameter)
 {
-	int err = listen(ss, 5);
-	if (SOCKET_ERROR != err)
+	int result = listen(listen_socket, 5);
+	if ( result != SOCKET_ERROR)
 	{
 		for (;;)
 		{
-			s = accept(ss, NULL, NULL);
+			data_socket = accept(listen_socket, NULL, NULL);
 			MessageBox(NULL, TEXT("—оединение установлено"), TEXT("Server"), MB_OK | MB_ICONINFORMATION);
-			if (INVALID_SOCKET == s)
+			if (INVALID_SOCKET == data_socket)
 			{
 				if (WSAEINTR == WSAGetLastError()) break;
 			}
