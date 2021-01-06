@@ -126,68 +126,51 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		HANDLE_MSG(hWnd, WM_CREATE, OnCreate);
 		HANDLE_MSG(hWnd, WM_DESTROY, OnDestroy);
 
-	case WM_COMMAND:
-	{
-		switch (LOWORD(wParam)) 
+		case WM_COMMAND:
 		{
-
-		case BUTTON_DISCONNECT:
-		{
-			int err = shutdown(listen_socket, SD_BOTH);
-		}
-		break;
-		case BUTTON_RECEIVE:
-		{
-			recv_file((char*)&msgA, sizeof(msgA));
-
-			CHAR name[MAX_PATH] = "";
-			TCHAR Message[MAX_MESSAGE_SIZE] = _T(""); //сообщение
-
-			StringCchCat(Message, _countof(Message), _T("Отправитель:"));
-			StringCchCat(Message, _countof(msgA.adr), msgA.adr);
-			
-			MessageBox(NULL, Message, TEXT("Server"), MB_OK | MB_ICONINFORMATION);
-		
-			for (int i = 0; i < msgA.CountOfFiles; i++)
+			switch (LOWORD(wParam)) 
 			{
-				MainHeader msgH = {0};
 
-				recv_file((char*)&msgH, sizeof(msgH));
-
-				byteBuffer = new BYTE[msgH.filesize];
-
-				recv_file((char*)byteBuffer, msgH.filesize);
-
-				//LPWSTR DIR = NULL;
-				//GetCurrentDirectory(MAX_PATH, DIR);
-
-				std::ofstream file_receive(msgH.filename, std::ios::out | std::ios::binary); // создание выходного потока
-				
-				file_receive.write((char*)byteBuffer, msgH.filesize + 1);
-
-				file_receive.close();
-
-				/*
-				hFile = CreateFile((LPCWSTR)msgH.filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_OVERLAPPED, NULL);
-				OVERLAPPED oWrite = { 0 };
-				oWrite.Offset = 0;
-				oWrite.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-
-				if (INVALID_HANDLE_VALUE != hFile)
+				case BUTTON_DISCONNECT:
 				{
-					WriteFile(hFile, byteBuffer, msgH.filesize, NULL, &oWrite);
-					WaitForSingleObject(oWrite.hEvent, INFINITE);
-					CloseHandle(oWrite.hEvent);
+					int err = shutdown(listen_socket, SD_BOTH);
 				}
-				CloseHandle(hFile);
-				*/
+				break;
+				case BUTTON_RECEIVE:
+				{
+					recv_file((char*)&msgA, sizeof(msgA));
+
+					CHAR name[MAX_PATH] = "";
+					TCHAR Message[MAX_MESSAGE_SIZE] = _T(""); //сообщение
+
+					StringCchCat(Message, _countof(Message), _T("Отправитель:"));
+					StringCchCat(Message, _countof(msgA.adr), msgA.adr);
+			
+					MessageBox(NULL, Message, TEXT("Server"), MB_OK | MB_ICONINFORMATION);
+		
+					for (int i = 0; i < msgA.CountOfFiles; i++)
+					{
+						MainHeader msgH = {0};
+
+						recv_file((char*)&msgH, sizeof(msgH));
+
+						byteBuffer = new BYTE[msgH.filesize];
+
+						recv_file((char*)byteBuffer, msgH.filesize);
+
+						std::ofstream file_receive(msgH.filename, std::ios::out | std::ios::binary); // создание выходного потока
+				
+						file_receive.write((char*)byteBuffer, msgH.filesize + 1);
+
+						file_receive.close();
+
+					}
+				}
+				break;
+			return TRUE;
 			}
-		}
-		break;
-		return TRUE;
-		}
 		return 0;
-	}
+		}
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -236,16 +219,31 @@ void recv_file(char* Data, int Size)
 	{
 		return;
 	}
-	int _return;
-	while (Size > 0 && stoped == false)
+	int _return, bytes_receive = 0;
+	do
 	{
-		_return = recv(data_socket, Data, Size, 0);
+		_return = recv(data_socket, Data + bytes_receive, Size, 0);
+		if (_return == SOCKET_ERROR)
+		{
+			int err = WSAGetLastError();
+			MessageBox(NULL, TEXT("Возникла ошибка", err), TEXT("Client"), MB_OK | MB_ICONERROR);
+		}
+		else
+		{
+			bytes_receive += _return;
+			Size -= _return;
+		}
+	} while (Size > 0 && stoped == false);
+
+	/*while (Size > 0 && stoped == false)
+	{
+		_return = recv(data_socket, Data + bytes_receive, Size, 0);
 			if (_return > 0)
 			{
-				Data += _return;
+				bytes_receive += _return;
 				Size -= _return;
 			}
-		}
+		}*/
 }
 
 unsigned __stdcall ListenThread(LPVOID lpParameter)

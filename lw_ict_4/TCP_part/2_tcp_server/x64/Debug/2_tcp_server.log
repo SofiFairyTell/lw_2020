@@ -1,2 +1,3 @@
 ﻿  Task_2_serv.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\tcp_part\2_tcp_server\task_2_serv.cpp(229): warning C4002: слишком много аргументов для вызова макроса, подобного функции, "TEXT"
   2_tcp_server.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\2_tcp_server.exe
