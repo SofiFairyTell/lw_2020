@@ -10,7 +10,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-
+#include <codecvt>//для фассетов 
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -140,7 +140,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					recv_file((char*)&msgA, sizeof(msgA));
 
-					CHAR name[MAX_PATH] = "";
+
+
 					TCHAR Message[MAX_MESSAGE_SIZE] = _T(""); //сообщение
 
 					StringCchCat(Message, _countof(Message), _T("Отправитель:"));
@@ -154,13 +155,21 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 						recv_file((char*)&msgH, sizeof(msgH));
 
-						byteBuffer = new BYTE[msgH.filesize];
 
-						recv_file((char*)byteBuffer, msgH.filesize);
+
+						char* buffer = new char[msgH.filesize + 1];//инициализация буфера 
+
+
+						recv_file((char*)buffer, msgH.filesize);
 
 						std::ofstream file_receive(msgH.filename, std::ios::out | std::ios::binary); // создание выходного потока
-				
-						file_receive.write((char*)byteBuffer, msgH.filesize + 1);
+						
+						//чтобы русский язык нормально определялся в буфере wchar_t
+						std::locale loc(std::locale(), new std::codecvt_utf8<__int32>);
+						file_receive.imbue(loc);
+
+
+						file_receive.write((char*)buffer, msgH.filesize + 1);
 
 						file_receive.close();
 
