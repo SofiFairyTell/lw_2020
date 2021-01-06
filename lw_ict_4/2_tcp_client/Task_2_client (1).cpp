@@ -351,7 +351,6 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпл€р файла
 			}
 			msgA.CountOfFiles = 0; //обнуление счетчика файлов
-
 		}
 		break;
 
@@ -367,7 +366,6 @@ void sendfile(SOCKET send_socket, const char* Data, int len)
 	int _return, bytes_send = 0;
 	do
 	{
-		//_return = send(send_socket, Data + bytes_send, len, 0);//возвращение количества отправленных байт
 		_return = send(send_socket, Data + bytes_send, len - bytes_send, 0);//возвращение количества отправленных байт
 		if (_return == SOCKET_ERROR)
 		{
@@ -377,7 +375,6 @@ void sendfile(SOCKET send_socket, const char* Data, int len)
 		else
 		{
 			bytes_send += _return;//сдвиг?
-			//len -= _return;//уменьшение длины файла 
 		}
 	} while (bytes_send < len);
 	
