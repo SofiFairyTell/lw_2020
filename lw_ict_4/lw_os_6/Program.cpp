@@ -54,7 +54,7 @@ struct SLP_msg
 {
 	int filelen;		 //длина сообщени¤
 	int numberfrag;		//номер фрагмента
-	WCHAR username[20]; //им¤ отправител¤
+	WCHAR username[20]; //имя отправителя
 	WCHAR text[10];		//текст сообщени¤
 };
 #pragma pack()

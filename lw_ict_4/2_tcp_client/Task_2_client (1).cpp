@@ -11,6 +11,10 @@
 #include <fstream>
 #include <iostream>
 #include <codecvt>//дл€ фассетов 
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
+
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
@@ -137,12 +141,21 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 {
 	std::wstring filename = L"";
+
 	if (CountOfFiles > 1)
 	{
 		/*выполнение первоначального сдвига, если в начале у нас был указатель на директорию*/
 		filename = NamesOfFile;
 		NamesOfFile += (filename.length() + 1);
 	}
+	//When try separate filename
+	//else
+	//{
+	//	filename = NamesOfFile;
+	//	//unsigned int found = filename.find_last_of(L'\\');
+	//	NamesOfFile = (wchar_t*)filename.substr(filename.find_last_of(L'\\')).c_str();
+	//	//fs::path(filename).filename();
+	//}
 	
 	while (NamesOfFile)
 	{
@@ -158,7 +171,7 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 
 		//узнаем размер файла
 		file_open.seekg(0,wifstream::end);//перейдем в конец файла
-		long size = file_open.tellg();//определим размер файла
+		int size = file_open.tellg();//определим размер файла
 		file_open.seekg(0);//вернемс€ в начало файла
 
 		char* buffer = new char[size+1];//инициализаци€ буфера 
@@ -339,16 +352,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		case IDC_BUTTONSend:
 		{
 			GetDlgItemTextW(hwnd, IDC_USERNAME, (LPWSTR)msgA.adr, sizeof(msgA.adr));//«апись имени отправител€ в структуру
-
+			/*
 			sendfile(s, (const char*)&msgA, sizeof(msgA));//отправим им€ серверу
+			*/
 			if (msgA.CountOfFiles > 1)
 			{
-				
 				FileSending(FileNameTitles, msgA.CountOfFiles);
 			}
 			else
 			{
-				FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпл€р файла
+			FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпл€р файла
 			}
 			msgA.CountOfFiles = 0; //обнуление счетчика файлов
 		}
