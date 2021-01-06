@@ -56,11 +56,11 @@ AdressHeader msgA;
 
 sockaddr_in soin;
 
-wchar_t* NamesOfFile;
+//wchar_t* NamesOfFile;
 
-TCHAR FileNameTitles[260] = L"";//хранит указатель на папку, если выбрано более одного файла
-TCHAR FileNameTitle[260] = L"";//использовать если выбран один файл
-TCHAR bufferNameIP[25] = L"";
+wchar_t FileNameTitles[260] = L"";//хранит указатель на папку, если выбрано более одного файла
+wchar_t FileNameTitle[260] = L"";//использовать если выбран один файл
+wchar_t bufferNameIP[25] = L"";
 
 BOOL FileSending(wchar_t* NameOfFiles);//функци€ дл€ отправки файлов, передаем их имена
 
@@ -134,19 +134,23 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	return (int)msg.wParam;
 }
 
-BOOL FileSending(wchar_t* NamesOfFile)
+BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 {
-	std::wstring filename = NamesOfFile;
-	NamesOfFile += (filename.length() + 1);
+	std::wstring filename = L"";
+	if (CountOfFiles > 1)
+	{
+		/*выполнение первоначального сдвига, если в начале у нас был указатель на директорию*/
+		filename = NamesOfFile;
+		NamesOfFile += (filename.length() + 1);
+	}
 	
-	while (*NamesOfFile)
+	while (NamesOfFile)
 	{
 		
 		//std::wstring filename = NamesOfFile;
 				
-		std::ifstream file_open(filename, ios::in|ios::binary); // создание входного потока
+		std::ifstream file_open(NamesOfFile, ios::in|ios::binary); // создание входного потока
 
-		//filename.
 		/*не вли€ет???*/
 		//чтобы русский €зык нормально определ€лс€ в буфере wchar_t
 		std::locale loc(std::locale(), new std::codecvt_utf8<__int32>);
@@ -173,7 +177,7 @@ BOOL FileSending(wchar_t* NamesOfFile)
 			/*освобождение ресурсов т.д. */
 			delete[] buffer;
 			file_open.close();
-
+			filename = NamesOfFile;
 			NamesOfFile += (filename.length() + 1);
 		}
 		
@@ -224,7 +228,7 @@ BOOL FileSending(wchar_t* NamesOfFile)
 		}
 		CloseHandle(hFile);*/
 
-		NamesOfFile += (filename.length() + 1);*/
+//		NamesOfFile += (filename.length() + 1);
 	}
 
 	return 0;
@@ -340,11 +344,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			if (msgA.CountOfFiles > 1)
 			{
 				
-				FileSending(FileNameTitles);
+				FileSending(FileNameTitles, msgA.CountOfFiles);
 			}
 			else
 			{
-				FileSending(FileNameTitle);//единственный экземпл€р файла
+				FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпл€р файла
 			}
 			msgA.CountOfFiles = 0; //обнуление счетчика файлов
 		}
