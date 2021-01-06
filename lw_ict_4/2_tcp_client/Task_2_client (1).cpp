@@ -26,7 +26,7 @@ using namespace std;
 #define IDC_BUTTONOpen			2006
 #define IDC_BUTTONSend			2007
 #define IDC_BUTTONGet			2008
-//#define IDC_EDIT1				2011
+
 #define IDC_IPADDR				2011
 #define IDC_USERNAME			2012
 
@@ -49,16 +49,16 @@ struct MainHeader
 
 BYTE* byteBuffer;
 
-SOCKET s;
-SOCKET ss;
-SOCKET sss;
+SOCKET sender_socket;//сокет для передачи данных 
+//SOCKET ss;
+//SOCKET sss;
 
 
 volatile bool stoped = false;
 
 AdressHeader msgA;
 
-sockaddr_in soin;
+//sockaddr_in soin;
 
 //wchar_t* NamesOfFile;
 
@@ -157,11 +157,8 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 	//	//fs::path(filename).filename();
 	//}
 	
-	while (NamesOfFile)
+	while (NamesOfFile != L"")
 	{
-		
-		//std::wstring filename = NamesOfFile;
-				
 		std::ifstream file_open(NamesOfFile, ios::in|ios::binary); // создание входного потока
 
 		/*не влияет???*/
@@ -184,64 +181,24 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 
 			StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
 			msgH.filesize = size;
-			sendfile(s, (const char*)&msgH, sizeof(msgH));
-			sendfile(s, (const char*)buffer, size);
+			sendfile(sender_socket, (const char*)&msgH, sizeof(msgH));
+			sendfile(sender_socket, (const char*)buffer, size);
 			
 			/*освобождение ресурсов т.д. */
 			delete[] buffer;
 			file_open.close();
 			filename = NamesOfFile;
-			NamesOfFile += (filename.length() + 1);
+			
+			NamesOfFile += (filename.length() + 1);//сдвиг к следующему файлу
 		}
 		
 		else
 		{
-
 			delete[] buffer;
 			file_open.close();
 			return 0;
-			//обработка ошибки чтения файла
-				//std::cout << "error: only " << is.gcount() << " could be read";
+			//обработка ошибки чтения файла должна быть где-то здесь....
 		}
-			
-		/*
-		MainHeader msgH;
-
-		StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
-		msgH.filesize = size;
-		sendfile(s, (const char*)&msgH, sizeof(msgH));
-		
-		sendfile(s, (const char*)buffer, size);
-
-		delete[] buffer;
-
-		file_open.close();
-
-		/*HANDLE hFile = CreateFile(NamesOfFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-		if (INVALID_HANDLE_VALUE != hFile)
-		{
-			OVERLAPPED ReadOL;
-
-
-			LARGE_INTEGER li;
-			GetFileSizeEx(hFile, &li);
-			DWORD sizeBuffer = li.LowPart;
-			byteBuffer = new BYTE[sizeBuffer];
-
-			ReadFile(hFile, byteBuffer, sizeBuffer, NULL, NULL);
-
-			MainHeader msgH;
-			StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
-			msgH.filesize = sizeBuffer;
-			sendfile(s, (const char*)&msgH, sizeof(msgH));
-			sendfile(s, (const char*)byteBuffer, sizeBuffer);
-
-			delete[] byteBuffer;
-
-		}
-		CloseHandle(hFile);*/
-
-//		NamesOfFile += (filename.length() + 1);
 	}
 
 	return 0;
@@ -258,34 +215,40 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct) 
 {
-
+	/*Кнопки*/
 	CreateWindowEx(0, WC_BUTTON, TEXT("Соединиться c сервером"),
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 20, 240, 27, hWnd, (HMENU)IDC_BUTTON_CONNECTION, lpCreateStruct->hInstance, NULL);
+	
+	CreateWindowEx(0, WC_BUTTON, TEXT("Завершить соединение"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 240, 27, hWnd, (HMENU)IDC_BUTTON_CLOSE, lpCreateStruct->hInstance, NULL);
+	
+	/*Поле для ввода IP-адреса*/
+	CreateWindowEx(0, TEXT("SysIPAddress32"), 
+		NULL, WS_CHILD | WS_VISIBLE, 20, 20, 240, 27, hWnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
 
-	//CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE, 20, 20, 240, 27, hWnd, (HMENU)IDC_EDIT1, lpCreateStruct->hInstance, NULL);
-	CreateWindowEx(0, TEXT("SysIPAddress32"), NULL, WS_CHILD | WS_VISIBLE,
-		20, 20, 240, 27, hWnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
+	/*Поле для ввода имени пользователя*/
 	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE, 20, 60, 240, 27, hWnd, (HMENU)IDC_USERNAME, lpCreateStruct->hInstance, NULL);
 	
 	
 	CreateWindowEx(0, WC_STATIC, TEXT("- Никнейм отправителя"), WS_CHILD | WS_VISIBLE, 275, 60, 240, 27, hWnd, NULL, lpCreateStruct->hInstance, NULL);
-	CreateWindowEx(0, WC_BUTTON, TEXT("Завершить соединение"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 240, 27, hWnd, (HMENU)IDC_BUTTON_CLOSE, lpCreateStruct->hInstance, NULL);
+
+	/*Работа с файлами*/
 	CreateWindowEx(0, WC_BUTTON, TEXT("Файл для отправки"),
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 110, 240, 27, hWnd, (HMENU)IDC_BUTTONOpen, lpCreateStruct->hInstance, NULL);
+
 	CreateWindowEx(0, WC_BUTTON, TEXT("Передать файл"),
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 110, 240, 27, hWnd, (HMENU)IDC_BUTTONSend, lpCreateStruct->hInstance, NULL);
 
 	WSADATA wsaData;
 	int err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	s = socket(AF_INET, SOCK_STREAM, 0);
+	sender_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	return TRUE;
 }
 
 void OnDestroy(HWND hWnd)
 {
-	closesocket(s);
+	closesocket(sender_socket);
 	WSACleanup();
 	PostQuitMessage(0);
 }
@@ -306,12 +269,12 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			//sin.sin_addr.s_addr = inet_addr("192.168.56.104");//адрес виртуальной машины
 			sin.sin_addr.s_addr = inet_addr("192.168.56.1");//адрес ПК
 			//sin.sin_addr.s_addr = inet_addr((const char*)bufferNameIP);
-			int err = connect(s, (sockaddr*)&sin, sizeof(sin));
+			int err = connect(sender_socket, (sockaddr*)&sin, sizeof(sin));
 		}
 		break;
 		case IDC_BUTTON_CLOSE:
 		{
-			int err = shutdown(s, SD_BOTH);
+			int err = shutdown(sender_socket, SD_BOTH);
 		}
 		break;
 		case IDC_BUTTONOpen:
@@ -321,7 +284,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			ofn.hInstance = GetModuleHandle(NULL);
 			ofn.lpstrFile = FileNameTitles;//полный путь
 			ofn.nMaxFile = MAX_PATH;
-			ofn.lpstrFilter = TEXT("Files\0*.*");
+			ofn.lpstrFilter = TEXT("Files\0*.*");//фильтр
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = FileNameTitle;//название файла
 			ofn.nMaxFileTitle = MAX_PATH;
@@ -331,18 +294,21 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			if (GetOpenFileName(&ofn) == TRUE) 
 			{
 				MessageBox(NULL, TEXT("Файлы успешно выбраны"), TEXT("Client"), MB_OK | MB_ICONINFORMATION);
-				int nOffset = ofn.nFileOffset;
+				int nFileOffset = ofn.nFileOffset;
 
-				if (nOffset > lstrlen(ofn.lpstrFile))
+				/*Начало подсчета количества файлов*/
+				if (nFileOffset > lstrlen(ofn.lpstrFile))
 				{
-					while (ofn.lpstrFile[nOffset])
+					/*Было выделено более одного файла*/
+					while (ofn.lpstrFile[nFileOffset])
 					{
-						nOffset = nOffset + wcslen(ofn.lpstrFile + nOffset) + 1;
+						nFileOffset = nFileOffset + wcslen(ofn.lpstrFile + nFileOffset) + 1;
 						msgA.CountOfFiles++;
 					}
 				}
 				else
 				{
+					/*Был выделен один файл*/
 					msgA.CountOfFiles++;
 				}
 			}
@@ -352,16 +318,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		case IDC_BUTTONSend:
 		{
 			GetDlgItemTextW(hwnd, IDC_USERNAME, (LPWSTR)msgA.adr, sizeof(msgA.adr));//Запись имени отправителя в структуру
-			/*
-			sendfile(s, (const char*)&msgA, sizeof(msgA));//отправим имя серверу
-			*/
+			
+			sendfile(sender_socket, (const char*)&msgA, sizeof(msgA));//отправим имя серверу
+			
 			if (msgA.CountOfFiles > 1)
 			{
-				FileSending(FileNameTitles, msgA.CountOfFiles);
+				FileSending(FileNameTitles, msgA.CountOfFiles);//отправка нескольких экземпляров файла
 			}
 			else
 			{
-			FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпляр файла
+				FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпляр файла
 			}
 			msgA.CountOfFiles = 0; //обнуление счетчика файлов
 		}
@@ -370,11 +336,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		}
 	}
 }
-void sendfile(SOCKET s, const char* buf, int len) 
+void sendfile(SOCKET send_socket, const char* buf, int len)
 {
 	int n, l = 0;
 	while (len > 0) {
-		n = send(s, buf + l, len, 0);
+		n = send(send_socket, buf + l, len, 0);
 		if (n > 0) 
 		{
 			l += n;

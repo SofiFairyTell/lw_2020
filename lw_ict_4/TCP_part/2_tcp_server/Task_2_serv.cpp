@@ -34,8 +34,8 @@ struct MainHeader
 HWND hListBox = NULL;
 volatile bool stoped = false;
 
-SOCKET s;
-SOCKET ss;
+SOCKET s;//сокет с данными от клиента
+SOCKET ss;//сокет для прослушивания потока
 
 BYTE* byteBuffer;
 sockaddr_in sOut;
@@ -180,10 +180,13 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct) {
 
 	WSADATA wsaData;
 	u_long argp = 1;
-	int err = ioctlsocket(s, FIONBIO, &argp);
+	int err = ioctlsocket(s, FIONBIO, &argp);// перевода сокета в не блокируемое состояние (nonblocking mode) используется команда FIONBIO
 	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (0 == err) {
+	
+	if (0 == err)
+	{
 		ss = socket(AF_INET, SOCK_STREAM, 0);
+		
 		if (ss != INVALID_SOCKET) 
 		{
 			sOut = { AF_INET, htons(7581), INADDR_ANY };
@@ -224,7 +227,7 @@ unsigned __stdcall ListenThread(LPVOID lpParameter)
 	{
 		for (;;)
 		{
-			s = accept(ss, NULL, NULL);
+			s = accept(ss, NULL, NULL);//установка соединения
 			MessageBox(NULL, TEXT("Соединение установлено"), TEXT("Server"), MB_OK | MB_ICONINFORMATION);
 			if (INVALID_SOCKET == s)
 			{
