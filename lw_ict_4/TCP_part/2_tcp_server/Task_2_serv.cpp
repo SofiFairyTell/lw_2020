@@ -227,7 +227,7 @@ unsigned __stdcall ListenThread(LPVOID lpParameter)
 	{
 		for (;;)
 		{
-			s = accept(ss, NULL, NULL);//установка соединени€
+			s = accept(ss, NULL, NULL);
 			MessageBox(NULL, TEXT("—оединение установлено"), TEXT("Server"), MB_OK | MB_ICONINFORMATION);
 			if (INVALID_SOCKET == s)
 			{

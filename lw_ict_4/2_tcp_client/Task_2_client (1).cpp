@@ -29,7 +29,7 @@ using namespace std;
 
 #define IDC_IPADDR				2011
 #define IDC_USERNAME			2012
-
+#define IDC_LIST				2013
 
 #pragma pack(1)
 struct AdressHeader
@@ -64,7 +64,8 @@ AdressHeader msgA;
 
 wchar_t FileNameTitles[260] = L"";//хранит указатель на папку, если выбрано более одного файла
 wchar_t FileNameTitle[260] = L"";//использовать если выбран один файл
-wchar_t bufferNameIP[25] = L"";
+//wchar_t bufferNameIP[25] = L"";
+//const char bufferNameIP[25];
 
 BOOL FileSending(wchar_t* NameOfFiles);//функция для отправки файлов, передаем их имена
 
@@ -76,7 +77,7 @@ void OnIdle(HWND hWnd);
 BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct);
 void OnDestroy(HWND hWnd);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
-void sendfile(SOCKET s, const char* buf, int len);
+void sendfile(SOCKET send_socket, const char* buf, int len);
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow) {
 
@@ -87,7 +88,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 2);
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = TEXT("WindowClass");
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -100,7 +101,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	LoadLibrary(TEXT("ComCtl32.dll"));
 
 	HWND hWnd = CreateWindowEx(NULL, TEXT("WindowClass"), TEXT("Client"),
-		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 550, 240, NULL, NULL, hInstance, NULL);
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 700, 400, NULL, NULL, hInstance, NULL);
 
 	if (NULL == hWnd) 
 	{
@@ -148,14 +149,7 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 		filename = NamesOfFile;
 		NamesOfFile += (filename.length() + 1);
 	}
-	//When try separate filename
-	//else
-	//{
-	//	filename = NamesOfFile;
-	//	//unsigned int found = filename.find_last_of(L'\\');
-	//	NamesOfFile = (wchar_t*)filename.substr(filename.find_last_of(L'\\')).c_str();
-	//	//fs::path(filename).filename();
-	//}
+
 	
 	while (NamesOfFile != L"")
 	{
@@ -200,12 +194,12 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 			//обработка ошибки чтения файла должна быть где-то здесь....
 		}
 	}
-
 	return 0;
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch (uMsg) {
+	switch (uMsg) 
+	{
 		HANDLE_MSG(hWnd, WM_CREATE, OnCreate);
 		HANDLE_MSG(hWnd, WM_DESTROY, OnDestroy);
 		HANDLE_MSG(hWnd, WM_COMMAND, OnCommand);
@@ -217,28 +211,31 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct)
 {
 	/*Кнопки*/
 	CreateWindowEx(0, WC_BUTTON, TEXT("Соединиться c сервером"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 20, 240, 27, hWnd, (HMENU)IDC_BUTTON_CONNECTION, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 100, 240, 27, hWnd, (HMENU)IDC_BUTTON_CONNECTION, lpCreateStruct->hInstance, NULL);
 	
 	CreateWindowEx(0, WC_BUTTON, TEXT("Завершить соединение"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 240, 27, hWnd, (HMENU)IDC_BUTTON_CLOSE, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 130, 240, 27, hWnd, (HMENU)IDC_BUTTON_CLOSE, lpCreateStruct->hInstance, NULL);
 	
 	/*Поле для ввода IP-адреса*/
 	CreateWindowEx(0, TEXT("SysIPAddress32"), 
-		NULL, WS_CHILD | WS_VISIBLE, 20, 20, 240, 27, hWnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
+		NULL, WS_CHILD | WS_VISIBLE, 20, 100, 240, 27, hWnd, (HMENU)IDC_IPADDR, lpCreateStruct->hInstance, NULL);
+	CreateWindowEx(0, WC_STATIC, TEXT("Адрес сервера:"), WS_CHILD | WS_VISIBLE, 20, 70, 240, 27, hWnd, NULL, lpCreateStruct->hInstance, NULL);
 
 	/*Поле для ввода имени пользователя*/
-	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE, 20, 60, 240, 27, hWnd, (HMENU)IDC_USERNAME, lpCreateStruct->hInstance, NULL);
+	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE, 20, 40, 240, 27, hWnd, (HMENU)IDC_USERNAME, lpCreateStruct->hInstance, NULL);
 	
 	
-	CreateWindowEx(0, WC_STATIC, TEXT("- Никнейм отправителя"), WS_CHILD | WS_VISIBLE, 275, 60, 240, 27, hWnd, NULL, lpCreateStruct->hInstance, NULL);
+	CreateWindowEx(0, WC_STATIC, TEXT("Имя:"), WS_CHILD | WS_VISIBLE, 20, 10, 240, 27, hWnd, NULL, lpCreateStruct->hInstance, NULL);
 
 	/*Работа с файлами*/
-	CreateWindowEx(0, WC_BUTTON, TEXT("Файл для отправки"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 110, 240, 27, hWnd, (HMENU)IDC_BUTTONOpen, lpCreateStruct->hInstance, NULL);
+	CreateWindowEx(0, WC_BUTTON, TEXT("Выбрать файлы/файлы"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 360, 230, 240, 27, hWnd, (HMENU)IDC_BUTTONOpen, lpCreateStruct->hInstance, NULL);
 
 	CreateWindowEx(0, WC_BUTTON, TEXT("Передать файл"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 110, 240, 27, hWnd, (HMENU)IDC_BUTTONSend, lpCreateStruct->hInstance, NULL);
-
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 360, 260, 240, 27, hWnd, (HMENU)IDC_BUTTONSend, lpCreateStruct->hInstance, NULL);
+	
+	CreateWindowEx(0, TEXT("ListBox"), 
+		NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_WANTKEYBOARDINPUT | LBS_NOTIFY|WS_VSCROLL|WS_HSCROLL, 20, 170, 320, 150, hWnd, (HMENU)IDC_LIST, lpCreateStruct->hInstance, NULL);
 	WSADATA wsaData;
 	int err = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	sender_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -262,13 +259,14 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		{
 		case IDC_BUTTON_CONNECTION:
 		{
-			GetDlgItemText(hwnd, IDC_IPADDR, (LPWSTR)bufferNameIP, _countof(bufferNameIP));
+			const char bufferNameIP[25] = {0};
+			GetDlgItemTextA(hwnd, IDC_IPADDR, (LPSTR)bufferNameIP, _countof(bufferNameIP));
 			sockaddr_in sin = { 0 };
 			sin.sin_family = AF_INET;
 			sin.sin_port = htons(7581);
 			//sin.sin_addr.s_addr = inet_addr("192.168.56.104");//адрес виртуальной машины
-			sin.sin_addr.s_addr = inet_addr("192.168.56.1");//адрес ПК
-			//sin.sin_addr.s_addr = inet_addr((const char*)bufferNameIP);
+			//sin.sin_addr.s_addr = inet_addr("192.168.56.1");//адрес ПК
+			sin.sin_addr.s_addr = inet_addr(bufferNameIP);
 			int err = connect(sender_socket, (sockaddr*)&sin, sizeof(sin));
 		}
 		break;
@@ -295,21 +293,28 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			{
 				MessageBox(NULL, TEXT("Файлы успешно выбраны"), TEXT("Client"), MB_OK | MB_ICONINFORMATION);
 				int nFileOffset = ofn.nFileOffset;
-
+				
+				HWND hWNDctrl = GetDlgItem(hwnd, IDC_LIST);
+				ListBox_ResetContent(hWNDctrl); //очистка списка просмотра
 				/*Начало подсчета количества файлов*/
 				if (nFileOffset > lstrlen(ofn.lpstrFile))
 				{
 					/*Было выделено более одного файла*/
 					while (ofn.lpstrFile[nFileOffset])
 					{
+
 						nFileOffset = nFileOffset + wcslen(ofn.lpstrFile + nFileOffset) + 1;
 						msgA.CountOfFiles++;
+						int iItem = ListBox_AddString(hWNDctrl, ofn.lpstrFile);
+						ListBox_SetCurSel(hWNDctrl, iItem);
 					}
 				}
 				else
 				{
 					/*Был выделен один файл*/
 					msgA.CountOfFiles++;
+					int iItem = ListBox_AddString(hWNDctrl, ofn.lpstrFile);
+					ListBox_SetCurSel(hWNDctrl, iItem);
 				}
 			}
 		}
@@ -330,6 +335,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				FileSending(FileNameTitle, msgA.CountOfFiles);//единственный экземпляр файла
 			}
 			msgA.CountOfFiles = 0; //обнуление счетчика файлов
+
 		}
 		break;
 
