@@ -11,25 +11,22 @@
 #include <fstream>
 #include <iostream>
 #include <codecvt>//для фассетов 
-#include <experimental/filesystem>
-
-namespace fs = std::experimental::filesystem;
 
 #pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
 
-#define IDC_STATIC				2001
-#define IDC_EDIT_OPEN_FILE_NAME 2003
-#define IDC_BUTTON_CONNECTION	2004
-#define IDC_BUTTON_CLOSE		2005
-#define IDC_BUTTONOpen			2006
-#define IDC_BUTTONSend			2007
-#define IDC_BUTTONGet			2008
+#define BUTTON_CONNECTION		2001 //соединение с сервером
+#define BUTTON_DISCONNECT		2002 //разрыв соединения с сервером
 
-#define IDC_IPADDR				2011
-#define IDC_USERNAME			2012
-#define IDC_LIST				2013
+#define BUTTON_CHOOSE_FILE		2003
+
+#define BUTTON_SEND				2004
+
+
+#define IDC_IPADDR				2005 //ввод IP-адреса
+#define IDC_USERNAME			2006 //ввод имени отправителя
+#define IDC_LIST				2007 //вывод списка файлов
 
 #pragma pack(1)
 struct AdressHeader
@@ -50,22 +47,14 @@ struct MainHeader
 BYTE* byteBuffer;
 
 SOCKET sender_socket;//сокет для передачи данных 
-//SOCKET ss;
-//SOCKET sss;
-
 
 volatile bool stoped = false;
 
 AdressHeader msgA;
 
-//sockaddr_in soin;
+wchar_t FileNameTitles[MAX_PATH] = L"";//хранит указатель на папку, если выбрано более одного файла
+wchar_t FileNameTitle[MAX_PATH] = L"";//использовать если выбран один файл
 
-//wchar_t* NamesOfFile;
-
-wchar_t FileNameTitles[260] = L"";//хранит указатель на папку, если выбрано более одного файла
-wchar_t FileNameTitle[260] = L"";//использовать если выбран один файл
-//wchar_t bufferNameIP[25] = L"";
-//const char bufferNameIP[25];
 
 BOOL FileSending(wchar_t* NameOfFiles);//функция для отправки файлов, передаем их имена
 
@@ -77,6 +66,7 @@ void OnIdle(HWND hWnd);
 BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct);
 void OnDestroy(HWND hWnd);
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);
+
 void sendfile(SOCKET send_socket, const char* buf, int len);
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCmdShow) {
@@ -211,10 +201,10 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct)
 {
 	/*Кнопки*/
 	CreateWindowEx(0, WC_BUTTON, TEXT("Соединиться c сервером"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 100, 240, 27, hWnd, (HMENU)IDC_BUTTON_CONNECTION, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 100, 240, 27, hWnd, (HMENU)BUTTON_CONNECTION, lpCreateStruct->hInstance, NULL);
 	
 	CreateWindowEx(0, WC_BUTTON, TEXT("Завершить соединение"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 130, 240, 27, hWnd, (HMENU)IDC_BUTTON_CLOSE, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 275, 130, 240, 27, hWnd, (HMENU)BUTTON_DISCONNECT, lpCreateStruct->hInstance, NULL);
 	
 	/*Поле для ввода IP-адреса*/
 	CreateWindowEx(0, TEXT("SysIPAddress32"), 
@@ -222,17 +212,18 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct)
 	CreateWindowEx(0, WC_STATIC, TEXT("Адрес сервера:"), WS_CHILD | WS_VISIBLE, 20, 70, 240, 27, hWnd, NULL, lpCreateStruct->hInstance, NULL);
 
 	/*Поле для ввода имени пользователя*/
-	CreateWindowEx(0, TEXT("Edit"), NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE, 20, 40, 240, 27, hWnd, (HMENU)IDC_USERNAME, lpCreateStruct->hInstance, NULL);
+	CreateWindowEx(0, TEXT("Edit"), 
+		NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE, 20, 40, 240, 27, hWnd, (HMENU)IDC_USERNAME, lpCreateStruct->hInstance, NULL);
 	
 	
 	CreateWindowEx(0, WC_STATIC, TEXT("Имя:"), WS_CHILD | WS_VISIBLE, 20, 10, 240, 27, hWnd, NULL, lpCreateStruct->hInstance, NULL);
 
 	/*Работа с файлами*/
 	CreateWindowEx(0, WC_BUTTON, TEXT("Выбрать файлы/файлы"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 360, 230, 240, 27, hWnd, (HMENU)IDC_BUTTONOpen, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 360, 230, 240, 27, hWnd, (HMENU)BUTTON_CHOOSE_FILE, lpCreateStruct->hInstance, NULL);
 
 	CreateWindowEx(0, WC_BUTTON, TEXT("Передать файл"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 360, 260, 240, 27, hWnd, (HMENU)IDC_BUTTONSend, lpCreateStruct->hInstance, NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 360, 260, 240, 27, hWnd, (HMENU)BUTTON_SEND, lpCreateStruct->hInstance, NULL);
 	
 	CreateWindowEx(0, TEXT("ListBox"), 
 		NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_WANTKEYBOARDINPUT | LBS_NOTIFY|WS_VSCROLL|WS_HSCROLL, 20, 170, 320, 150, hWnd, (HMENU)IDC_LIST, lpCreateStruct->hInstance, NULL);
@@ -257,7 +248,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		HINSTANCE hInstance = GetWindowInstance(hwnd);
 		switch (id)
 		{
-		case IDC_BUTTON_CONNECTION:
+		case BUTTON_CONNECTION:
 		{
 			const char bufferNameIP[25] = {0};
 			GetDlgItemTextA(hwnd, IDC_IPADDR, (LPSTR)bufferNameIP, _countof(bufferNameIP));
@@ -270,12 +261,12 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			int err = connect(sender_socket, (sockaddr*)&sin, sizeof(sin));
 		}
 		break;
-		case IDC_BUTTON_CLOSE:
+		case BUTTON_DISCONNECT:
 		{
 			int err = shutdown(sender_socket, SD_BOTH);
 		}
 		break;
-		case IDC_BUTTONOpen:
+		case BUTTON_CHOOSE_FILE:
 		{
 			OPENFILENAME ofn = {sizeof(OPENFILENAME)};
 
@@ -302,9 +293,9 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 					/*Было выделено более одного файла*/
 					while (ofn.lpstrFile[nFileOffset])
 					{
-
 						nFileOffset = nFileOffset + wcslen(ofn.lpstrFile + nFileOffset) + 1;
 						msgA.CountOfFiles++;
+						/*По одному добавляем в listbox*/
 						int iItem = ListBox_AddString(hWNDctrl, ofn.lpstrFile);
 						ListBox_SetCurSel(hWNDctrl, iItem);
 					}
@@ -320,7 +311,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		}
 		break;
 
-		case IDC_BUTTONSend:
+		case BUTTON_SEND:
 		{
 			GetDlgItemTextW(hwnd, IDC_USERNAME, (LPWSTR)msgA.adr, sizeof(msgA.adr));//Запись имени отправителя в структуру
 			
