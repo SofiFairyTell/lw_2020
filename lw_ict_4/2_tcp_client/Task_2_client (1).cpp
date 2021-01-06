@@ -44,7 +44,6 @@ struct MainHeader
 };
 #pragma pack()
 
-BYTE* byteBuffer;
 
 SOCKET sender_socket;//сокет дл€ передачи данных 
 
@@ -161,7 +160,7 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 
 		if (file_open)
 		{
-			MainHeader msgH;
+			MainHeader msgH; //пакет с файлом
 
 			StringCchCopy(msgH.filename, MAX_PATH, NamesOfFile);
 			msgH.filesize = size;
@@ -170,6 +169,7 @@ BOOL FileSending(wchar_t* NamesOfFile, int CountOfFiles)
 			
 			/*освобождение ресурсов т.д. */
 			delete[] buffer;
+
 			file_open.close();
 			filename = NamesOfFile;
 			
@@ -227,10 +227,16 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct)
 	
 	CreateWindowEx(0, TEXT("ListBox"), 
 		NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_WANTKEYBOARDINPUT | LBS_NOTIFY|WS_VSCROLL|WS_HSCROLL, 20, 170, 320, 150, hWnd, (HMENU)IDC_LIST, lpCreateStruct->hInstance, NULL);
+	
+	/*»нициализаци€ сокета*/
 	WSADATA wsaData;
 	int err = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	sender_socket = socket(AF_INET, SOCK_STREAM, 0);
-
+	
+	if (sender_socket == INVALID_SOCKET)
+	{
+		return WSAGetLastError();
+	}
 	return TRUE;
 }
 
@@ -258,12 +264,31 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			//sin.sin_addr.s_addr = inet_addr("192.168.56.104");//адрес виртуальной машины
 			//sin.sin_addr.s_addr = inet_addr("192.168.56.1");//адрес ѕ 
 			sin.sin_addr.s_addr = inet_addr(bufferNameIP);
-			int err = connect(sender_socket, (sockaddr*)&sin, sizeof(sin));
+			int result = connect(sender_socket, (sockaddr*)&sin, sizeof(sin));
+			if (result == SOCKET_ERROR)
+			{
+				closesocket(sender_socket);
+				sender_socket = INVALID_SOCKET;
+				MessageBox(NULL, TEXT("Ќе удалось установить соединение с сервером\n", result), TEXT("Client"), MB_OK | MB_ICONERROR);
+			}
 		}
 		break;
 		case BUTTON_DISCONNECT:
 		{
-			int err = shutdown(sender_socket, SD_BOTH);
+			//завершение соединени€ с сервером. 
+			int result = shutdown(sender_socket, SD_SEND);//закрытие канала клиент-сервер
+			closesocket(sender_socket);
+
+			if (result == SOCKET_ERROR)
+			{
+				closesocket(sender_socket);
+				sender_socket = INVALID_SOCKET;
+				MessageBox(NULL, TEXT("Ќе удалось завершить соединение с сервером\n", result), TEXT("Client"), MB_OK | MB_ICONERROR);
+			}
+			else
+			{
+				MessageBox(NULL, TEXT("”далось завершить соединение с сервером\n", result), TEXT("Client"), MB_OK | MB_ICONINFORMATION);
+			}
 		}
 		break;
 		case BUTTON_CHOOSE_FILE:
@@ -333,17 +358,29 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		}
 	}
 }
-void sendfile(SOCKET send_socket, const char* buf, int len)
+void sendfile(SOCKET send_socket, const char* Data, int len)
 {
-	int n, l = 0;
-	while (len > 0) {
-		n = send(send_socket, buf + l, len, 0);
-		if (n > 0) 
-		{
-			l += n;
-			len -= n;
-		}
+	if (Data == nullptr || len == 0)
+	{
+		return;
 	}
+	int _return, bytes_send = 0;
+	do
+	{
+		//_return = send(send_socket, Data + bytes_send, len, 0);//возвращение количества отправленных байт
+		_return = send(send_socket, Data + bytes_send, len - bytes_send, 0);//возвращение количества отправленных байт
+		if (_return == SOCKET_ERROR)
+		{
+			int err = WSAGetLastError();
+			MessageBox(NULL, TEXT("¬озникла ошибка", err), TEXT("Client"), MB_OK | MB_ICONERROR);
+		}
+		else
+		{
+			bytes_send += _return;//сдвиг?
+			//len -= _return;//уменьшение длины файла 
+		}
+	} while (bytes_send < len);
+	
 }
 void OnIdle(HWND hWnd) 
 {
