@@ -14,7 +14,6 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-//#define IDC_BUTTON1			2001
 #define BUTTON_DISCONNECT		2001
 #define BUTTON_RECEIVE			2002
 
@@ -37,26 +36,20 @@ struct MainHeader
 #pragma pack()
 
 
-HWND hListBox = NULL;
 volatile bool stoped = false;
 
 SOCKET data_socket;//сокет с данными от клиента
 SOCKET listen_socket;//сокет дл€ прослушивани€ потока
 
-BYTE* byteBuffer;
+
 sockaddr_in sOut;
 
-AdressHeader msgA;
+AdressHeader msgA;//дл€ пакета с имененем адресата и количеством файлов
 
-
-//char bufferNameIP[15];
-
-HANDLE hFile = NULL;
 
 void recv_file(char* Data, int Size);
 
-unsigned __stdcall ListenThread(LPVOID lpParameter);
-unsigned __stdcall RecvData(LPVOID lpParameter);
+unsigned __stdcall ListenThread(LPVOID lpParameter);//дл€ ожидани€ соединени€
 
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -78,7 +71,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	wcex.lpszClassName = TEXT("WindowClass");
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-	if (0 == RegisterClassEx(&wcex)) {
+	if (0 == RegisterClassEx(&wcex)) 
+	{
 		return -1;
 	}
 
@@ -140,8 +134,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					recv_file((char*)&msgA, sizeof(msgA));
 
-
-
 					TCHAR Message[MAX_MESSAGE_SIZE] = _T(""); //сообщение
 
 					StringCchCat(Message, _countof(Message), _T("ќтправитель:"));
@@ -153,14 +145,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						MainHeader msgH = {0};
 
-						recv_file((char*)&msgH, sizeof(msgH));
-
-
-
-						char* buffer = new char[msgH.filesize + 1];//инициализаци€ буфера 
-
-
-						recv_file((char*)buffer, msgH.filesize);
+						recv_file((char*)&msgH, sizeof(msgH)); //получим пакет с данными
 
 						std::ofstream file_receive(msgH.filename, std::ios::out | std::ios::binary); // создание выходного потока
 						
@@ -168,9 +153,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						std::locale loc(std::locale(), new std::codecvt_utf8<__int32>);
 						file_receive.imbue(loc);
 
-
-						file_receive.write((char*)buffer, msgH.filesize + 1);
-
+						char* Data = new char[msgH.filesize + 1];//инициализаци€ буфера 
+						recv_file((char*)Data, msgH.filesize);//чтение данных в буфер
+						
+						file_receive.write((char*)Data, msgH.filesize + 1);
 						file_receive.close();
 
 					}
@@ -243,16 +229,6 @@ void recv_file(char* Data, int Size)
 			Size -= _return;
 		}
 	} while (Size > 0 && stoped == false);
-
-	/*while (Size > 0 && stoped == false)
-	{
-		_return = recv(data_socket, Data + bytes_receive, Size, 0);
-			if (_return > 0)
-			{
-				bytes_receive += _return;
-				Size -= _return;
-			}
-		}*/
 }
 
 unsigned __stdcall ListenThread(LPVOID lpParameter)
@@ -269,7 +245,6 @@ unsigned __stdcall ListenThread(LPVOID lpParameter)
 				if (WSAEINTR == WSAGetLastError()) break;
 			}
 		}
-		
 	}
 	return 0;
 }
