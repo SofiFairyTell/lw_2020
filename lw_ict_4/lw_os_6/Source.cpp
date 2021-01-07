@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"user32.lib")
+
 #include <Winsock2.h>
 #include <Windows.h> 
 #include <Windowsx.h>
@@ -65,13 +66,15 @@ struct SLP_msg
 
 //работа с сокетами
 SOCKET sockets;
+
 sockaddr_in sockSin = { 0 };
 sockaddr_in sockSout = { 0 };
 sockaddr_in sockSoin = { 0 };
 
 //отправка сообщений
-void SendText(SLP_msg msg, LPCTSTR lpData, DWORD cbData, BOOL DataCopy);
+void SendText(SLP_msg msg, LPCTSTR lpData, DWORD cbData);
 void StartChat(HWND hwnd, LPCTSTR Message);
+
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR CmdLine, int CmdShow)
 {
 
@@ -183,7 +186,7 @@ BOOL PreTranslateMessage(LPMSG Msg)
 
 					StartChat(hwnd,Message);//отобрзим отправляемый текст у себя
 
-					SendText(msg, Message, _tcslen(Message), FALSE);
+					SendText(msg, Message, _tcslen(Message));
 
 				}
 			}
@@ -270,64 +273,68 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		HINSTANCE hInstance = GetWindowInstance(hwnd);
 		switch (id)
 		{
-		case IDC_CLEAR_ALL:
-		{
-			HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);		
-			Edit_SetText(hwndCtl, NULL);// очищаем поле ввода
-		}
-		break;
-		case IDC_CONNECT:
-		{
-			DWORD addr = 0; // IP-адрес
-
-			// получим IP-адрес из поля ввода
-			SendDlgItemMessage(hwnd, IDC_IPADDR, IPM_GETADDRESS, 0, (LPARAM)&addr);
-
-			if (0 != addr)
+			case IDC_CLEAR_ALL:
 			{
-				struct in_addr paddr;
-				paddr.S_un.S_addr = addr;
-				char *str = inet_ntoa(paddr);
+				HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);		
+				Edit_SetText(hwndCtl, NULL);// очищаем поле ввода
+			}
+			break;
+			case IDC_CONNECT:
+			{
+				// получим IP-адрес из поля ввода
+				const char bufferNameIP[25] = { 0 };
+				GetDlgItemTextA(hwnd, IDC_IPADDR, (LPSTR)bufferNameIP, _countof(bufferNameIP));
+
+				if (bufferNameIP != NULL)
+				{
+					sockaddr_in sin = { 0 };
+					sockSin.sin_family = AF_INET;
+					sockSin.sin_port = htons(7581);
+					sockSin.sin_addr.s_addr = inet_addr(bufferNameIP);//"192.168.56.104" "192.168.56.1"
+			
+					MessageBox(hwnd, L"IP-connect Enable", L"Details", MB_OK);
+				}
+				else
+				{
+					MessageBox(hwnd, L"Null IP", L"Details", MB_OK);
+				}
+		
+			}
+			break;
+			case IDC_DISCONNECT:
+			{
+				// очистим поле ввода IP-адреса
+				SendDlgItemMessage(hwnd, IDC_IPADDR, IPM_CLEARADDRESS,0,0);
+			
+				BOOL optval = TRUE;
+				int optlen = sizeof(optval);
+				int err = setsockopt(sockets, SOL_SOCKET, SO_BROADCAST, (char*)&optval, optlen);
 				sockSin.sin_family = AF_INET;
 				sockSin.sin_port = htons(7581);
-				//sockSin.sin_addr.s_addr = inet_addr("192.168.56.104");//а он  должен быть в обратном порядке??? нет. надо в прямом. от старших к младшему
-				sockSin.sin_addr.s_addr = inet_addr(str);
-			}
-		}
-		break;
-		case IDC_DISCONNECT:
-		{
-			// очистим поле ввода IP-адреса
-			SendDlgItemMessage(hwnd, IDC_IPADDR, IPM_CLEARADDRESS,0,0);
-			
-			BOOL optval = TRUE;
-			int optlen = sizeof(optval);
-			int err = setsockopt(sockets, SOL_SOCKET, SO_BROADCAST, (char*)&optval, optlen);
-			sockSin.sin_family = AF_INET;
-			sockSin.sin_port = htons(7581);
-			sockSin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
-			MessageBox(hwnd, L"BroadCast Enable", L"Details", MB_OK);
-		}
-		break;
-		}
+				sockSin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
 
+				MessageBox(hwnd, L"BroadCast Enable", L"Details", MB_OK);
+			}
+			break;
+		}
 	}
 }
 
 
 // ----------------------------------------------------------------------------------------------
-void SendText(SLP_msg msg,LPCTSTR lpData, DWORD cbData, BOOL DataCopy)
+void SendText(SLP_msg msg, LPCTSTR lpData, DWORD cbData)
 {
 	
 	if ((lpData != NULL) && (cbData > 0))
 	{
 		
 		//cbData - размер отправляемого сообщения
-		int packnum;
+		int packnum = 0;
 		
 		msg.filelen = (int)cbData;
-		packnum = 0;
-		for (int i = 0; i<(int)cbData; i+=10)
+		//packnum = 0;
+
+		for (int i = 0; i < (int)cbData; i+=10)
 		{
 			WCHAR frag_pack[10] = L"";
 
@@ -379,7 +386,10 @@ unsigned __stdcall ThreadFunc(void* lParam)
 		{
 			int struct_size = sizeof(recived_msg);//узнаем размер структуры
 			 
-			int reseived_size = recived_msg.filelen/10; //количество пакетов
+			//int reseived_size = recived_msg.filelen/10; //количество пакетов
+			
+			int reseived_size = recived_msg.filelen / wcslen(recived_msg.text); //количество пакетов
+
 
 			if (recived_msg.filelen % 10 == 0)
 			{

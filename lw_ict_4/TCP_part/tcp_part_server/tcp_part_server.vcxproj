@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\Downloads\Microsoft.SkypeApp_kzf8qxf38zg5c!App\All\Task_1 (2).cpp" />
     <ClCompile Include="..\..\Task_2_serv.cpp" />
     <ClCompile Include="Task_2_server.cpp" />
   </ItemGroup>

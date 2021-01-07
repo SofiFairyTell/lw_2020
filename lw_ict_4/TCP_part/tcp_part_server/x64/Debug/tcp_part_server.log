@@ -1,2 +1,6 @@
-﻿  Task_2_serv.cpp
+﻿  Task_1 (2).cpp
+c:\users\kurbatova\downloads\microsoft.skypeapp_kzf8qxf38zg5c!app\all\task_1 (2).cpp(225): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+  Task_2_serv.cpp
+  Task_2_server.cpp
+  Создание кода...
   tcp_part_server.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\tcp_part_server.exe

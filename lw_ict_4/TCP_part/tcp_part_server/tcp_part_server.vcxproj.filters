@@ -21,5 +21,8 @@
     <ClCompile Include="Task_2_server.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Downloads\Microsoft.SkypeApp_kzf8qxf38zg5c!App\All\Task_1 (2).cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
