@@ -356,14 +356,17 @@ void StartChat(HWND hwnd, LPCTSTR Message)
 {
 	MessageBox(hwnd, L"LET'S GO CHAT!", L"CHAT", MB_OK);
 	
-	WCHAR UserMessage[532] = _T("");
+	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = _T("");
 
 	HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);
 
-	StringCchCat(UserMessage, _countof(UserMessage), _T("\n\n"));
+	StringCchCat(UserMessage, _countof(UserMessage), _T("\r\n"));
 	StringCchCat(UserMessage, _countof(UserMessage), Message);
 
 	Edit_SetSel(hwndCtl, Edit_GetTextLength(hwndCtl), -1);// устанавливаем курсор в конец поля вывода
+
+	SetFocus(hwnd);
+
 	Edit_ReplaceSel(hwndCtl, UserMessage);// вставляем текст в поле вывода
 } 
 
@@ -405,13 +408,9 @@ unsigned __stdcall ThreadFunc(void* lParam)
 				if (reseived_size == recived_msg.numberfrag)
 				{
 					/*Заполнение массивов для вывода имени отправителя и сообщения*/
-					StringCchCat(UserMessage, _countof(UserMessage), _T("\n\n"));
-
 					StringCchCat(UserName, 20, recived_msg.username);
 
 					StringCchCat(UserName, _countof(UserName), _T(":"));
-
-					StringCchCat(Message, _countof(Message), _T("\n\n"));
 
 					StringCchCat(UserMessage, _countof(UserMessage), UserName);
 
