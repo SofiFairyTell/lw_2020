@@ -371,6 +371,7 @@ void sendfile(SOCKET send_socket, const char* Data, int len)
 		{
 			int err = WSAGetLastError();
 			MessageBox(NULL, TEXT("Возникла ошибка", err), TEXT("Client"), MB_OK | MB_ICONERROR);
+			continue;
 		}
 		else
 		{

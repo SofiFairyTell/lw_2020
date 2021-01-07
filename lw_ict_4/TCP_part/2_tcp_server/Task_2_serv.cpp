@@ -36,13 +36,13 @@ struct MainHeader
 #pragma pack()
 
 
-volatile bool stoped = false;
+//volatile bool stoped = false;
 
 SOCKET data_socket;//сокет с данными от клиента
 SOCKET listen_socket;//сокет для прослушивания потока
 
 
-sockaddr_in sOut;
+sockaddr_in sOut;//описание сокета для работы с протоколом
 
 AdressHeader msgA;//для пакета с имененем адресата и количеством файлов
 
@@ -154,6 +154,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						file_receive.imbue(loc);
 
 						char* Data = new char[msgH.filesize + 1];//инициализация буфера 
+						Data[0] = {0};
+
+
 						recv_file((char*)Data, msgH.filesize);//чтение данных в буфер
 						
 						file_receive.write((char*)Data, msgH.filesize + 1);
@@ -191,9 +194,15 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct) {
 		
 		if (listen_socket != INVALID_SOCKET)
 		{
-			sOut = { AF_INET, htons(7581), INADDR_ANY };
-			bind(listen_socket, (sockaddr*)&sOut, sizeof(sOut));
-			_beginthreadex(NULL, 0, ListenThread, NULL, 0, NULL);
+			//начало ассоциирование сокета
+			sOut.sin_family = AF_INET;
+			sOut.sin_port = htons(7581);
+			sOut.sin_addr.s_addr = htonl(INADDR_ANY);
+
+			//sOut = { AF_INET, htons(7581), INADDR_ANY };
+			bind(listen_socket, (sockaddr*)&sOut, sizeof(sOut));//ассоциирование
+
+			_beginthreadex(NULL, 0, ListenThread, NULL, 0, NULL);//создание потока прослушивания
 		}
 	}
 	return TRUE;
@@ -201,7 +210,7 @@ BOOL OnCreate(HWND hWnd, LPCREATESTRUCT lpCreateStruct) {
 
 void OnDestroy(HWND hWnd) 
 {
-	stoped = true;
+	//stoped = true;
 	closesocket(listen_socket);
 	WSACleanup();
 	PostQuitMessage(0);
@@ -228,7 +237,8 @@ void recv_file(char* Data, int Size)
 			bytes_receive += _return;
 			Size -= _return;
 		}
-	} while (Size > 0 && stoped == false);
+	//} while (Size > 0 && stoped == false);
+	} while (Size > 0);
 }
 
 unsigned __stdcall ListenThread(LPVOID lpParameter)
