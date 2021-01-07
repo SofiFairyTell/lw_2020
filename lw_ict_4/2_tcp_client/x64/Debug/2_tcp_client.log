@@ -3,6 +3,7 @@ c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1)
 c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(272): warning C4002: слишком много аргументов для вызова макроса, подобного функции, "TEXT"
 c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(286): warning C4002: слишком много аргументов для вызова макроса, подобного функции, "TEXT"
 c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(290): warning C4002: слишком много аргументов для вызова макроса, подобного функции, "TEXT"
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(321): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(373): warning C4002: слишком много аргументов для вызова макроса, подобного функции, "TEXT"
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(325): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(341): warning C4312: приведение типов: преобразование из "int" в "LPCTSTR" большего размера
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\2_tcp_client\task_2_client (1).cpp(382): warning C4002: слишком много аргументов для вызова макроса, подобного функции, "TEXT"
   2_tcp_client.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\2_tcp_client.exe

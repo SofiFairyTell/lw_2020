@@ -309,27 +309,36 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			{
 				MessageBox(NULL, TEXT("Файлы успешно выбраны"), TEXT("Client"), MB_OK | MB_ICONINFORMATION);
 				int nFileOffset = ofn.nFileOffset;
-				
+
 				HWND hWNDctrl = GetDlgItem(hwnd, IDC_LIST);
 				ListBox_ResetContent(hWNDctrl); //очистка списка просмотра
 				/*Начало подсчета количества файлов*/
 				if (nFileOffset > lstrlen(ofn.lpstrFile))
 				{
+					wchar_t* str = ofn.lpstrFile;//ссылка на директорию
+					std::wstring filename = str;
+					str += (filename.length() + 1);//сдвиг, пропускаем корневую папку
+
 					/*Было выделено более одного файла*/
 					while (ofn.lpstrFile[nFileOffset])
 					{
 						nFileOffset = nFileOffset + wcslen(ofn.lpstrFile + nFileOffset) + 1;
 						msgA.CountOfFiles++;
+
 						/*По одному добавляем в listbox*/
-						int iItem = ListBox_AddString(hWNDctrl, ofn.lpstrFile);
+						int iItem = ListBox_AddString(hWNDctrl, str);
 						ListBox_SetCurSel(hWNDctrl, iItem);
+
+						/*сдвиг к следующему имени файла*/
+						filename = str;
+						str += (filename.length() + 1);
 					}
 				}
 				else
 				{
 					/*Был выделен один файл*/
 					msgA.CountOfFiles++;
-					int iItem = ListBox_AddString(hWNDctrl, ofn.lpstrFile);
+					int iItem = ListBox_AddString(hWNDctrl, nFileOffset);
 					ListBox_SetCurSel(hWNDctrl, iItem);
 				}
 			}
