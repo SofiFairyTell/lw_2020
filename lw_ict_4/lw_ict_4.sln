@@ -5,10 +5,6 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lw_os_6", "lw_os_6\lw_os_6.vcxproj", "{70263668-FFC9-4ECD-BCD9-603B6B80BEEA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tcp_server", "TCP_part\tcp_server\tcp_server.vcxproj", "{B18519DD-C3A5-4259-9C25-DCD63DC0E402}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tcp_client", "TCP_part\tcp_client\tcp_client.vcxproj", "{641CF193-AA72-4601-8812-AF1185E92D02}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2_tcp_server", "TCP_part\2_tcp_server\2_tcp_server.vcxproj", "{0680247D-364D-4B94-BE5C-AB6D228B9AAB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2_tcp_client", "2_tcp_client\2_tcp_client.vcxproj", "{FE2A2849-32BC-4F93-84A0-A4EBC32ACE92}"
@@ -29,22 +25,6 @@ Global
 		{70263668-FFC9-4ECD-BCD9-603B6B80BEEA}.Release|x64.Build.0 = Release|x64
 		{70263668-FFC9-4ECD-BCD9-603B6B80BEEA}.Release|x86.ActiveCfg = Release|Win32
 		{70263668-FFC9-4ECD-BCD9-603B6B80BEEA}.Release|x86.Build.0 = Release|Win32
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Debug|x64.ActiveCfg = Debug|x64
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Debug|x64.Build.0 = Debug|x64
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Debug|x86.ActiveCfg = Debug|Win32
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Debug|x86.Build.0 = Debug|Win32
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Release|x64.ActiveCfg = Release|x64
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Release|x64.Build.0 = Release|x64
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Release|x86.ActiveCfg = Release|Win32
-		{B18519DD-C3A5-4259-9C25-DCD63DC0E402}.Release|x86.Build.0 = Release|Win32
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Debug|x64.ActiveCfg = Debug|x64
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Debug|x64.Build.0 = Debug|x64
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Debug|x86.ActiveCfg = Debug|Win32
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Debug|x86.Build.0 = Debug|Win32
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Release|x64.ActiveCfg = Release|x64
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Release|x64.Build.0 = Release|x64
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Release|x86.ActiveCfg = Release|Win32
-		{641CF193-AA72-4601-8812-AF1185E92D02}.Release|x86.Build.0 = Release|Win32
 		{0680247D-364D-4B94-BE5C-AB6D228B9AAB}.Debug|x64.ActiveCfg = Debug|x64
 		{0680247D-364D-4B94-BE5C-AB6D228B9AAB}.Debug|x64.Build.0 = Debug|x64
 		{0680247D-364D-4B94-BE5C-AB6D228B9AAB}.Debug|x86.ActiveCfg = Debug|Win32
