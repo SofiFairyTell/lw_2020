@@ -31,6 +31,8 @@
 //размеры текста с сообщением
 #define MAX_MESSAGE_SIZE            255
 #define MAX_USERNAME_SIZE			20
+#define MAX_USERMESSAGE_SIZE		532
+#define FRAFMENT_PACK_SIZE			10
 /*Дескрипторы*/
 HWND hwnd = NULL; // дескриптор главного окна
 
@@ -71,9 +73,10 @@ sockaddr_in sockSin = { 0 };
 sockaddr_in sockSout = { 0 };
 sockaddr_in sockSoin = { 0 };
 
-//отправка сообщений
-void SendText(SLP_msg msg, LPCTSTR lpData, DWORD cbData);
-void StartChat(HWND hwnd, LPCTSTR Message);
+
+void SendText(SLP_msg msg, LPCTSTR Send_Data, unsigned int Send_Data_Size);//отправка сообщений
+
+void StartChat(HWND hwnd, LPCTSTR Message);//вывод имени отправителя и сообщения на экран
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR CmdLine, int CmdShow)
 {
@@ -149,12 +152,13 @@ BOOL PreTranslateMessage(LPMSG Msg)
 	/*Переменные*/
 	WCHAR Message[MAX_MESSAGE_SIZE]; //сообщение
 	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");//имя отправителя
-	WCHAR UserMessage[532] = _T("");
+	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = _T("");//сообщение + имя отправителя
 
 	//объявим структуру с пакетом
 	SLP_msg msg;
 	memset(msg.text, NULL, 10);
 	memset(msg.username, NULL, 20);
+
 	DWORD symbols, symb_user;  //количество символов в сообщении
 
 	if ((WM_KEYDOWN == Msg->message) && (VK_RETURN == Msg->wParam)) // нажата клавиша Enter
@@ -179,14 +183,13 @@ BOOL PreTranslateMessage(LPMSG Msg)
 				{
 					// очищаем поле ввода
 					Edit_SetText(hwndCtl, NULL);
+
 					//скопируем введенные данные в структуру
 					StringCchCat(msg.username,20, UserName);
 
-					MessageBox(hwnd, L"thread", L"tr", MB_OK);
-
 					StartChat(hwnd,Message);//отобрзим отправляемый текст у себя
 
-					SendText(msg, Message, _tcslen(Message));
+					SendText(msg, Message, wcslen(Message));
 
 				}
 			}
@@ -322,39 +325,36 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 
 // ----------------------------------------------------------------------------------------------
-void SendText(SLP_msg msg, LPCTSTR lpData, DWORD cbData)
+void SendText(SLP_msg msg, LPCTSTR Send_Data, unsigned int Send_Data_Size)
 {
 	
-	if ((lpData != NULL) && (cbData > 0))
+	if ((Send_Data != NULL) && (Send_Data_Size > 0))
 	{
-		
-		//cbData - размер отправляемого сообщения
-		int packnum = 0;
-		
-		msg.filelen = (int)cbData;
-		//packnum = 0;
+		int packnum = 0;//номер пакета
 
-		for (int i = 0; i < (int)cbData; i+=10)
+		msg.filelen = Send_Data_Size;
+
+		for (int i = 0; i < Send_Data_Size; i+=10)
 		{
-			WCHAR frag_pack[10] = L"";
-
-			memcpy(frag_pack, &lpData[i], sizeof(frag_pack));
-
-			msg.numberfrag = packnum;//укажем номер пакета
-
-			packnum++;
-			StringCchCat(msg.text,sizeof(msg.text), frag_pack);
-
-			int result = sendto(sockets,(const char*)&msg, sizeof(msg), NULL,(struct sockaddr*)&sockSin, sizeof(sockSin));
-
-			ZeroMemory(msg.text,sizeof(msg.text));
+			WCHAR frag_pack[FRAFMENT_PACK_SIZE] = L""; //инициализация фрагмента пакета
+			
+			
+			memcpy(frag_pack, &Send_Data[i], sizeof(frag_pack));//скопируем данные в фрагмента пакета
+			
+			StringCchCat(msg.text,sizeof(msg.text), frag_pack);//скопируем данные в отправялемый пакет
+			msg.numberfrag = packnum;//запишем номер пакета
+			
+			int result = sendto(sockets,(const char*)&msg, sizeof(msg), NULL,(struct sockaddr*)&sockSin, sizeof(sockSin));			
+			
+			packnum++;//увеличим номер пакета для следующей отправки
+			ZeroMemory(msg.text, sizeof(msg.text));
 		}
 	}
 }
 				
 void StartChat(HWND hwnd, LPCTSTR Message)
 {
-	MessageBox(hwnd, L"LET'S GO CHAT", L"tr", MB_OK);
+	MessageBox(hwnd, L"LET'S GO CHAT!", L"CHAT", MB_OK);
 	
 	WCHAR UserMessage[532] = _T("");
 
@@ -370,50 +370,41 @@ void StartChat(HWND hwnd, LPCTSTR Message)
 unsigned __stdcall ThreadFunc(void* lParam)
 {
 	/*Переменные*/
-	WCHAR Message[MAX_MESSAGE_SIZE] = _T(""); //сообщение
-	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");//имя отправителя
-	WCHAR UserMessage[532] = _T("");
+	WCHAR Message[MAX_MESSAGE_SIZE] = _T("");			//сообщение
+	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");			//имя отправителя
+	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = _T("");	//имя отправителя+сообщение
 
 	SLP_msg recived_msg = {0};
 	int socket_len  = sizeof(sockSout);
 
-	for (;;)
-	{
-		//Начнем прием сообщений через сокет
-		int result = recvfrom(sockets,(char*)&recived_msg,sizeof(recived_msg),NULL,(struct sockaddr*)&sockSout, &socket_len);
-		
-		if(result != SOCKET_ERROR)
+		for (;;)
 		{
-			int struct_size = sizeof(recived_msg);//узнаем размер структуры
-			 
-			//int reseived_size = recived_msg.filelen/10; //количество пакетов
+			//Начнем прием сообщений через сокет
+			int result = recvfrom(sockets,(char*)&recived_msg,sizeof(recived_msg),NULL,(struct sockaddr*)&sockSout, &socket_len);
+		
+			if(result != SOCKET_ERROR)
+			{
+				int struct_size = sizeof(recived_msg);//узнаем размер структуры
 			
-			int reseived_size = recived_msg.filelen / wcslen(recived_msg.text); //количество пакетов
+				int reseived_size = recived_msg.filelen / _countof(recived_msg.text); //количество пакетов
 
-
-			if (recived_msg.filelen % 10 == 0)
-			{
-				recived_msg.numberfrag--;
-			}
-
-			for (int i = 0; i < MAX_MESSAGE_SIZE; i++)
-			{
-				if (i == recived_msg.numberfrag*10)
+				/*Собираем сообщение*/
+				for (int i = 0; i < MAX_MESSAGE_SIZE; i++)
 				{
-					for (int j = 0; j < 10 ; j++)
+					if (i == recived_msg.numberfrag*10)
 					{
-						Message[i+j] = recived_msg.text[j];
+						for (int j = 0; j < 10 ; j++)
+						{
+							Message[i+j] = recived_msg.text[j];
+						}
 					}
-				}
-			}	
-				if (recived_msg.filelen%10 == 0)
-				{
-					recived_msg.numberfrag++;
-				}
+				}	
 
+				int recived = wcslen(Message);//не используется. Для просмотра размера при отладке
 
 				if (reseived_size == recived_msg.numberfrag)
 				{
+					/*Заполнение массивов для вывода имени отправителя и сообщения*/
 					StringCchCat(UserMessage, _countof(UserMessage), _T("\n\n"));
 
 					StringCchCat(UserName, 20, recived_msg.username);
@@ -428,11 +419,12 @@ unsigned __stdcall ThreadFunc(void* lParam)
 
 					StartChat(hwnd, UserMessage);
 
+					/*Освобождение ресурсов и т.д.*/
 					memset(UserName, NULL, 255);
 					memset(UserMessage, NULL, 255);
 					memset(Message, NULL, 255);
 				}
 			}
 		}
-		return(0);
-	}
+return(0);
+}
