@@ -17,13 +17,13 @@
 #define BUTTON_DISCONNECT		2001
 #define BUTTON_RECEIVE			2002
 
-#define MAX_MESSAGE_SIZE	255
+#define MAX_MESSAGE_SIZE		255
 
 #pragma pack(1)
 struct AdressHeader
 {
-	int CountOfFiles;
-	TCHAR adr[128] = L""; //адрес отправителя
+	int CountOfFiles;		//количество файлов
+	TCHAR adr[128] = L"";	//адрес отправителя
 };
 #pragma pack()
 
@@ -66,7 +66,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR lpszCmdLine, int nCm
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
+	//wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
+	wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 100, 256));
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = TEXT("WindowClass");
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -163,6 +164,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						file_receive.close();
 
 					}
+					MessageBox(NULL, TEXT("Прием файлов завершен\n"), TEXT("Server"), MB_OK | MB_ICONINFORMATION);
 				}
 				break;
 			return TRUE;

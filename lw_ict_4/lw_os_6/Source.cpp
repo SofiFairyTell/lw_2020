@@ -23,9 +23,6 @@
 #define IDC_CONNECT					2006
 #define IDC_DISCONNECT				2007
 
-
-
-
 #define MAX_TEXT                    1024
 
 //размеры текста с сообщением
@@ -61,8 +58,8 @@ struct SLP_msg
 {
 	int filelen;		 //длина сообщени¤
 	int numberfrag;		//номер фрагмента
-	WCHAR username[20]; //им¤ отправител¤
-	WCHAR text[10];		//текст сообщени¤
+	WCHAR username[20]; //имя отправителя
+	WCHAR text[10];		//текст сообщения
 };
 #pragma pack()
 
@@ -404,6 +401,8 @@ unsigned __stdcall ThreadFunc(void* lParam)
 				}	
 
 				int recived = wcslen(Message);//не используется. Для просмотра размера при отладке
+
+				//если определенный через размер номер равен номеру пакета, значит сообщение было получено верно
 
 				if (reseived_size == recived_msg.numberfrag)
 				{
