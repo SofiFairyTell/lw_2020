@@ -336,7 +336,8 @@ void SendText(SLP_msg msg, LPCTSTR Send_Data, unsigned int Send_Data_Size)
 			WCHAR frag_pack[FRAFMENT_PACK_SIZE] = L""; //инициализация фрагмента пакета
 			
 			
-			memcpy(frag_pack, &Send_Data[i], sizeof(frag_pack));//скопируем данные в фрагмента пакета
+			memcpy_s(frag_pack, sizeof(frag_pack), &Send_Data[i], sizeof(frag_pack));//скопируем данные в фрагмента пакета
+			//memcpy(frag_pack, &Send_Data[i], sizeof(frag_pack));//скопируем данные в фрагмента пакета
 			
 			StringCchCat(msg.text,sizeof(msg.text), frag_pack);//скопируем данные в отправялемый пакет
 			msg.numberfrag = packnum;//запишем номер пакета
