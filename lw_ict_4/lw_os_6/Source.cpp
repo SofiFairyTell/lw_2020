@@ -70,10 +70,11 @@ sockaddr_in sockSin = { 0 };
 sockaddr_in sockSout = { 0 };
 sockaddr_in sockSoin = { 0 };
 
+void ReceiveText(WCHAR* Message, SLP_msg recived_msg, int socket_len); //получене сообщений
 
-void SendText(SLP_msg msg, LPCTSTR Send_Data, unsigned int Send_Data_Size);//отправка сообщений
+void SendText(SLP_msg msg, LPWSTR Send_Data, size_t Send_Data_Size);//отправка сообщений
 
-void StartChat(HWND hwnd, LPCTSTR Message);//вывод имени отправителя и сообщения на экран
+void StartChat(HWND hwnd, LPWSTR Message);//вывод имени отправителя и сообщения на экран
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR CmdLine, int CmdShow)
 {
@@ -148,13 +149,18 @@ BOOL PreTranslateMessage(LPMSG Msg)
 {
 	/*Переменные*/
 	WCHAR Message[MAX_MESSAGE_SIZE]; //сообщение
-	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");//имя отправителя
-	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = _T("");//сообщение + имя отправителя
+	WCHAR UserName[MAX_USERNAME_SIZE] = L"";//имя отправителя
+	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = L"";//сообщение + имя отправителя
 
 	//объявим структуру с пакетом
 	SLP_msg msg;
-	memset(msg.text, NULL, 10);
-	memset(msg.username, NULL, 20);
+	
+	ZeroMemory(msg.text, sizeof(msg.text));
+	ZeroMemory(msg.username, sizeof(msg.username));
+
+
+	//memset(msg.text, NULL, 10);
+	//memset(msg.username, NULL, 20);
 
 	DWORD symbols, symb_user;  //количество символов в сообщении
 
@@ -169,7 +175,7 @@ BOOL PreTranslateMessage(LPMSG Msg)
 			/*CTRL+ENTER*/
 			if (GetKeyState(VK_SHIFT) < 0) // нажата клавиша SHIFT
 			{
-				Edit_ReplaceSel(hwndCtl, _T("\r\n"));
+				Edit_ReplaceSel(hwndCtl, L"\r\n");
 			}
 			else
 			{
@@ -322,18 +328,18 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 
 // ----------------------------------------------------------------------------------------------
-void SendText(SLP_msg msg, LPCTSTR Send_Data, unsigned int Send_Data_Size)
+void SendText(SLP_msg msg, LPWSTR Send_Data, size_t Send_Data_Size)
 {
 	
-	if ((Send_Data != NULL) && (Send_Data_Size > 0))
+	if ((Send_Data != NULL) && (Send_Data_Size != NULL))
 	{
 		int packnum = 0;//номер пакета
 
 		msg.filelen = Send_Data_Size;
 
-		for (int i = 0; i < Send_Data_Size; i+=10)
+		for (unsigned int i = 0; i < Send_Data_Size; i+=10)
 		{
-			WCHAR frag_pack[FRAFMENT_PACK_SIZE] = L""; //инициализация фрагмента пакета
+			WCHAR frag_pack[FRAFMENT_PACK_SIZE] = { L"" }; //инициализация фрагмента пакета
 			
 			
 			memcpy_s(frag_pack, sizeof(frag_pack), &Send_Data[i], sizeof(frag_pack));//скопируем данные в фрагмента пакета
@@ -350,30 +356,41 @@ void SendText(SLP_msg msg, LPCTSTR Send_Data, unsigned int Send_Data_Size)
 	}
 }
 				
-void StartChat(HWND hwnd, LPCTSTR Message)
+void StartChat(HWND hwnd, LPWSTR Message)
 {
 	MessageBox(hwnd, L"LET'S GO CHAT!", L"CHAT", MB_OK);
+
+	DWORD err = GetLastError();
+	wchar_t* us = new wchar_t[wcslen(Message)+4];
+
+	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = L"";
+	//WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = { L"" };
+
 	
-	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = _T("");
 
 	HWND hwndCtl = GetDlgItem(hwnd, IDC_EDIT_MESSAGES);
 
-	StringCchCat(UserMessage, _countof(UserMessage), _T("\r\n"));
+	StringCchCat(UserMessage, _countof(UserMessage), L"\r\n");
 	StringCchCat(UserMessage, _countof(UserMessage), Message);
+	//StringCchCat(us, wcslen(us), L"\r\n");
+	//StringCchCat(us, wcslen(us), Message);
 
 	Edit_SetSel(hwndCtl, Edit_GetTextLength(hwndCtl), -1);// устанавливаем курсор в конец поля вывода
 
 	SetFocus(hwnd);
 
 	Edit_ReplaceSel(hwndCtl, UserMessage);// вставляем текст в поле вывода
+	//Edit_ReplaceSel(hwndCtl, us);// вставляем текст в поле вывода
+//	MessageBox(hwnd, L"LET'S GO CHAT!", L"CHAT", MB_OK);
 } 
 
 unsigned __stdcall ThreadFunc(void* lParam)
 {
 	/*Переменные*/
-	WCHAR Message[MAX_MESSAGE_SIZE] = _T("");			//сообщение
-	WCHAR UserName[MAX_USERNAME_SIZE] = _T("");			//имя отправителя
-	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = _T("");	//имя отправителя+сообщение
+	//WCHAR Message[MAX_MESSAGE_SIZE] = _T("");		//сообщение
+	WCHAR Message[MAX_MESSAGE_SIZE] = L"";			//сообщение
+	WCHAR UserName[MAX_USERNAME_SIZE] = L"";		//имя отправителя
+	WCHAR UserMessage[MAX_USERMESSAGE_SIZE] = L"";	//имя отправителя+сообщение
 
 	SLP_msg recived_msg = {0};
 	int socket_len  = sizeof(sockSout);
@@ -385,6 +402,8 @@ unsigned __stdcall ThreadFunc(void* lParam)
 		
 			if(result != SOCKET_ERROR)
 			{
+				//Тестирование на: ТестТестТестТестТестТестТестТест
+				//ReceiveText(Message, recived_msg, socket_len);
 				int struct_size = sizeof(recived_msg);//узнаем размер структуры
 			
 				int reseived_size = recived_msg.filelen / _countof(recived_msg.text); //количество пакетов
@@ -392,12 +411,11 @@ unsigned __stdcall ThreadFunc(void* lParam)
 				/*Собираем сообщение*/
 				for (int i = 0; i < MAX_MESSAGE_SIZE; i++)
 				{
-					if (i == recived_msg.numberfrag*10)
+					//будем выполнять сдвиг указателя в массиве Message 
+					//пока не дойдем до конца уже заполненной части массива
+					if (i == recived_msg.numberfrag*FRAFMENT_PACK_SIZE)
 					{
-						for (int j = 0; j < 10 ; j++)
-						{
-							Message[i+j] = recived_msg.text[j];
-						}
+						StringCchCatW(Message, _countof(Message), recived_msg.text);
 					}
 				}	
 
@@ -425,5 +443,7 @@ unsigned __stdcall ThreadFunc(void* lParam)
 				}
 			}
 		}
+		ZeroMemory(Message, sizeof(Message));
 return(0);
 }
+

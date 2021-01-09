@@ -1,5 +1,6 @@
-﻿  Source.cpp
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\lw_os_6\source.cpp(189): warning C4267: аргумент: преобразование из "size_t" в "unsigned int"; возможна потеря данных
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\lw_os_6\source.cpp(334): warning C4018: <: несоответствие типов со знаком и без знака
-c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\lw_os_6\source.cpp(404): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+﻿  Theory.cpp
+  Source.cpp
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\lw_os_6\source.cpp(338): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\kurbatova\source\lw2020\lw_2020\lw_ict_4\lw_os_6\source.cpp(425): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+  Создание кода...
   lw_os_6.vcxproj -> C:\Users\Kurbatova\source\LW2020\lw_2020\lw_ict_4\x64\Debug\lw_os_6.exe
