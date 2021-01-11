@@ -338,7 +338,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				{
 					/*ֱûכ גûהוכום מהטם פאיכ*/
 					msgA.CountOfFiles++;
-					int iItem = ListBox_AddString(hWNDctrl, nFileOffset);
+					int iItem = ListBox_AddString(hWNDctrl, FileNameTitle);
 					ListBox_SetCurSel(hWNDctrl, iItem);
 				}
 			}
