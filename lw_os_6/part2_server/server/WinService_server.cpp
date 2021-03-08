@@ -6,43 +6,43 @@
 #include <fstream>
 #include <iostream>
 
-//extern LPCTSTR service_name; // имя службы
-//extern LPCTSTR SvcDisplayName; // отображаемое имя службы
+//extern LPCTSTR service_name; // РёРјСЏ СЃР»СѓР¶Р±С‹
+//extern LPCTSTR SvcDisplayName; // РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕРµ РёРјСЏ СЃР»СѓР¶Р±С‹
 
-LPCTSTR service_name = TEXT("DemoService"); //// внутреннее имя сервиса, используемое SCM
-LPCTSTR SvcDisplayName = TEXT("DemoService");// внешнее имя сервиса в панели управления
+LPCTSTR service_name = TEXT("DemoService"); //// РІРЅСѓС‚СЂРµРЅРЅРµРµ РёРјСЏ СЃРµСЂРІРёСЃР°, РёСЃРїРѕР»СЊР·СѓРµРјРѕРµ SCM
+LPCTSTR SvcDisplayName = TEXT("DemoService");// РІРЅРµС€РЅРµРµ РёРјСЏ СЃРµСЂРІРёСЃР° РІ РїР°РЅРµР»Рё СѓРїСЂР°РІР»РµРЅРёСЏ
 
-SERVICE_STATUS service_status; // текущее состояние службы
-SERVICE_STATUS_HANDLE hServiceStatus; // дескриптор состояния службы
+SERVICE_STATUS service_status; // С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃР»СѓР¶Р±С‹
+SERVICE_STATUS_HANDLE hServiceStatus; // РґРµСЃРєСЂРёРїС‚РѕСЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ СЃР»СѓР¶Р±С‹
 
-std::ofstream  out;   // выходной файл для протокола работы сервиса
-int  nCount;     // счетчик
+std::ofstream  out;   // РІС‹С…РѕРґРЅРѕР№ С„Р°Р№Р» РґР»СЏ РїСЂРѕС‚РѕРєРѕР»Р° СЂР°Р±РѕС‚С‹ СЃРµСЂРІРёСЃР°
+int  nCount;     // СЃС‡РµС‚С‡РёРє
 
 // ------------------------------------------------------------------------------------------------
 
-BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv);// эта функция вызывается при запуске службы
+BOOL OnSvcInit(DWORD dwArgc, LPTSTR *lpszArgv);// СЌС‚Р° С„СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ РїСЂРё Р·Р°РїСѓСЃРєРµ СЃР»СѓР¶Р±С‹
 
-void OnSvcStop(void);// эта функция вызывается для остановки службы
+void OnSvcStop(void);// СЌС‚Р° С„СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ РґР»СЏ РѕСЃС‚Р°РЅРѕРІРєРё СЃР»СѓР¶Р±С‹
 
-DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv);// в этой функции реализован основной функционал
+DWORD SvcMain(DWORD dwArgc, LPTSTR *lpszArgv);// РІ СЌС‚РѕР№ С„СѓРЅРєС†РёРё СЂРµР°Р»РёР·РѕРІР°РЅ РѕСЃРЅРѕРІРЅРѕР№ С„СѓРЅРєС†РёРѕРЅР°Р»
 
 // ------------------------------------------------------------------------------------------------
 DWORD WINAPI SvcHandler(DWORD fdwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext)
 {
 	if (SERVICE_CONTROL_STOP == fdwControl || SERVICE_CONTROL_SHUTDOWN == fdwControl)
 	{
-		OnSvcStop(); // останавливаем службу
-		service_status.dwCurrentState = SERVICE_STOP_PENDING; // новое состояние службы
+		OnSvcStop(); // РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃР»СѓР¶Р±Сѓ
+		service_status.dwCurrentState = SERVICE_STOP_PENDING; // РЅРѕРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃР»СѓР¶Р±С‹
 	}
 	
-	SetServiceStatus(hServiceStatus, &service_status);// изменяем текущее состояние службы
+	SetServiceStatus(hServiceStatus, &service_status);// РёР·РјРµРЅСЏРµРј С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃР»СѓР¶Р±С‹
 	return NO_ERROR;
 } 
 
 // ------------------------------------------------------------------------------------------------
 void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 {
-	// регистрируем обработчик управляющих команд для сервиса
+	// СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РѕР±СЂР°Р±РѕС‚С‡РёРє СѓРїСЂР°РІР»СЏСЋС‰РёС… РєРѕРјР°РЅРґ РґР»СЏ СЃРµСЂРІРёСЃР°
 	hServiceStatus = RegisterServiceCtrlHandlerEx(service_name, SvcHandler, NULL);
 
 	if (!hServiceStatus)
@@ -56,7 +56,7 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
 	if (NULL != hServiceStatus)
 	{
-		// начальное состояние
+		// РЅР°С‡Р°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
 		service_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 		service_status.dwCurrentState = SERVICE_START_PENDING;
 		service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
@@ -65,21 +65,21 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 		service_status.dwCheckPoint = 0;
 		service_status.dwWaitHint = 0;
 
-		// задаем начальное состояние службы
+		// Р·Р°РґР°РµРј РЅР°С‡Р°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃР»СѓР¶Р±С‹
 		SetServiceStatus(hServiceStatus, &service_status);
 
 		// /// //
 
 		if (OnSvcInit(dwArgc, lpszArgv) != FALSE)
 		{
-			// определяем сервис как работающий 
-			service_status.dwCurrentState = SERVICE_RUNNING; // новое состояние
+			// РѕРїСЂРµРґРµР»СЏРµРј СЃРµСЂРІРёСЃ РєР°Рє СЂР°Р±РѕС‚Р°СЋС‰РёР№ 
+			service_status.dwCurrentState = SERVICE_RUNNING; // РЅРѕРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
 		
-			SetServiceStatus(hServiceStatus, &service_status);// изменяем текущее состояние службы
+			SetServiceStatus(hServiceStatus, &service_status);// РёР·РјРµРЅСЏРµРј С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃР»СѓР¶Р±С‹
 
-			DWORD dwExitCode = SvcMain(dwArgc, lpszArgv);
+			DWORD dwExitCode = SvcMain(dwArgc, lpszArgv);// РІ СЌС‚РѕР№ С„СѓРЅРєС†РёРё СЂРµР°Р»РёР·РѕРІР°РЅ РѕСЃРЅРѕРІРЅРѕР№ С„СѓРЅРєС†РёРѕРЅР°Р»
 
-			if (dwExitCode != 0) // возвращаем код ошибки
+			if (dwExitCode != 0) // РІРѕР·РІСЂР°С‰Р°РµРј РєРѕРґ РѕС€РёР±РєРё
 			{
 				service_status.dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
 				service_status.dwServiceSpecificExitCode = dwExitCode;
@@ -90,8 +90,8 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 			} 
 		} 
 
-		service_status.dwCurrentState = SERVICE_STOPPED; // новое состояние
-		SetServiceStatus(hServiceStatus, &service_status);// задаем конечное состояние службы
+		service_status.dwCurrentState = SERVICE_STOPPED; // РЅРѕРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
+		SetServiceStatus(hServiceStatus, &service_status);// Р·Р°РґР°РµРј РєРѕРЅРµС‡РЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃР»СѓР¶Р±С‹
 	} 
 } 
 
@@ -99,23 +99,20 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 int _tmain(int argc, LPTSTR argv[])
 {
 	_tsetlocale(LC_ALL, TEXT(""));
-
 	if (argc < 2)
 	{
-		_tprintf(TEXT("> Не указан параметр.\n"));
-		return 0; // завершаем работу приложения
+		_tprintf(TEXT("> РќРµ СѓРєР°Р·Р°РЅ РїР°СЂР°РјРµС‚СЂ.\n"));
+		return 0; // Р·Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ РїСЂРёР»РѕР¶РµРЅРёСЏ
 	} // if
-
-
-	if (_tcscmp(argv[1], TEXT("/runservice")) == 0) // начало работы службы
+	if (_tcscmp(argv[1], TEXT("/runservice")) == 0) // РЅР°С‡Р°Р»Рѕ СЂР°Р±РѕС‚С‹ СЃР»СѓР¶Р±С‹
 	{
-		//  инициализируем структуру сервисов
+		//  РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ СЃРµСЂРІРёСЃРѕРІ
 		SERVICE_TABLE_ENTRY service_table[] =
 		{
-			{(LPTSTR)service_name, ServiceMain},// имя сервиса и функция сервиса
-			{NULL, NULL} // больше сервисов нет
+			{(LPTSTR)service_name, ServiceMain},// РёРјСЏ СЃРµСЂРІРёСЃР° Рё С„СѓРЅРєС†РёСЏ СЃРµСЂРІРёСЃР°
+			{NULL, NULL} // Р±РѕР»СЊС€Рµ СЃРµСЂРІРёСЃРѕРІ РЅРµС‚
 		};
-//отследить в отладчике не получится, потому что требуется создание канала диспетчером, а им канал здесь не создается 
+//РѕС‚СЃР»РµРґРёС‚СЊ РІ РѕС‚Р»Р°РґС‡РёРєРµ РЅРµ РїРѕР»СѓС‡РёС‚СЃСЏ, РїРѕС‚РѕРјСѓ С‡С‚Рѕ С‚СЂРµР±СѓРµС‚СЃСЏ СЃРѕР·РґР°РЅРёРµ РєР°РЅР°Р»Р° РґРёСЃРїРµС‚С‡РµСЂРѕРј, Р° РёРј РєР°РЅР°Р» Р·РґРµСЃСЊ РЅРµ СЃРѕР·РґР°РµС‚СЃСЏ 
 		if (!StartServiceCtrlDispatcher(service_table))
 		{
 			out.open("C:\\ServiceFile.log");
@@ -131,13 +128,13 @@ int _tmain(int argc, LPTSTR argv[])
 		}
 	}
 	
-	if (_tcscmp(argv[1], TEXT("/create")) == 0) // создание службы
+	if (_tcscmp(argv[1], TEXT("/create")) == 0) // СЃРѕР·РґР°РЅРёРµ СЃР»СѓР¶Р±С‹
 	{
-			// связываемся с менеджером сервисов
+			// СЃРІСЏР·С‹РІР°РµРјСЃСЏ СЃ РјРµРЅРµРґР¶РµСЂРѕРј СЃРµСЂРІРёСЃРѕРІ
 			SC_HANDLE hServiceControlManager = OpenSCManager
-			(NULL, //локальная машина
-				NULL, //активная база данных сервисов
-				SC_MANAGER_CREATE_SERVICE //возможно создание сервиса
+			(NULL, //Р»РѕРєР°Р»СЊРЅР°СЏ РјР°С€РёРЅР°
+				NULL, //Р°РєС‚РёРІРЅР°СЏ Р±Р°Р·Р° РґР°РЅРЅС‹С… СЃРµСЂРІРёСЃРѕРІ
+				SC_MANAGER_CREATE_SERVICE //РІРѕР·РјРѕР¶РЅРѕ СЃРѕР·РґР°РЅРёРµ СЃРµСЂРІРёСЃР°
 			);
 			if (hServiceControlManager == NULL)
 			{
@@ -149,21 +146,21 @@ int _tmain(int argc, LPTSTR argv[])
 				return -1;
 			}
 
-			TCHAR CmdLine[MAX_PATH + 13]; // командная строка
+			TCHAR CmdLine[MAX_PATH + 13]; // РєРѕРјР°РЅРґРЅР°СЏ СЃС‚СЂРѕРєР°
 
-			// определяем путь и имя исполняемого файла
+			// РѕРїСЂРµРґРµР»СЏРµРј РїСѓС‚СЊ Рё РёРјСЏ РёСЃРїРѕР»РЅСЏРµРјРѕРіРѕ С„Р°Р№Р»Р°
 			GetModuleFileName(NULL, CmdLine, _countof(CmdLine));
-			// добавляем аргумент командной строки
+			// РґРѕР±Р°РІР»СЏРµРј Р°СЂРіСѓРјРµРЅС‚ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 			StringCchCat(CmdLine, _countof(CmdLine), TEXT(" /runservice"));
 
-			// создаем службу
+			// СЃРѕР·РґР°РµРј СЃР»СѓР¶Р±Сѓ
 			SC_HANDLE hService = CreateService(
-				hServiceControlManager, //дескриптор менеджера сервисов
-				service_name, //внтуренее имя сервиса
-				SvcDisplayName, //внешнее имя отображаемое
-				0,//нет полных прав контроля сервиса
-				SERVICE_WIN32_OWN_PROCESS, // сервис является процессом
-				SERVICE_DEMAND_START, // служба запускается "вручную"
+				hServiceControlManager, //РґРµСЃРєСЂРёРїС‚РѕСЂ РјРµРЅРµРґР¶РµСЂР° СЃРµСЂРІРёСЃРѕРІ
+				service_name, //РІРЅС‚СѓСЂРµРЅРµРµ РёРјСЏ СЃРµСЂРІРёСЃР°
+				SvcDisplayName, //РІРЅРµС€РЅРµРµ РёРјСЏ РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕРµ
+				0,//РЅРµС‚ РїРѕР»РЅС‹С… РїСЂР°РІ РєРѕРЅС‚СЂРѕР»СЏ СЃРµСЂРІРёСЃР°
+				SERVICE_WIN32_OWN_PROCESS, // СЃРµСЂРІРёСЃ СЏРІР»СЏРµС‚СЃСЏ РїСЂРѕС†РµСЃСЃРѕРј
+				SERVICE_DEMAND_START, // СЃР»СѓР¶Р±Р° Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ "РІСЂСѓС‡РЅСѓСЋ"
 				SERVICE_ERROR_NORMAL, CmdLine, NULL, NULL, NULL, NULL, NULL);
 
 			if (hService == NULL)
@@ -173,7 +170,7 @@ int _tmain(int argc, LPTSTR argv[])
 					<< "Press any key to exit." << std::endl;
 				std::cin.get();
 
-				// закрываем дескриптор менеджера сервисов
+				// Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РјРµРЅРµРґР¶РµСЂР° СЃРµСЂРІРёСЃРѕРІ
 				CloseServiceHandle(hServiceControlManager);
 
 				return 0;
@@ -184,7 +181,7 @@ int _tmain(int argc, LPTSTR argv[])
 
 				std::cin.get();
 
-				// закрываем дескрипторы
+				// Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂС‹
 				CloseServiceHandle(hService);
 				CloseServiceHandle(hServiceControlManager);
 
@@ -193,10 +190,10 @@ int _tmain(int argc, LPTSTR argv[])
 
 		}
 
-	if (_tcscmp(argv[1], TEXT("/delete")) == 0) // удаление службы
+	if (_tcscmp(argv[1], TEXT("/delete")) == 0) // СѓРґР°Р»РµРЅРёРµ СЃР»СѓР¶Р±С‹
 	{
-		// открываем SCM
-		SC_HANDLE hServiceControlManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);//третий параметр - соединение с менеджером
+		// РѕС‚РєСЂС‹РІР°РµРј SCM
+		SC_HANDLE hServiceControlManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);//С‚СЂРµС‚РёР№ РїР°СЂР°РјРµС‚СЂ - СЃРѕРµРґРёРЅРµРЅРёРµ СЃ РјРµРЅРµРґР¶РµСЂРѕРј
 
 		if (hServiceControlManager == NULL)
 		{
@@ -213,7 +210,7 @@ int _tmain(int argc, LPTSTR argv[])
 		}
 
 
-		// открываем службу для удаления
+		// РѕС‚РєСЂС‹РІР°РµРј СЃР»СѓР¶Р±Сѓ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
 		SC_HANDLE hService = OpenService(hServiceControlManager, service_name, SERVICE_ALL_ACCESS | DELETE);
 
 		if (hService == NULL)
@@ -223,12 +220,12 @@ int _tmain(int argc, LPTSTR argv[])
 				<< "Press any key to exit." << std::endl;
 			std::cin.get();
 
-			// закрываем дескриптор менеджера сервисов
+			// Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РјРµРЅРµРґР¶РµСЂР° СЃРµСЂРІРёСЃРѕРІ
 			CloseServiceHandle(hServiceControlManager);
 			return 0;
 		}
 
-		// получаем состояние сервиса
+		// РїРѕР»СѓС‡Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ СЃРµСЂРІРёСЃР°
 		if (!QueryServiceStatus(hService, &service_status))
 		{
 			std::cout << "Query service status failed." << std::endl
@@ -236,14 +233,14 @@ int _tmain(int argc, LPTSTR argv[])
 				<< "Press any key to exit." << std::endl;
 			std::cin.get();
 
-			// закрываем дескрипторы
+			// Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂС‹
 			CloseServiceHandle(hServiceControlManager);
 			CloseServiceHandle(hService);
 
 			return 0;
 		}
 
-		// если сервис работает, то останавливаем его
+		// РµСЃР»Рё СЃРµСЂРІРёСЃ СЂР°Р±РѕС‚Р°РµС‚, С‚Рѕ РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј РµРіРѕ
 		if (service_status.dwCurrentState != SERVICE_STOPPED)
 		{
 			std::cout << "Service is working. It will be stoped" << std::endl;
@@ -254,13 +251,13 @@ int _tmain(int argc, LPTSTR argv[])
 					<< "Press any key to exit." << std::endl;
 				std::cin.get();
 
-				// закрываем дескрипторы
+				// Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂС‹
 				CloseServiceHandle(hServiceControlManager);
 				CloseServiceHandle(hService);
 
 				return 0;
 			}
-			// ждем, пока сервис остановится
+			// Р¶РґРµРј, РїРѕРєР° СЃРµСЂРІРёСЃ РѕСЃС‚Р°РЅРѕРІРёС‚СЃСЏ
 			Sleep(500);
 		}
 
@@ -271,7 +268,7 @@ int _tmain(int argc, LPTSTR argv[])
 				<< "Press any key to exit." << std::endl;
 			std::cin.get();
 
-			// закрываем дескрипторы
+			// Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂС‹
 			CloseServiceHandle(hServiceControlManager);
 			CloseServiceHandle(hService);
 
@@ -286,9 +283,9 @@ int _tmain(int argc, LPTSTR argv[])
 
 
 		CloseServiceHandle(hService);
-		CloseServiceHandle(hServiceControlManager); // закрываем дескриптор
-		return 0; // завершаем работу приложения
+		CloseServiceHandle(hServiceControlManager); // Р·Р°РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ
+		return 0; // Р·Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ РїСЂРёР»РѕР¶РµРЅРёСЏ
 	} // if
 
-	_tprintf(TEXT("> Неизвестный параметр.\n"));
+	_tprintf(TEXT("> РќРµРёР·РІРµСЃС‚РЅС‹Р№ РїР°СЂР°РјРµС‚СЂ.\n"));
 }
