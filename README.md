@@ -8,6 +8,7 @@
 > * [Лабораторная работа 5](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_OS/lw_os_5)
 > * [Лабораторная работа 6](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_OS/lw_os_6)
 2. Лабораторные работы по дисциплине "Информационно-коммуникационные системы и сети":
+> * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/REPORT)
 > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/lw_ict_4)
 3. Лабораторные работы по дисциплине "Теория информации": 
 [Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI)
@@ -19,4 +20,5 @@
 > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/4_TOI_invertsearch)
 > * [Лабораторная работа 5](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/5_TOI)
 4. Лабораторные работы по дисциплине "Периферийное оборудование":
+> * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD/REPORT)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD/keyboardcmd)
