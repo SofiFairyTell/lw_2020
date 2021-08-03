@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=Windows-1251">
+<title>NL: xlaplace.c</title>
+<link href="nl.doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+<!-- Создано системой Doxygen 1.4.7 -->
+<div class="tabs">
+  <ul>
+    <li><a href="index.html"><span>Титульная&nbsp;страница</span></a></li>
+    <li><a href="classes.html"><span>Классы</span></a></li>
+    <li><a href="files.html"><span>Файлы</span></a></li>
+    <li><a href="pages.html"><span>Описания</span></a></li>
+    <li><a href="examples.html"><span>Примеры</span></a></li>
+    <li>
+      <form action="search.php" method="get">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td><label>&nbsp;Поиск&nbsp;</label></td>
+            <td><input type="text" name="query" value="" size="20" accesskey="s"/></td>
+          </tr>
+        </table>
+      </form>
+    </li>
+  </ul></div>
+<h1>xlaplace.c</h1><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*    </span>
+<a name="l00002"></a>00002 <span class="comment">  Пример использования функции @gall_laplace@</span>
+<a name="l00003"></a>00003 <span class="comment">*/</span>
+<a name="l00004"></a>00004 
+<a name="l00005"></a>00005 <span class="preprocessor">#include "<a class="code" href="nl_8h.html">nl.h</a>"</span>
+<a name="l00006"></a>00006 
+<a name="l00007"></a>00007 <span class="keywordtype">int</span> main()
+<a name="l00008"></a>00008 {
+<a name="l00009"></a>00009   size_t *IA, *JA, m, n, N, nz;
+<a name="l00010"></a>00010   <span class="keywordtype">double</span> *AN, *AD, **A;
+<a name="l00011"></a>00011 
+<a name="l00012"></a>00012   m = n = 3;
+<a name="l00013"></a>00013   N = m * n;
+<a name="l00014"></a>00014 
+<a name="l00015"></a>00015   printf(<span class="stringliteral">"5-точечная аппроксимация уравнения Пуассона\n"</span>);
+<a name="l00016"></a>00016   printf(<span class="stringliteral">"Решетка 3x3\n"</span>);
+<a name="l00017"></a>00017   printf(<span class="stringliteral">"\nРазреженное полное представление:\n"</span>);
+<a name="l00018"></a>00018 
+<a name="l00019"></a>00019   <a name="a69"></a><a class="code" href="gallery_8h.html#8d1aac071d96a97dd1772cf496a3da3e">gall_laplace_size</a>(m, n, &amp;N, &amp;nz);
+<a name="l00020"></a>00020   <a name="a70"></a><a class="code" href="sparse_8h.html#e41940cfad7f1ff43e644cfe489f63a6">sp_create</a>(N, nz, &amp;IA, &amp;JA, &amp;AN);
+<a name="l00021"></a>00021   <a name="a71"></a><a class="code" href="gallery_8h.html#cd8afd0406eafcb2b6aa4888b377c463">gall_laplace</a>(m, n, IA, JA, AN);
+<a name="l00022"></a>00022   <a name="a72"></a><a class="code" href="sparse_8h.html#091e52c9e832d7019d35bbadac942225">sp_print</a>(IA, JA, AN, N, N, NULL);
+<a name="l00023"></a>00023 
+<a name="l00024"></a>00024   A = <a name="a73"></a><a class="code" href="util_8h.html#6edefe99eb1df48d1a5107cbd0fff870">nl_dmatrix_create</a>(N, N);
+<a name="l00025"></a>00025   <a name="a74"></a><a class="code" href="sparse_8h.html#67ee6d7a18148c20a9c7850ee68b0fc9">sp_full</a>(IA, JA, AN, N, N, A);
+<a name="l00026"></a>00026 
+<a name="l00027"></a>00027   printf(<span class="stringliteral">"\nПлотное представление:\n"</span>);
+<a name="l00028"></a>00028   <a name="a75"></a><a class="code" href="util_8h.html#5a45afb29eb489f6f1794c02ef2aa3fb">nl_dmatrix_print</a>(A, N, N, NULL);
+<a name="l00029"></a>00029 
+<a name="l00030"></a>00030   <a name="a76"></a><a class="code" href="sparse_8h.html#af4999a6f555c104bf78e9903fd71688">sp_free</a>(IA, JA, AN);
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032   printf(<span class="stringliteral">"\nРазреженное неполное представление\n"</span>);
+<a name="l00033"></a>00033   printf(<span class="stringliteral">"(верхнетреугольная часть):\n"</span>);
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035   <a name="a77"></a><a class="code" href="gallery_8h.html#e6c9fbebc1121ac0836fa5242a24a01f">gall_laplace_sym_size</a>(m, n, &amp;N, &amp;nz);
+<a name="l00036"></a>00036   <a name="a78"></a><a class="code" href="sparse_8h.html#625c8776401caf12182998e84a96b565">sp_create_sym</a>(N, nz, &amp;IA, &amp;JA, &amp;AN, &amp;AD);
+<a name="l00037"></a>00037   <a name="a79"></a><a class="code" href="gallery_8h.html#f73d502339773ae61364afdd78a01f72">gall_laplace_sym</a>(m, n, IA, JA, AN, AD);
+<a name="l00038"></a>00038   <a class="code" href="sparse_8h.html#091e52c9e832d7019d35bbadac942225">sp_print</a>(IA, JA, AN, N, N, NULL);
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040   A = <a class="code" href="util_8h.html#6edefe99eb1df48d1a5107cbd0fff870">nl_dmatrix_create</a>(N, N);
+<a name="l00041"></a>00041   <a class="code" href="sparse_8h.html#67ee6d7a18148c20a9c7850ee68b0fc9">sp_full</a>(IA, JA, AN, N, N, A);
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043   printf(<span class="stringliteral">"\nПлотное представление:\n"</span>);
+<a name="l00044"></a>00044   <a class="code" href="util_8h.html#5a45afb29eb489f6f1794c02ef2aa3fb">nl_dmatrix_print</a>(A, N, N, NULL);
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046   printf(<span class="stringliteral">"\nДиагональные элементы:\n"</span>);
+<a name="l00047"></a>00047   <a name="a80"></a><a class="code" href="util_8h.html#fb0e62a1dcae57f968237392f74a15c6">nl_dvector_print</a>(AD, N, NULL);
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049   <a name="a81"></a><a class="code" href="sparse_8h.html#ed187f2bbed242f827e7ef934a8784ab">sp_free_sym</a>(IA, JA, AN, AD);
+<a name="l00050"></a>00050   <a name="a82"></a><a class="code" href="util_8h.html#fb7d0819fe1e3929001fe8648afc1c7d">nl_dmatrix_free</a>(A, N);
+<a name="l00051"></a>00051 
+<a name="l00052"></a>00052   <span class="keywordflow">return</span> 0;
+<a name="l00053"></a>00053 }
+</pre></div> <hr size="1"><address style="align: right;"><small>Документация по NL. Последние изменения: Mon Oct 9 12:25:54 2006. Создано системой&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
+</body>
+</html>

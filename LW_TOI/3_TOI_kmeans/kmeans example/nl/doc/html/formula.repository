@@ -1,0 +1,769 @@
+\form#0:$A=LL^T$
+\form#1:$L$
+\form#2:$Ax=b$
+\form#3:$Ly=b$
+\form#4:$L^Tx=y$
+\form#5:$L^T$
+\form#6:$\frac13n^3 + O(n^2)$
+\form#7:$2n^2 + O(n)$
+\form#8:$\frac{2}{3}n^3 + O(n^2)$
+\form#9:$2n + O(1)$
+\form#10:$m\times n$
+\form#11:$Q = Q_k*...*Q_2*Q_1$
+\form#12:$Q_i=E-t_i*v_i*v_i^T$
+\form#13:$v_i=(0,...,1,A_{i+1,i},A_{i+2,i},...,A_{m,i})$
+\form#14:$2n^2(m-n)/3$
+\form#15:$n^2$
+\form#16:$A^Tx=b$
+\form#17:$|Ax-b|$
+\form#18:$Ax-b$
+\form#19:$mn+n^2$
+\form#20:$A^T$
+\form#21:$|A^Tx-b|$
+\form#22:$A^Tx-b$
+\form#23:$z = \alpha x + y$
+\form#24:$Q = Q_k\cdot\dots\cdot Q_2\cdot Q_1$
+\form#25:$Q_i=E-t_i v_i v_i^{\rm T}$
+\form#26:$QR$
+\form#27:$A$
+\form#28:$A=QR$
+\form#29:$Q$
+\form#30:$R$
+\form#31:$n\times n$
+\form#32:$Rx=Q^{\rm T}b$
+\form#33:$m \times n$
+\form#34:$t$
+\form#35:$\min\{n,m\}$
+\form#36:$m$
+\form#37:$n$
+\form#38:$2n^2m-(2/3)n^3+O(mn)$
+\form#39:$At$
+\form#40:$x$
+\form#41:$b$
+\form#42:$r$
+\form#43:$mxm$
+\form#44:$m\times m$
+\form#45:$n$\f aiioneaao ?acei?aiea aeaa $
+\form#46:$, aaa $
+\form#47:$ - $
+\form#48:$ iao?eoa n i?oiaiiaeuiuie noieaoaie, $
+\form#49:$ - aa?oiao?aoaieuiay $
+\form#50:$ iao?eoa. Oaeia ?acei?aiea ii?ii eniieuciaaou aey ?aoaiey nenoaiu eeiaeiuo o?aaiaiee $
+\form#51:$, naiay aa e o?aoaieuiie nenoaia $
+\form#52:$. Aaiiay o?aoaieuiay nenoaia iicaieyao oae?a iaeoe inaaai?aoaiea (a niunea iaoiaa iaeiaiuoeo eaaa?aoia) ia?aii?aaaeaiiie nenoaiu e ii?iaeuiia ?aoaiea (?aoaiea ieieiaeuiie ii?iu) iaaiii?aaaeaiiie nenoaiu. $
+\form#53:$-?acei?aiea eniieucoaony oae?a aey iaoi?aaiey i?oiii?ie?iaaiiiai aacena iiai?ino?ainoaa. Anee $
+\form#54:$ eiaao iieiue noieaoiaue ?aia, oi noieaou iao?eou $
+\form#55:$ ninoaaey?o i?oiii?ie?iaaiiue aacen iiai?ino?ainoaa, iaoyiooiai ia noieaou iao?eou $
+\form#56:$. \note Oaee niaa??eo aaa oeia ooieoee. E ia?aiio oeio ioiinyony ooieoee a iacaaiea eioi?uo ionoonoaoao iinooeen _t, ei aoi?iio oeio ioiinyony ooieoee a eioi?uo anou iinooeen _t. Ooieoee aoi?iai oeia eniieuco?ony, anee enoiaiay iao?eoa auea o?ainiiie?iaaia. A neeo iniaaiiinoae nia?aiaiiuo i?ioanni?ia, ooieoee aoi?iai oeia ?aaioa?o nouanoaaiii auno?aa, oioy aeai?eoiu ia ioee?a?ony. Iiyoiio aey ?aoaiey aieuoeo nenoai eeiaeiuo o?aaiaiee n iiiiuu? iaoiaa $
+\form#57:$n$\f. Iao?eoa $
+\form#58:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#59:$, aaa $
+\form#60:$ e $
+\form#61:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#62:$ - iao?eoa, $
+\form#63:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#64:$, $
+\form#65:$ - ?acia?u iao?eou A - Auoia: - $
+\form#66:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#67:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#68:$n^2+O(n)$
+\form#69:$\|Ax-b\|_2$
+\form#70:$A^{\rm T}x=b$
+\form#71:$\|A^{\rm T}x-b\|_2$
+\form#72:$A^{\rm T}x-b$
+\form#73:$n$\f. Iao?eoa $
+\form#74:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#75:$, aaa $
+\form#76:$ e $
+\form#77:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#78:$ - iao?eoa, $
+\form#79:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#80:$ - ?acia?u iao?eou A - Auoia: - $
+\form#81:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#82:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#83:$n$\f. Iao?eoa $
+\form#84:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#85:$, aaa $
+\form#86:$ e $
+\form#87:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#88:$ - iao?eoa, $
+\form#89:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#90:$ - ?acia?u iao?eou A - Auoia: - $
+\form#91:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#92:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#93:$n$\f. Iao?eoa $
+\form#94:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#95:$, aaa $
+\form#96:$ e $
+\form#97:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#98:$ - iao?eoa, $
+\form#99:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#100:$ - ?acia?u iao?eou A - Auoia: - $
+\form#101:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#102:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#103:$n$\f. Iao?eoa $
+\form#104:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#105:$, aaa $
+\form#106:$ e $
+\form#107:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#108:$ - iao?eoa, $
+\form#109:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#110:$ - ?acia?u iao?eou A - Auoia: - $
+\form#111:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#112:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#113:$n$\f. Iao?eoa $
+\form#114:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#115:$, aaa $
+\form#116:$ e $
+\form#117:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#118:$ - iao?eoa, $
+\form#119:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#120:$ - ?acia?u iao?eou A - Auoia: - $
+\form#121:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#122:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#123:$a$
+\form#124:$d$
+\form#125:$c$
+\form#126:$a[0]$
+\form#127:$c[n-1]$
+\form#128:$8n - 7$
+\form#129:$LU$
+\form#130:$PA=LU$
+\form#131:$m1$
+\form#132:$m2$
+\form#133:$n \times (m1+m2+1)$
+\form#134:$U$
+\form#135:$n \times m1$
+\form#136:$. Iao?eoa ia?anoaiiaie $
+\form#137:$p$
+\form#138:$j$
+\form#139:$P$
+\form#140:$p[j]$
+\form#141:$sgn$
+\form#142:$Ax = $
+\form#143:$n$\f. Iao?eoa $
+\form#144:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#145:$, aaa $
+\form#146:$ e $
+\form#147:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#148:$ - iao?eoa, $
+\form#149:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#150:$ - ?acia?u iao?eou A - Auoia: - $
+\form#151:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#152:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#153:$1$
+\form#154:$n$\f. Iao?eoa $
+\form#155:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#156:$, aaa $
+\form#157:$ e $
+\form#158:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#159:$ - iao?eoa, $
+\form#160:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#161:$ - ?acia?u iao?eou A - Auoia: - $
+\form#162:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#163:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#164:$n$\f. Iao?eoa $
+\form#165:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#166:$, aaa $
+\form#167:$ e $
+\form#168:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#169:$ - iao?eoa, $
+\form#170:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#171:$ - ?acia?u iao?eou A - Auoia: - $
+\form#172:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#173:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#174:$n$\f. Iao?eoa $
+\form#175:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#176:$, aaa $
+\form#177:$ e $
+\form#178:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#179:$ - iao?eoa, $
+\form#180:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#181:$ - ?acia?u iao?eou A - Auoia: - $
+\form#182:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#183:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#184:$n$\f. Iao?eoa $
+\form#185:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#186:$, aaa $
+\form#187:$ e $
+\form#188:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#189:$ - iao?eoa, $
+\form#190:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#191:$ - ?acia?u iao?eou A - Auoia: - $
+\form#192:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#193:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#194:$LL$
+\form#195:$n$\f. Iao?eoa $
+\form#196:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#197:$, aaa $
+\form#198:$ e $
+\form#199:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#200:$ - iao?eoa, $
+\form#201:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#202:$ - ?acia?u iao?eou A - Auoia: - $
+\form#203:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#204:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#205:$n$\f. Iao?eoa $
+\form#206:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#207:$, aaa $
+\form#208:$ e $
+\form#209:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#210:$ - iao?eoa, $
+\form#211:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#212:$ - ?acia?u iao?eou A - Auoia: - $
+\form#213:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#214:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#215:$IA$
+\form#216:$JA$
+\form#217:$AN$
+\form#218:$AD$
+\form#219:$Ly=Pb$
+\form#220:$Ux=y$
+\form#221:$A$
+\form#222:$10$
+\form#223:$r=Ax-b$
+\form#224:$r'=Ax-b$
+\form#225:$Ar'=b$
+\form#226:$x=x-r$
+\form#227:$B$
+\form#228:$v$
+\form#229:$A\cdot v$
+\form#230:$res$
+\form#231:$n$\f. Iao?eoa $
+\form#232:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#233:$, aaa $
+\form#234:$ e $
+\form#235:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#236:$ - iao?eoa, $
+\form#237:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#238:$ - ?acia?u iao?eou A - Auoia: - $
+\form#239:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#240:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#241:$A$
+\form#242:$n$\f. Iao?eoa $
+\form#243:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#244:$, aaa $
+\form#245:$ e $
+\form#246:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#247:$ - iao?eoa, $
+\form#248:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#249:$ - ?acia?u iao?eou A - Auoia: - $
+\form#250:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#251:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#252:$A$
+\form#253:$n$\f. Iao?eoa $
+\form#254:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#255:$, aaa $
+\form#256:$ e $
+\form#257:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#258:$ - iao?eoa, $
+\form#259:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#260:$ - ?acia?u iao?eou A - Auoia: - $
+\form#261:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#262:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#263:$A$
+\form#264:$A$
+\form#265:$A$
+\form#266:$A$
+\form#267:$A$
+\form#268:$A$
+\form#269:$n$\f. Iao?eoa $
+\form#270:$ ii?aaaeyaony i?iecaaaaieai iao?eo io?a?aiee Oaonoieaa?a: $
+\form#271:$, aaa $
+\form#272:$ e $
+\form#273:$. Oaeay ?a noaia eniieucoaony a aeaeeioaeao LAPACK, GSL e a?. Aey ?acei?aiey eniieucoaony aeai?eoi a?auaiee Oaonoieaa?a (Ni. [GolubVanLoan], aeai?eoi 5.2.1). - Aoia: - $
+\form#274:$ - iao?eoa, $
+\form#275:$-?acei?aiea eioi?ie o?aaoaony iaeoe - $
+\form#276:$ - ?acia?u iao?eou A - Auoia: - $
+\form#277:$ - iao?eoa e aaeoi?, eioi?ua caaa?o $
+\form#278:$-?acei?aiea enoiaiie iao?eou O?oaiaieinou: $
+\form#279:$A$
+\form#280:$A$
+\form#281:$A$
+\form#282:$A$
+\form#283:$A$
+\form#284:$A$
+\form#285:$A$
+\form#286:$A$
+\form#287:$A$
+\form#288:$LU-$
+\form#289:$QR-$
+\form#290:$A$
+\form#291:$A$
+\form#292:$first$
+\form#293:$last$
+\form#294:$A$
+\form#295:$A$
+\form#296:$A$
+\form#297:$A$
+\form#298:$IA[r]$
+\form#299:$IA[r+1]-1$
+\form#300:$IA[r]=IA[r+1]$
+\form#301:$ - ?enei iaioeaauo yeaiaioia iao?eou $
+\form#302:$nz$
+\form#303:$2*nz + n$
+\form#304:$IS$
+\form#305:$JS$
+\form#306:$SN$
+\form#307:$SD$
+\form#308:$I$
+\form#309:$J$
+\form#310:$format$
+\form#311:$xformat$
+\form#312:$dformat$
+\form#313:$file$
+\form#314:$0$
+\form#315:$IAT$
+\form#316:$JAT$
+\form#317:$ANT$
+\form#318:$A$
+\form#319:$A$ - Auoia: $
+\form#320:$A$
+\form#321:$A$ - Auoia: $
+\form#322:$IB$
+\form#323:$JB$
+\form#324:$size_C$
+\form#325:$JC$
+\form#326:$IC$
+\form#327:$A+B$
+\form#328:$BN$
+\form#329:$C$
+\form#330:$CN$
+\form#331:$A*b$
+\form#332:$b*A$
+\form#333:$k$
+\form#334:$A*B$
+\form#335:$i$
+\form#336:$n + nz$
+\form#337:$nz\log(nz) + n$
+\form#338:$A=U^{\rm T} U$
+\form#339:$size_U$
+\form#340:$JU$
+\form#341:$IU$
+\form#342:$A=U^{\rm T}U$
+\form#343:$UN$
+\form#344:$DINV$
+\form#345:$D$
+\form#346:$f$
+\form#347:$eps$
+\form#348:$max_iter$
+\form#349:$-1$
+\form#350:$A$
+\form#351:$A$ - Auoia: $
+\form#352:$max\_iter$
+\form#353:$A$
+\form#354:$A$ - Auoia: $
+\form#355:$A$
+\form#356:$A$
+\form#357:$A$
+\form#358:$A$
+\form#359:$A$
+\form#360:$A$
+\form#361:$A$
+\form#362:$A$
+\form#363:$A$
+\form#364:$A$
+\form#365:$A$
+\form#366:$A$
+\form#367:$A$
+\form#368:$A$
+\form#369:$A$
+\form#370:$A\cdot b$
+\form#371:$A \cdot B$
+\form#372:$A\cdot B$
+\form#373:$A$
+\form#374:$A$
+\form#375:$A$
+\form#376:$A$
+\form#377:$m \ge n$
+\form#378:$A = U\cdot S\cdot V^{\rm T}$
+\form#379:$V$
+\form#380:$n \times n$
+\form#381:$S$
+\form#382:$Ax = b$
+\form#383:$S={\rm diag}(\sigma_1,\dots,\sigma_r,0,\dots,0)$
+\form#384:$U=(U_1, U_2)$
+\form#385:$V=(V_1, V_2)$
+\form#386:$U_1$
+\form#387:$V_1$
+\form#388:$x = V_1 S_1^{-1} U_1^{\rm T} b$
+\form#389:$ - ?aaii $
+\form#390:$matv$
+\form#391:$w$
+\form#392:$ierr$
+\form#393:$ierr+1$
+\form#394:$\dots$
+\form#395:$n - 1$
+\form#396:$30$
+\form#397:$svd_decomp$
+\form#398:$rel\_err$
+\form#399:$rel\_err = 0$
+\form#400:$\varepsilon\cdot n$
+\form#401:$\varepsilon \approx 10^16$
+\form#402:$rell\_err \cdot \sigma_{\max}$
+\form#403:$\sigma_{\max}$
+\form#404:$A = USV^{\rm T}$
+\form#405:$A$
+\form#406:$A = U S V^{\rm T}$
+\form#407:$ - ?aaii $
+\form#408:$A$
+\form#409:$matu$
+\form#410:$A$
+\form#411:$\varepsilon \approx 10^{16}$
+\form#412:$A$
+\form#413:$a = a+b$
+\form#414:$a = a-b$
+\form#415:$\|a-b\|_1$
+\form#416:$\|a-b\|_2$
+\form#417:$\|a\|_1$
+\form#418:$\|a\|_2$
+\form#419:$\infty$
+\form#420:$\|a\|_{\infty}$
+\form#421:$(a,b)$
+\form#422:$alpha$
+\form#423:$y$
+\form#424:$z$
+\form#425:$n \times k$
+\form#426:$Mul$
+\form#427:$m\times k$
+\form#428:$A = A+B$
+\form#429:$\|A-B\|^{\infty}$
+\form#430:$$
+\form#431:$res = A\cdot b$
+\form#432:$A$
+\form#433:$\|A-B\|_{\infty}$
+\form#434:$A$
+\form#435:$A$
+\form#436:$A$
+\form#437:$A$
+\form#438:$A$
+\form#439:$filename$
+\form#440:$A$
+\form#441:$A$
+\form#442:$A$
+\form#443:$A$
+\form#444:$A$
+\form#445:$A$
+\form#446:$a_{ij} = 0$
+\form#447:$i > j + m_1$
+\form#448:$j > i + m_2$
+\form#449:$m_1 + m_2 + 1$
+\form#450:$m_1$
+\form#451:$m_2$
+\form#452:$m_1 = m_2 = 1$
+\form#453:$a_{k1}, a_{k+1,2},\dots,a_{n,n-k+1}$
+\form#454:$(k-1)$
+\form#455:$a_{1k}, a_{2,k+1},\dots,a_{n-k+1,n}$
+\form#456:$n \times (m_1 + m_2 + 1)$
+\form#457:$c_{ij} = a_{i,\,i+j-m_1-1}$
+\form#458:$A$
+\form#459:$A$
+\form#460:$A$
+\form#461:$A$
+\form#462:$A$
+\form#463:$B=Q^{\rm T}AQ$
+\form#464:$e$
+\form#465:$QL$
+\form#466:$Z$
+\form#467:$d[k]$
+\form#468:$nrot$
+\form#469:$low - 1$
+\form#470:$hight+1$
+\form#471:$n-1$
+\form#472:$perm$
+\form#473:$low$
+\form#474:$high$
+\form#475:$H$
+\form#476:$wr$
+\form#477:$wi$
+\form#478:$wi[j]=0$
+\form#479:$wr[j]=wr[j+1]$
+\form#480:$wi[j]=-wi[j+1]$
+\form#481:$j\f$
+\form#482:$Q\f$
+\form#483:$(j+1)$
+\form#484:$cnt$
+\form#485:$rc = 0$
+\form#486:$rc$
+\form#487:$a[i][j]$
+\form#488:$i \le j + 1$
+\form#489:$Wi$
+\form#490:$A$
+\form#491:$A$
+\form#492:$A$
+\form#493:$A$
+\form#494:$A$
+\form#495:$A$
+\form#496:$A$
+\form#497:$A$
+\form#498:$A$
+\form#499:$A$
+\form#500:$A$
+\form#501:$A$
+\form#502:$A$
+\form#503:$a[0] = 0$
+\form#504:$iter$
+\form#505:$A$
+\form#506:$A$
+\form#507:$A$
+\form#508:$A$
+\form#509:$A$
+\form#510:$A$
+\form#511:$Q \ne NULL$
+\form#512:$A$
+\form#513:$A$
+\form#514:$V\ne NULL$
+\form#515:$A$
+\form#516:$A$
+\form#517:$matq \ne 0$
+\form#518:$matq = 0$
+\form#519:$Q = NULL$
+\form#520:$A$
+\form#521:$NULL$
+\form#522:$rc=0$
+\form#523:$A$
+\form#524:$A$
+\form#525:$A$
+\form#526:$A$
+\form#527:$A$
+\form#528:$scal$
+\form#529:$A$
+\form#530:$A$
+\form#531:$A$
+\form#532:$A$
+\form#533:$A$
+\form#534:$A$
+\form#535:$Ax=\lambda x$
+\form#536:$\lambda$
+\form#537:$A$
+\form#538:$A$
+\form#539:$A$
+\form#540:$A$
+\form#541:$A$
+\form#542:$A$
+\form#543:$A$
+\form#544:$A$
+\form#545:$A$
+\form#546:$A$
+\form#547:$A$
+\form#548:$A$
+\form#549:$A$
+\form#550:$A$
+\form#551:$M$
+\form#552:$m \ge \max M[i]$
+\form#553:$n + 1$
+\form#554:$A$
+\form#555:$gridm$
+\form#556:$gridn$
+\form#557:$IP$
+\form#558:$IP[P[i]] = i$
+\form#559:$P[IP[i]] = i$
+\form#560:$A$
+\form#561:$A$
+\form#562:$unz$
+\form#563:$UD$
+\form#564:$A$
+\form#565:$A$
+\form#566:$A$
+\form#567:$A$
+\form#568:$A$
+\form#569:$A$
+\form#570:$A$
+\form#571:$A$
+\form#572:$A$
+\form#573:$A$
+\form#574:$A$
+\form#575:$A$
+\form#576:$A$
+\form#577:$A$
+\form#578:$N$
+\form#579:$A$
+\form#580:$A$
+\form#581:$A$
+\form#582:$A$
+\form#583:$A$
+\form#584:$A$
+\form#585:$A$
+\form#586:$A$
+\form#587:$A$
+\form#588:$A$
+\form#589:$n+1$
+\form#590:$2nz$
+\form#591:$A$
+\form#592:$1,2,\dots,n$
+\form#593:$A$
+\form#594:$A$
+\form#595:$A$
+\form#596:$PAP^{T}$
+\form#597:$Pb$
+\form#598:$PAP^{T}y=Pb$
+\form#599:$x=P^{T}y$
+\form#600:$A$
+\form#601:$A$
+\form#602:$A$
+\form#603:$A$
+\form#604:$A$
+\form#605:$A$
+\form#606:$A$
+\form#607:$A$
+\form#608:$A$
+\form#609:$A$
+\form#610:$A$
+\form#611:$A$
+\form#612:$A$
+\form#613:$A$
+\form#614:$n\ge 2$
+\form#615:$A$
+\form#616:$f(x)$
+\form#617:$func$
+\form#618:$x0$
+\form#619:$f0$
+\form#620:$initsimplex$
+\form#621:$tolf$
+\form#622:$tolx$
+\form#623:$maxfun$
+\form#624:$maxiter$
+\form#625:$nfun$
+\form#626:$niter$
+\form#627:$xbar$
+\form#628:$xr$
+\form#629:$xe$
+\form#630:$xc$
+\form#631:$A$
+\form#632:$initsimplex = 0$
+\form#633:$initsimplex = 1$
+\form#634:$(n+1)\times n$
+\form#635:$rc = 1$
+\form#636:$A$
+\form#637:$A$
+\form#638:$A$
+\form#639:$A$
+\form#640:$data$
+\form#641:$compare$
+\form#642:$swap$
+\form#643:$A$
+\form#644:$-1, $
+\form#645:$ eee $
+\form#646:$, eiaaa ia?aue ec n?aaieaaaiuo yeaiaioia iaiuoa aoi?iai, ?aaai aoi?iio eee niioaaonoaaiii aieuoa aoi?iai - $
+\form#647:$ - oeacaoaeu ia iieuciaaoaeuneo? ooieoe?, ia?anoaaey?uo? oeacaiiua yeaiaiou ianneaa; ooieoey eiaao o?e a?aoiaioa: ia?aua aaa --- eiaaenu n?aaieaaaiuo yeaiaioia, iineaaiee a?aoiaio --- oeacaoaeu ia aaiiua - Auoia: - $
+\form#648:$A$
+\form#649:$ eee $
+\form#650:$, eiaaa ia?aue ec n?aaieaaaiuo yeaiaioia iaiuoa aoi?iai, ?aaai aoi?iio eee niioaaonoaaiii aieuoa aoi?iai - $
+\form#651:$ - oeacaoaeu ia iieuciaaoaeuneo? ooieoe?, ia?anoaaey?uo? oeacaiiua yeaiaiou ianneaa; ooieoey eiaao o?e a?aoiaioa: ia?aua aaa --- eiaaenu n?aaieaaaiuo yeaiaioia, iineaaiee a?aoiaio --- oeacaoaeu ia aaiiua - Auoia: - $
+\form#652:$A$
+\form#653:$ eee $
+\form#654:$, eiaaa ia?aue ec n?aaieaaaiuo yeaiaioia iaiuoa aoi?iai, ?aaai aoi?iio eee niioaaonoaaiii aieuoa aoi?iai - $
+\form#655:$ - oeacaoaeu ia iieuciaaoaeuneo? ooieoe?, ia?anoaaey?uo? oeacaiiua yeaiaiou ianneaa; ooieoey eiaao o?e a?aoiaioa: ia?aua aaa --- eiaaenu n?aaieaaaiuo yeaiaioia, iineaaiee a?aoiaio --- oeacaoaeu ia aaiiua - Auoia: - $
+\form#656:$A$
+\form#657:$ eee $
+\form#658:$, eiaaa ia?aue ec n?aaieaaaiuo yeaiaioia iaiuoa aoi?iai, ?aaai aoi?iio eee niioaaonoaaiii aieuoa aoi?iai - $
+\form#659:$ - oeacaoaeu ia iieuciaaoaeuneo? ooieoe?, ia?anoaaey?uo? oeacaiiua yeaiaiou ianneaa; ooieoey eiaao o?e a?aoiaioa: ia?aua aaa --- eiaaenu n?aaieaaaiuo yeaiaioia, iineaaiee a?aoiaio --- oeacaoaeu ia aaiiua - Auoia: - $
+\form#660:$A$
+\form#661:$A$
+\form#662:$A$
+\form#663:$ eee $
+\form#664:$, eiaaa ia?aue ec n?aaieaaaiuo yeaiaioia iaiuoa aoi?iai, ?aaai aoi?iio eee niioaaonoaaiii aieuoa aoi?iai - $
+\form#665:$ - oeacaoaeu ia iieuciaaoaeuneo? ooieoe?, ia?anoaaey?uo? oeacaiiua yeaiaiou ianneaa; ooieoey eiaao o?e a?aoiaioa: ia?aua aaa --- eiaaenu n?aaieaaaiuo yeaiaioia, iineaaiee a?aoiaio --- oeacaoaeu ia aaiiua - Auoia: - $
+\form#666:$A$
+\form#667:$A$
+\form#668:$A$
+\form#669:$A$
+\form#670:$A$
+\form#671:$A$
+\form#672:$A$
+\form#673:$A$
+\form#674:$A$
+\form#675:$A$
+\form#676:$A$
+\form#677:$A$
+\form#678:$A$
+\form#679:$A$
+\form#680:$
+\form#681:$A$
+\form#682:$
+\form#683:$tol$
+\form#684:$IM$
+\form#685:$JM$
+\form#686:$MN$
+\form#687:$IK$
+\form#688:$JK$
+\form#689:$KN$
+\form#690:$K$
+\form#691:$work$
+\form#692:$6n$
+\form#693:$MK$
+\form#694:$\|b-Ax\|_2/\|b\|_2$
+\form#695:$M\times K$
+\form#696:$A$
+\form#697:$A$
+\form#698:$A$
+\form#699:$A$
+\form#700:$A$
+\form#701:$\widehat{x}_k = \sum_{j=0}^{n-1} x_j e^{-\frac{jk2\pi i}{n}}$
+\form#702:$x_j = \frac{1}{n} \sum_{k=0}^{n-1} \widehat{x}_k e^{\frac{jk2\pi i}{n}}$
+\form#703:$re$
+\form#704:$im$
+\form#705:$A$
+\form#706:$A$
+\form#707:$A$
+\form#708:$A$
+\form#709:$A$
+\form#710:$\widehat{x}_k = \sum_{j=0}^{n-1} x_j e^{\displaystyle-\frac{jk2\pi i}{n}}$
+\form#711:$A$
+\form#712:$\widehat{x}_k = \displaystyle\sum_{j=0}^{n-1} x_j e^{\displaystyle-\frac{jk2\pi i}{n}}$
+\form#713:$x_j = \frac{1}{n} \displaystyle\sum_{k=0}^{n-1} \widehat{x}_k e^{\displaystyle\frac{jk2\pi i}{n}}$
+\form#714:$A$
+\form#715:$x_j = \frac{\displaystyle 1}{n} \displaystyle\sum_{k=0}^{n-1} \widehat{x}_k e^{\displaystyle\frac{jk2\pi i}{n}}$
+\form#716:$A$
+\form#717:$x_j = \frac{\displaystyle 1}{\displaystyle n} \displaystyle\sum_{k=0}^{n-1} \widehat{x}_k e^{\displaystyle\frac{jk2\pi i}{n}}$
+\form#718:$A$
+\form#719:$\varphi: {\bf C}^n \to {\bf C}^n$
+\form#720:$x=(x_0, x_1, \dots, x){n-1})$
+\form#721:$\widehat{x}=(\widehat{x}_0,\widehat{x}_1,\dots,\widehat{x}_{n-1})$
+\form#722:$\varphi^{-1}$
+\form#723:$A$
+\form#724:$x=(x_0, x_1, \dots, x_{n-1})$
+\form#725:$A$
+\form#726:$(k=0,1,\dots,n-1)$
+\form#727:$(j=0,1,\dots,n-1)$
+\form#728:$A$
+\form#729:$stack$
+\form#730:$4 \log n$
+\form#731:$nk$
+\form#732:$A$
+\form#733:$A$
+\form#734:$A$
+\form#735:$A$
+\form#736:$A$
+\form#737:$A$
+\form#738:$O(n \cdot nk)$
+\form#739:$O(n \log n)$
+\form#740:$A$
+\form#741:$A$
+\form#742:$A$
+\form#743:$A$
+\form#744:$A$
+\form#745:$A$
+\form#746:$A$
+\form#747:$A$
+\form#748:$A$
+\form#749:$A$
+\form#750:$A$
+\form#751:$A$
+\form#752:$A$
+\form#753:$A$
+\form#754:$A$
+\form#755:$A$
+\form#756:$A$
+\form#757:$A$
+\form#758:$A$
+\form#759:$A$
+\form#760:$A$
+\form#761:$A$
+\form#762:$A$
+\form#763:$A$
+\form#764:$A$
+\form#765:$A$
+\form#766:$A$
+\form#767:$A$
+\form#768:$A$
