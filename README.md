@@ -27,7 +27,7 @@
 > > > * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/REPORT)
 > > > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/lw_ict_4)
 
-# 3. Лабораторные работы по дисциплине "Теория обработки информации": 
+# 3. Дисциплина "Теория обработки информации": 
 
 [Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI)
 
@@ -39,14 +39,14 @@
 > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/4_TOI_invertsearch)
 > * [Лабораторная работа 5](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/5_TOI)
 
-# 4. Лабораторные работы по дисциплине "Периферийное оборудование":
+# 4. Дисциплина "Периферийное оборудование":
 
 [Общая папка с разработками по дисциплине](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD)
 
 > * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD/REPORT)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD/keyboardcmd)
 
-# 5. Лабораторные работы по дисциплине "Представление знаний"
+# 5. Дисциплина "Представление знаний"
 
 [Общая папка с разработками по дисциплине](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PZ)
 
