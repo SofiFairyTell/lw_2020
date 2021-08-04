@@ -3,6 +3,8 @@
 
 # 1. Дисциплина "Операционные системы"
 
+[Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_OS)
+
 > * [Лекции по курсу Операционные системы](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_OS/Lection)
 
 > > ## Лабораторные работы
@@ -16,6 +18,8 @@
 
 # 2. Дисциплина "Информационно-коммуникационные системы и сети":
 
+[Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT)
+
 > * [Лекции по курсу Информационно-коммуникационные системы и сети](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/Lection)
 
 > > ## Лабораторные работы
@@ -24,7 +28,9 @@
 > > > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/lw_ict_4)
 
 # 3. Лабораторные работы по дисциплине "Теория обработки информации": 
+
 [Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI)
+
 > * [Лабораторная работа 1](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/1_TOI_naivesearch)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/2_TOI_stemmerporthersearch/stemmerporthersearch)
 > > * Дополнительно можно посмотреть еще здесь проект:[Поиск с использованием Стеммера Портера](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/stemmerporthersearch/stemmerporthersearch)
@@ -34,11 +40,16 @@
 > * [Лабораторная работа 5](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/5_TOI)
 
 # 4. Лабораторные работы по дисциплине "Периферийное оборудование":
+
+[Общая папка с разработками по дисциплине](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD)
+
 > * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD/REPORT)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PD/keyboardcmd)
 
 # 5. Лабораторные работы по дисциплине "Представление знаний"
-> * [Общая папка с лабораторными работами](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PZ)
+
+[Общая папка с разработками по дисциплине](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PZ)
+
 > * [Лабораторная работа 1](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PZ/LW_1)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PZ/LW_2)
 > * [Лабораторная работа 3](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_PZ/LW_3)
