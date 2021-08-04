@@ -12,7 +12,7 @@
 > * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/REPORT)
 > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/lw_ict_4)
 
-3. Лабораторные работы по дисциплине "Теория информации": 
+3. Лабораторные работы по дисциплине "Теория обработки информации": 
 [Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI)
 > * [Лабораторная работа 1](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/1_TOI_naivesearch)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/2_TOI_stemmerporthersearch/stemmerporthersearch)
