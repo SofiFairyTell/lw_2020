@@ -27,7 +27,7 @@
 > > > * [Отчеты по лабораторным работам](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/REPORT)
 > > > * [Лабораторная работа 4](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_ICT/lw_ict_4)
 
-# 3. Дисциплина "Теория обработки информации": 
+# 3. Дисциплина "Технологии обработки информации": 
 
 [Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI)
 
