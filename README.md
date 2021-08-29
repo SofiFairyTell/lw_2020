@@ -30,6 +30,7 @@
 # 3. Дисциплина "Технологии обработки информации": 
 
 [Общая папка с разработками по дисциплине здесь](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI)
+> * [Методичесие указания](https://github.com/SofiFairyTell/lw_2020/tree/lw_os_3/LW_TOI/LW_Method)
 
 > * [Лабораторная работа 1](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/1_TOI_naivesearch)
 > * [Лабораторная работа 2](https://github.com/SofiFairyTell/labwork_os/tree/lw_os_3/LW_TOI/2_TOI_stemmerporthersearch/stemmerporthersearch)
